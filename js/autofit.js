@@ -19,10 +19,11 @@ function lettersOf(words, ink) {
   // (palabra subrayada: la raya va en un hueco reservado debajo de cada letra; negrita: más grosor)
   return words.map((w, wi) => w.set.glyphs.map((q, j) => {
     const b = q.g.box, bd = q.g.body;
-    const ik = ink * (w.bold ? 1.6 : 1);
+    // (negativo: cada letra lleva alrededor el hueco de la caja pintada)
+    const ik = ink * (w.bold ? 1.6 : 1) + (w.neg ? 0.2 : 0);
     const bw = Math.max(0.06, bd.right - bd.left) + ik;
     const top = -b.top, desc = Math.max(0, b.bottom);
-    const ul = w.under ? 0.2 : 0;
+    const ul = w.under && !w.neg ? 0.2 : 0;
     // todas las letras cuentan al menos con la altura de mayúscula (signos y minúsculas cortas no se agigantan)
     const ht = Math.max(0.7 * 0.97, top + desc) + ik + ul;
     return { q, g: q.g, word: wi, first: j === 0, bw, ht, a: bw / ht, desc: desc + ul, ink: ik, bold: !!w.bold };

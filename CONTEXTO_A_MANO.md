@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.4)
+## 2. Cómo se usa (2.5)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -194,6 +194,28 @@ en azul, pincel en azul y burdeos, autoencajar en arco con líneas montadas)
   largo que se salen un poco de la caja + capa cruzada; el canto de la letra lo hace la misma pintura (sin raya).
   `ink.paintStroke` acepta `opts.mask` (rejilla 0..1) para no pintar dentro de las letras.
 
+### Tras probar la 2.4
+- «Los negativos son terribles. HAZLOS MEJOR.» «No tienen que ser una técnica: tienen que estar donde la negrita,
+  pequeña… Tengo que poder usarlos para resaltar.» «Su textura interna es terriblemente mala, hazla 100000 veces
+  más realista.» «Su trazado vuelve la letra ilegible.» «Cada técnica (carbón, ceras, pincel, boli) tiene que poder
+  hacer bien el trazado, con formas distintas de hacerlo.»
+
+### Qué se hizo en la 2.5
+- **Negativo = marca de palabra** ('n' en `st.marks`, botón «negativo» junto a negrita/subrayada, vale en
+  autoencajar). En CALCAR es una opción de **Relleno** (No / Brocha / Sello / Negativo) con la técnica elegida.
+  Ya no es una herramienta (los ajustes guardados con `tool: 'negativo'` pasan a lápiz).
+- `writer.plan` termina con `NG.planWords`: los trazos de las palabras en negativo no se pintan; con ellos se hace
+  la máscara (cada trazo con su grosor o, como mínimo, 0,042 em: letras finas y legibles, huecos abiertos) y se
+  pinta la caja de la palabra (sigue la forma: en un arco se curva). La maqueta les reserva sitio alrededor.
+- **Relleno según la técnica** (`STYLE` y `fillBox` en `negativo.js`): lápiz = sombreado en zigzag con vueltas
+  redondas, por parches solapados, dirección dominante y segunda capa casi paralela; carboncillo = barrido ancho en
+  zigzag largo y golpes sueltos; cera = zigzag apretado casi vertical + otra pasada; boli = garabato de bucles en
+  filas (dos capas); rotulador = pasadas paralelas que se montan; pincel = pinceladas anchas + capa cruzada. El
+  relleno usa el pack que tenga el usuario de esa técnica.
+- **Perfil** de cada letra con una versión fina de la misma técnica (lápiz HB, carboncillo fino, cera fina, boli,
+  rotulador fino, pincel fino), pegado a la letra (su canto interior la toca: no la come).
+- El relleno no sale de su caja (máscara con borde a mano, ondulado a dos escalas): no se come las palabras vecinas.
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -252,7 +274,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.4.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.5.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)
@@ -271,7 +293,8 @@ python3 tests/node/sheet.py DIR hoja.png 2 800   # hoja de contactos
   aparezca al marcarla).
 - 2.3 añade: negrita y subrayado en autoencajar (marcas en el panel).
 - 2.4 añade: negativos a lápiz y a pincel en GENERAR y en CALCAR.
-- Último resultado: **55/55 bien, sin errores de modal**.
+- 2.5: negativo como marca con las 6 técnicas en GENERAR y como relleno en CALCAR.
+- Último resultado: **58/58 bien, sin errores de modal**.
 
 ---
 

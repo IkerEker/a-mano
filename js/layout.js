@@ -45,19 +45,24 @@ function measure(tokens, levels, o) {
     let lv = levelOf(levels[i] || 0, o.contrast);
     // marcas de la palabra: negrita (repasada con pasadas que se ven, algo más gruesa) y subrayado
     const mk = (o.marks && o.marks[i]) || '';
-    const bold = mk.indexOf('b') >= 0, under = mk.indexOf('u') >= 0;
+    const bold = mk.indexOf('b') >= 0, under = mk.indexOf('u') >= 0, neg = mk.indexOf('n') >= 0;
     if (bold) lv = { size: lv.size, passes: lv.passes + 2, w: lv.w * 1.15 };
     // el grosor de la herramienta también ocupa: más aire entre letras y entre líneas con trazo gordo
     const mk0 = (o.marks && o.marks[i]) || '';
-    const pad = (o.inkPad || 0) * (mk0.indexOf('b') >= 0 ? 1.8 : 1);
+    const pad = (o.inkPad || 0) * (mk0.indexOf('b') >= 0 ? 1.8 : 1) + (mk0.indexOf('n') >= 0 ? 0.05 : 0);
     const sw = FN.setWord(o.persona, o.mode, FN.caseText(t.text, o.mode), o.track || 0, pad, i + 1);
     const caps = o.mode === 'mayus';
     // las letras de alturas desiguales (infantil, nerviosa) necesitan más aire entre líneas
     const hv = FN.styleOf(o.persona).hVar || 0;
     const asc = (caps ? FN.CAP * (1 + hv * 1.5) + 0.12 : met.asc) + pad * 1.1, desc = (caps ? 0.1 + hv * 0.12 : met.desc) + pad * 0.9;
-    // el subrayado necesita sitio debajo
-    const descU = under ? Math.max(desc, 0.1) + 0.2 : desc;
-    return { text: t.text, brk: t.brk, level: levels[i] || 0, lv, size: lv.size, set: sw, w: sw.width * lv.size, asc: asc * lv.size, desc: descU * lv.size, bold, under };
+    // el subrayado necesita sitio debajo; el negativo, su caja alrededor
+    let descU = under && !neg ? Math.max(desc, 0.1) + 0.2 : desc, ascN = asc, set = sw;
+    if (neg) {
+      const NP = 0.16 + pad;
+      set = Object.assign({}, sw, { width: sw.width + 2 * NP, glyphs: sw.glyphs.map(q => Object.assign({}, q, { x: q.x + NP })) });
+      ascN += NP * 0.9; descU += NP * 0.9;
+    }
+    return { text: t.text, brk: t.brk, level: levels[i] || 0, lv, size: lv.size, set, w: set.width * lv.size, asc: ascN * lv.size, desc: descU * lv.size, bold, under, neg };
   });
 }
 

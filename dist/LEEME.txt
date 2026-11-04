@@ -1,8 +1,8 @@
-A MANO 2.4 · plugin para Photoshop (2024 o posterior)
+A MANO 2.5 · plugin para Photoshop (2024 o posterior)
 =====================================================
 
 INSTALAR
-- Doble clic en A_mano_v2.4.0.ccx -> Creative Cloud avisa de que no viene del
+- Doble clic en A_mano_v2.5.0.ccx -> Creative Cloud avisa de que no viene del
   Marketplace -> "Instalar". Sustituye a las versiones anteriores. Es independiente de Cartelator.
 - En Photoshop: Plugins > A mano.
 
@@ -19,20 +19,22 @@ GENERAR, de arriba abajo
 2. TEXTO: escribe (Intro = otra línea). Toca palabras en el recuadro de abajo
    (o selecciónalas en la casilla) y elige: pequeña, normal, importante o ¡LA MÁS!
    Las importantes salen más grandes y repasadas (varias pasadas encima).
-   NEGRITA y SUBRAYADA (fila de abajo): la negrita se repasa a mano con las pasadas a la
-   vista; la subrayada lleva una raya a mano debajo. Valen también en Autoencajar.
+   NEGRITA, SUBRAYADA y NEGATIVO (fila de abajo): la negrita se repasa a mano con las pasadas
+   a la vista; la subrayada lleva una raya a mano debajo; en NEGATIVO la palabra queda en
+   blanco y se pinta su caja alrededor, con la técnica elegida (cada una rellena a su manera:
+   lápiz sombreado, carboncillo barrido, cera en zigzag, boli en bucles, rotulador a pasadas,
+   pincel a pinceladas) y perfilando cada letra. Valen también en Autoencajar.
    AUTOENCAJAR (debajo de la casilla): se olvida de las importancias (no de negrita y subrayado) y llena la forma
    al máximo, letra a letra: cada letra crece hasta el hueco que le dejan las de
    arriba y las de abajo (bajo una letra baja va una alta, y al revés). Las letras no
    se montan y los espacios entre palabras se mantienen claros.
-3. ESTILO: lápiz, carboncillo, cera (gruesa, blanda o fina), boli, rotulador, pincel o NEGATIVO, y su pack
+3. ESTILO: lápiz, carboncillo, cera (gruesa, blanda o fina), boli, rotulador o pincel, y su pack
    (por ejemplo, pincel fino, gordo, seco o húmedo). Color: pulsa el cuadrado
    para tomar el color frontal de Photoshop.
    "Una letra de cada color": cada letra sale con un tono distinto a partir del color
    base; el deslizador que aparece dice cuánto cambian tono, saturación y luz.
    (También en CALCAR, a partir del color de cada capa de texto.)
-   NEGATIVO (lápiz o pincel): pinta la caja de cada línea alrededor de las letras y las letras
-   quedan libres, con su contorno dibujado a mano. También en CALCAR (usa la forma de tu fuente).
+
 4. LETRA: infantil, adulta, nerviosa o elegante, cada una en versión A o B
    (A/B cambian el carácter: p. ej. Infantil A de niño, Infantil B de piezas;
    Nerviosa A rabiosa alta y estrecha a picos, Nerviosa B rabiosa a lo loco);
@@ -47,7 +49,8 @@ GENERAR, de arriba abajo
 CALCAR
 Selecciona capas de texto (o un grupo) y pulsa "Aplicar a lo seleccionado".
 Se crea una copia "✍ ..." encima y el original queda oculto. "Volver al original"
-lo deshace. Relleno (brocha, sello) rellena la letra en vez de trazarla.
+lo deshace. Relleno (brocha, sello) rellena la letra en vez de trazarla; Negativo pinta la caja
+de cada línea alrededor de las letras (con la técnica elegida) y las deja libres.
 
 AVANZADO ›  grosor, tinta, pulso, repasado (fundido o con pasadas visibles), locura, prisa, apretadas/sueltas,
 interlineado, tamaño de las importancias, llenar la forma, margen y alineación.

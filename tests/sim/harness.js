@@ -30,9 +30,7 @@ const { open } = require('./setup.js');
     ['rect', 'rotulador', 'gordo', 'adulta', 'mayus', 'b'],
     ['rect', 'boli', 'fino', 'elegante', 'minus', 'a'],
     ['arco', 'cera', 'oleo', 'elegante', 'mayus', 'a'],
-    ['rect', 'rotulador', 'gastado', 'elegante', 'mayus', 'b'],
-    ['rect', 'negativo', 'lapiz', 'adulta', 'mayus', 'a'],
-    ['arco', 'negativo', 'pincel', 'nerviosa', 'mayus', 'b']
+    ['rect', 'rotulador', 'gastado', 'elegante', 'mayus', 'b']
   ];
   let ci = 0;
   for (const [type, tool, preset, persona, mode, ver] of combos) {
@@ -77,6 +75,18 @@ const { open } = require('./setup.js');
   await rec('G2d negrita y subrayado en autoencajar' + (marksOk ? '' : ' (FALLO marcas)'), marksOk ? sm : Object.assign({}, sm, { cls: 'err' }));
   await snap('g_marcas');
   await run(() => { T.style('había', 'clean'); T.style('sótano', 'clean'); T.seg('textModeSeg', 'importancia'); });
+  // 2e. negativo (marca de palabra), con cada técnica
+  for (const [tool, pk] of [['lapiz', 'blando'], ['carbon', 'suave'], ['cera', 'cera'], ['boli', 'bic'], ['rotulador', 'gordo'], ['pincel', 'seco']]) {
+    await newDoc(3000, 1900); await refresh();
+    await shape('arco');
+    await run(([tool, pk]) => { T.seg('toolSeg', tool); T.seg('presetSeg', pk); T.seg('fontSeg', 'adulta'); T.seg('versionSeg', 'a'); T.seg('caseSeg', 'mayus'); T.style('había', 'negv'); }, [tool, pk]);
+    const ch = (await run(() => T.chips())).join(' ');
+    await click('btnGo');
+    const sn = await waitDone();
+    await rec('G2e negativo en «había» con ' + tool + (/m-n[^:]*:había/.test(ch) ? '' : ' (FALLO marca)'), /m-n[^:]*:había/.test(ch) ? sn : Object.assign({}, sn, { cls: 'err' }));
+    await snap('g_neg_' + tool);
+    await run(() => { T.style('había', 'clean'); });
+  }
 
   // 3. selección de lazo
   await newDoc(3000, 1900); await refresh();
@@ -163,7 +173,7 @@ const { open } = require('./setup.js');
   };
   let ids = await setup();
   await snap('c_00_original');
-  for (const [tool, pk, fill] of [['boli', 'bic', ''], ['rotulador', 'gordo', ''], ['pincel', 'gordo', ''], ['lapiz', 'hb', ''], ['carbon', 'fuerte', ''], ['pincel', 'seco', 'brocha'], ['pincel', 'fino', 'sello'], ['negativo', 'lapiz', ''], ['negativo', 'pincel', '']]) {
+  for (const [tool, pk, fill] of [['boli', 'bic', ''], ['rotulador', 'gordo', ''], ['pincel', 'gordo', ''], ['lapiz', 'hb', ''], ['carbon', 'fuerte', ''], ['pincel', 'seco', 'brocha'], ['pincel', 'fino', 'sello'], ['lapiz', 'blando', 'negativo'], ['pincel', 'seco', 'negativo'], ['boli', 'bic', 'negativo']]) {
     await run(([ids, tool, pk, fill]) => { SIM.select(...ids); T.seg('toolSeg', tool); T.seg('presetSeg', pk); T.seg('fillSeg', fill); T.seg('kindSeg', 'imagen'); }, [ids, tool, pk, fill]);
     await refresh();
     const t0 = Date.now();

@@ -4,7 +4,7 @@
 - `dist/`: el .ccx listo para instalar y el LEEME para el usuario.
 - `js/`: código (se une en un solo main.js con `python3 tools/build.py`).
   - `texdata.js` y `fontdata.js` son generados (no editar a mano).
-  - `skeleton.js`: las letras dibujadas trazo a trazo; `fonts.js`: los 8 estilos; `calco.js`: calco guiado; `autofit.js`: autoencajar letra a letra; `negativo.js`: negativos.
+  - `skeleton.js`: las letras dibujadas trazo a trazo; `fonts.js`: los 8 estilos; `calco.js`: calco guiado; `autofit.js`: autoencajar letra a letra; `negativo.js`: palabras en negativo (relleno a mano por técnica).
 - `src/`: index.html, styles.css, manifest.json, LEEME.txt, LICENCIAS.txt.
 - `TRAZOS/`: trazos reales y generados que manda el usuario (fuente de las texturas).
 - `fonts/svg/`: fuentes de trazo único de partida (EMS y Hershey).

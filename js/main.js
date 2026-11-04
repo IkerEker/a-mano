@@ -36,6 +36,7 @@ const DEF = {
 const st = Object.assign({}, DEF, store.get('settings2', {}));
 if (st.persona === 'rabiosa') st.persona = 'nerviosa';
 if (st.tool === 'carbon' && st.preset === 'cera') { st.tool = 'cera'; st.preset = 'cera'; }
+if (st.tool === 'negativo') { st.tool = 'lapiz'; st.preset = 'blando'; }
 if (!/^[ab]$/.test(st.version)) st.version = 'a';
 let saveTimer = null;
 function save() { clearTimeout(saveTimer); saveTimer = setTimeout(() => store.set('settings2', st), 250); }
@@ -94,7 +95,7 @@ function genParams() {
     width: Math.pow(2, st.grosor / 50), repasado: st.repasado / 50, tinta: st.tinta / 100,
     contrast: st.contraste / 50, leading: st.inter / 100, align: st.align, stretch: 1 + st.llenar / 100,
     xFill: st.llenar / 150, margin: st.margen / 100, track: st.tight / 50 * 0.07,
-    inkPad: st.tool === 'negativo' ? (st.preset === 'pincel' ? 0.15 : 0.13) * Math.pow(2, st.grosor / 50) : Math.max(INK.preset(st.tool, st.preset).w * FN.styleOf(st.persona + '_' + st.version).weight, FN.styleOf(st.persona + '_' + st.version).absW || 0) * Math.pow(2, st.grosor / 50)
+    inkPad: Math.max(INK.preset(st.tool, st.preset).w * FN.styleOf(st.persona + '_' + st.version).weight, FN.styleOf(st.persona + '_' + st.version).absW || 0) * Math.pow(2, st.grosor / 50)
   };
 }
 function handParams() {
@@ -143,7 +144,7 @@ function renderBoard() {
     const lv = st.levels[i] || 0;
     const mk = (st.marks && st.marks[i]) || '';
     const auto = st.textMode === 'auto';
-    c.className = 'chip' + (auto ? '' : lv === -1 ? ' c-small' : lv === 1 ? ' c-bold' : lv === 2 ? ' c-hero' : '') + (mk.indexOf('b') >= 0 ? ' m-b' : '') + (mk.indexOf('u') >= 0 ? ' m-u' : '') + (chipSel.has(i) ? ' sel' : '');
+    c.className = 'chip' + (auto ? '' : lv === -1 ? ' c-small' : lv === 1 ? ' c-bold' : lv === 2 ? ' c-hero' : '') + (mk.indexOf('b') >= 0 ? ' m-b' : '') + (mk.indexOf('u') >= 0 ? ' m-u' : '') + (mk.indexOf('n') >= 0 ? ' m-n' : '') + (chipSel.has(i) ? ' sel' : '');
     c.textContent = t.text;
     c.setAttribute('data-i', String(i));
     b.appendChild(c);
@@ -300,7 +301,7 @@ async function doWrite(fresh) {
       const seed = seedFor('g|' + key, fresh);
       gp.colorSeed = seed;
       // negativos: se pinta alrededor de las letras (las letras quedan libres)
-      const strokes = st.tool === 'negativo' ? NG.fromLayout(WR, lay, gp, seed).strokes : WR.plan(lay, gp, seed);
+      const strokes = WR.plan(lay, gp, seed);
       const bb = WR.bounds(strokes);
       if (!bb) throw new P.UserError('No hay nada que escribir.');
       // lo escrito antes con esta forma se sustituye
@@ -350,7 +351,7 @@ function progressFor(ctx, label) {
 async function handImage(doc, ctx, insts, hp, seed, name, say) {
   if (!insts.length) throw new P.UserError('No hay letras que pasar a mano.');
   say('Pasando a mano…');
-  if (hp.tool === 'negativo') {
+  if (hp.fill === 'negativo') {
     // negativo: la caja de cada línea pintada alrededor de las letras de la fuente
     const neg = NG.fromInstances(HD, GEO, insts, hp, seed);
     const bb = WR.bounds(neg.strokes);
@@ -381,7 +382,7 @@ async function handText(doc, ctx, layer, hp, fresh, say) {
   const out = await handImage(doc, ctx, insts, hp, seed, P.HAND_PREFIX + layer.name.replace(/[\r\n]+/g, ' '), say);
   out.move(layer, constants.ElementPlacement.PLACEBEFORE);
   await P.copyLook(layer, out);
-  if (!hp.fill && INK.preset(hp.tool, hp.preset).blend === 'multiply' && /normal/i.test(String(out.blendMode || 'normal'))) { try { out.blendMode = constants.BlendMode.MULTIPLY; } catch (e) { /* nada */ } }
+  if ((!hp.fill || hp.fill === 'negativo') && INK.preset(hp.tool, hp.preset).blend === 'multiply' && /normal/i.test(String(out.blendMode || 'normal'))) { try { out.blendMode = constants.BlendMode.MULTIPLY; } catch (e) { /* nada */ } }
   layer.visible = false;
   return out;
 }
@@ -517,6 +518,7 @@ function bind() {
   $('stHero').addEventListener('click', () => applyLevel(2));
   $('stNeg').addEventListener('click', () => applyMark('b'));
   $('stSub').addEventListener('click', () => applyMark('u'));
+  $('stNegv').addEventListener('click', () => applyMark('n'));
   $('stClean').addEventListener('click', () => applyMark(''));
   // color
   $('swColor').addEventListener('click', () => {

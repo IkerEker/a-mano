@@ -40,7 +40,7 @@ async function open(docW, docH) {
         do { i = v.indexOf(word, i + 1); } while (i >= 0 && k++ < (nth || 0));
         if (i < 0) throw new Error('no está ' + word);
         t.focus(); t.setSelectionRange(i, i + word.length); t.dispatchEvent(new Event('select'));
-        $({ bold: 'stBold', hero: 'stHero', small: 'stSmall', normal: 'stNormal', neg: 'stNeg', sub: 'stSub', clean: 'stClean' }[tier]).click();
+        $({ bold: 'stBold', hero: 'stHero', small: 'stSmall', normal: 'stNormal', neg: 'stNeg', sub: 'stSub', negv: 'stNegv', clean: 'stClean' }[tier]).click();
       },
       click(id) { $(id).click(); },
       seg(id, v) { $(id).querySelector('[data-v="' + v + '"]').click(); },

@@ -70,14 +70,7 @@ const TOOLS = {
     }
   }
 };
-// negativos: se pinta alrededor de las letras (js/negativo.js); aquí solo su modo de capa
-TOOLS.negativo = {
-  label: 'Negativo', neg: true, presets: {
-    lapiz: { label: 'Lápiz', neg: true, fams: ['lapiz'], blend: 'multiply' },
-    pincel: { label: 'Pincel', neg: true, fams: ['pincel'], blend: 'over' }
-  }
-};
-const TOOL_ORDER = ['lapiz', 'carbon', 'cera', 'boli', 'rotulador', 'pincel', 'negativo'];
+const TOOL_ORDER = ['lapiz', 'carbon', 'cera', 'boli', 'rotulador', 'pincel'];
 
 function preset(tool, pk) {
   const T = TOOLS[tool] || TOOLS.rotulador;
