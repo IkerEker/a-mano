@@ -198,7 +198,8 @@ def strip_of(d, lab, comp, E, fam):
     A = A[max(0, on[0] - 2): on[-1] + 3]
     # normaliza: tinta plena = 1 (percentil alto del núcleo)
     core = A[:, ncol // 2 - int(mhc * 0.6): ncol // 2 + int(mhc * 0.6) + 1]
-    p = np.percentile(core, 92)
+    # se normaliza por arriba del todo: así se conserva la veta (las zonas con más pigmento siguen siendo más oscuras)
+    p = np.percentile(core, 99.3)
     if p < 0.05:
         return None
     A = np.clip(A / p, 0, 1)

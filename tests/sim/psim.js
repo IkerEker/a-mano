@@ -70,6 +70,7 @@
     get name() { return this._name; } set name(v) { needModal('name'); this._name = v; }
     get visible() { return this._visible; } set visible(v) { needModal('visible'); this._visible = !!v; }
     get opacity() { return this._opacity; } set opacity(v) { needModal('opacity'); this._opacity = v; }
+    get blend() { return this.blendMode; }
     get layers() { return this._children; }
     get bounds() { return boundsOf(this); }
     get boundsNoEffects() { return boundsOf(this); }
@@ -280,7 +281,8 @@
   const constants = {
     LayerKind: { TEXT: 'text', GROUP: 'group', PIXEL: 'pixel', SOLIDFILL: 'solidColor' },
     ElementPlacement: { PLACEBEFORE: 'placeBefore', PLACEAFTER: 'placeAfter', PLACEINSIDE: 'placeInside' },
-    AnchorPosition: { MIDDLECENTER: 'middleCenter' }, RasterizeType: { TEXTCONTENTS: 'textContents' }
+    AnchorPosition: { MIDDLECENTER: 'middleCenter' }, RasterizeType: { TEXTCONTENTS: 'textContents' },
+    BlendMode: { NORMAL: 'normal', MULTIPLY: 'multiply' }
   };
   const app = { get activeDocument() { return doc; }, foregroundColor: { rgb: { hexValue: '2a6f97' } }, fonts: [] };
   const PS = { app, core, action, imaging, constants };

@@ -30,6 +30,11 @@
 
       <div class="sec"><span class="num">2</span>TEXTO</div>
       <textarea id="txt" placeholder="Escribe aquí el texto (Intro = nueva línea)"></textarea>
+      <div class="seg mt4" id="textModeSeg">
+        <div class="segb" data-v="importancia" title="Tú eliges qué palabras importan más">Por importancia</div><div class="segb" data-v="auto" title="Las letras llenan la forma al máximo, encajadas entre ellas">Autoencajar</div>
+      </div>
+      <div class="hint hidden" id="autoHint">Autoencajar: las letras llenan la forma al máximo, cambian de tamaño y se meten en los huecos de la línea de arriba. Los espacios entre palabras se mantienen claros.</div>
+      <div id="levelBox">
       <div class="styles-bar">
         <div class="sbtn s-small" id="stSmall" title="Más pequeña">pequeña</div>
         <div class="sbtn" id="stNormal">normal</div>
@@ -37,6 +42,7 @@
         <div class="sbtn s-hero" id="stHero" title="La que más se lee: grande y muy repasada">¡LA MÁS!</div>
       </div>
       <div class="board" id="board"><span class="empty">Toca palabras aquí (o selecciónalas arriba) y elige su importancia.</span></div>
+      </div>
     </div>
 
     <!-- ---------------- CALCAR ---------------- -->
@@ -67,7 +73,11 @@
     <div id="pane-gen2">
       <div class="sec"><span class="num">4</span>LETRA</div>
       <div class="seg" id="fontSeg">
-        <div class="segb f-inf" data-v="infantil">Infantil</div><div class="segb f-adu" data-v="adulta">Adulta</div><div class="segb f-rab" data-v="rabiosa">Rabiosa</div><div class="segb f-ele" data-v="elegante">Elegante</div>
+        <div class="segb f-inf" data-v="infantil">Infantil</div><div class="segb f-adu" data-v="adulta">Adulta</div><div class="segb f-rab" data-v="nerviosa">Nerviosa</div><div class="segb f-ele" data-v="elegante">Elegante</div>
+      </div>
+      <div class="row mt4">
+        <div class="seg" id="versionSeg"><div class="segb" data-v="a">A</div><div class="segb" data-v="b">B</div></div>
+        <div class="hint inline" id="versionHint"></div>
       </div>
       <div class="seg mt4" id="caseSeg">
         <div class="segb" data-v="mayus">MAYÚSCULAS</div><div class="segb" data-v="minus">minúsculas</div><div class="segb" data-v="cursiva"><i>cursiva</i></div>
@@ -95,6 +105,8 @@
     <sp-slider id="slTinta" min="0" max="100" value="55" show-value="true"><sp-label slot="label">Tinta (carga, sequedad, textura)</sp-label></sp-slider>
     <sp-slider id="slPulso" min="0" max="100" value="40" show-value="true"><sp-label slot="label">Pulso (temblor de la mano)</sp-label></sp-slider>
     <sp-slider id="slRepasado" min="0" max="100" value="50" show-value="true"><sp-label slot="label">Repasado de las palabras importantes</sp-label></sp-slider>
+    <div class="label">Repasado</div>
+    <div class="seg" id="repasoSeg"><div class="segb" data-v="auto" title="Según la herramienta">Auto</div><div class="segb" data-v="fundido" title="Más pigmento, sin líneas sueltas">Fundido</div><div class="segb" data-v="visible" title="Alguna pasada se separa un poco">Visible</div></div>
     <div class="row hidden" id="followRow"><div class="lbl">Grosor</div>
       <div class="seg grow" id="followSeg"><div class="segb" data-v="auto">Auto</div><div class="segb" data-v="herramienta">De la herramienta</div><div class="segb" data-v="letra">De la letra</div></div>
     </div>

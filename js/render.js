@@ -11,32 +11,91 @@ function hexToRgb(hex) {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
+// Lienzo de pigmento: cada píxel guarda cómo se ve sobre papel blanco (W, por canal, 1 = blanco) y cuánto
+// está cubierto (A). Las tintas transparentes se acumulan como veladuras (multiplican: donde se montan,
+// más oscuro y más saturado; donde hay poco pigmento, más claro y lavado). Al terminar, finalize() lo pasa
+// a RGBA: el color y la opacidad que, sobre blanco, dan exactamente ese aspecto.
 function makeCanvas(x0, y0, w, h) {
   w = Math.max(1, Math.ceil(w)); h = Math.max(1, Math.ceil(h));
-  return { x0: Math.floor(x0), y0: Math.floor(y0), w, h, data: new Uint8ClampedArray(w * h * 4) };
+  return { x0: Math.floor(x0), y0: Math.floor(y0), w, h, data: new Uint8ClampedArray(w * h * 4), W: null, A: null };
+}
+function pig(canvas) {
+  if (!canvas.W) { canvas.W = new Float32Array(canvas.w * canvas.h * 3).fill(1); canvas.A = new Float32Array(canvas.w * canvas.h); }
+  return canvas;
 }
 
-// cobertura (Float32 bw*bh, 0..1) -> lienzo, operador "sobre"
+// cobertura (Float32 bw*bh, 0..1) -> lienzo, como pintura que tapa (operador «sobre»)
 function composite(canvas, cov, bx, by, bw, bh, rgb, alphaMul) {
-  const D = canvas.data, W = canvas.w, H = canvas.h;
+  pig(canvas);
+  const Wb = canvas.W, Ab = canvas.A, CW = canvas.w, CH = canvas.h;
   const am = alphaMul == null ? 1 : alphaMul;
+  const T = [rgb[0] / 255, rgb[1] / 255, rgb[2] / 255];
   for (let y = 0; y < bh; y++) {
     const cy = by + y - canvas.y0;
-    if (cy < 0 || cy >= H) continue;
+    if (cy < 0 || cy >= CH) continue;
     const row = y * bw;
     for (let x = 0; x < bw; x++) {
       const a = cov[row + x] * am;
       if (a <= 0.002) continue;
       const cx = bx + x - canvas.x0;
-      if (cx < 0 || cx >= W) continue;
-      const i = (cy * W + cx) * 4;
-      const da = D[i + 3] / 255;
-      const oa = a + da * (1 - a);
-      const k = a / oa;
-      D[i] += (rgb[0] - D[i]) * k; D[i + 1] += (rgb[1] - D[i + 1]) * k; D[i + 2] += (rgb[2] - D[i + 2]) * k;
-      D[i + 3] = oa * 255;
+      if (cx < 0 || cx >= CW) continue;
+      const k = cy * CW + cx, i = k * 3;
+      Wb[i] += (T[0] - Wb[i]) * a; Wb[i + 1] += (T[1] - Wb[i + 1]) * a; Wb[i + 2] += (T[2] - Wb[i + 2]) * a;
+      Ab[k] = 1 - (1 - Ab[k]) * (1 - a);
     }
   }
+}
+
+// pigmento (Float32 bw*bh, cantidad: 1 = el color tal cual, <1 más claro, >1 más oscuro y saturado)
+// mode 'multiply': tinta transparente (veladura); 'over': pintura que tapa (guache, óleo)
+function compositePigment(canvas, dens, bx, by, bw, bh, rgb, mode, alphaMul) {
+  pig(canvas);
+  const Wb = canvas.W, Ab = canvas.A, CW = canvas.w, CH = canvas.h;
+  const am = alphaMul == null ? 1 : alphaMul;
+  const T = [Math.max(0.02, rgb[0] / 255), Math.max(0.02, rgb[1] / 255), Math.max(0.02, rgb[2] / 255)];
+  const L = [Math.log(T[0]), Math.log(T[1]), Math.log(T[2])];
+  const over = mode === 'over';
+  for (let y = 0; y < bh; y++) {
+    const cy = by + y - canvas.y0;
+    if (cy < 0 || cy >= CH) continue;
+    const row = y * bw;
+    for (let x = 0; x < bw; x++) {
+      const d = dens[row + x] * am;
+      if (d <= 0.004) continue;
+      const cx = bx + x - canvas.x0;
+      if (cx < 0 || cx >= CW) continue;
+      const k = cy * CW + cx, i = k * 3;
+      if (over) {
+        // pintura opaca: tapa según la carga; el tono va de lavado (poca) a profundo (mucha)
+        const a = 1 - Math.exp(-3.4 * d);
+        const e = 0.2 + 0.8 * Math.min(2.2, d);
+        Wb[i] += (Math.exp(L[0] * e) - Wb[i]) * a; Wb[i + 1] += (Math.exp(L[1] * e) - Wb[i + 1]) * a; Wb[i + 2] += (Math.exp(L[2] * e) - Wb[i + 2]) * a;
+        Ab[k] = 1 - (1 - Ab[k]) * (1 - a);
+      } else {
+        Wb[i] *= Math.exp(L[0] * d); Wb[i + 1] *= Math.exp(L[1] * d); Wb[i + 2] *= Math.exp(L[2] * d);
+        const a = 1 - Math.exp(-3 * d);
+        Ab[k] = 1 - (1 - Ab[k]) * (1 - a);
+      }
+    }
+  }
+}
+
+// lienzo de pigmento -> RGBA (color y opacidad que sobre blanco dan el mismo aspecto)
+function finalize(canvas) {
+  if (!canvas.W) return canvas;
+  const Wb = canvas.W, Ab = canvas.A, D = canvas.data, n = canvas.w * canvas.h;
+  for (let k = 0; k < n; k++) {
+    const i = k * 3;
+    const r = Wb[i], g = Wb[i + 1], b = Wb[i + 2];
+    let a = Ab[k];
+    const need = 1 - Math.min(r, g, b);
+    if (need > a) a = need;
+    if (a < 0.004) { D[4 * k + 3] = 0; continue; }
+    D[4 * k] = (1 - (1 - r) / a) * 255; D[4 * k + 1] = (1 - (1 - g) / a) * 255; D[4 * k + 2] = (1 - (1 - b) / a) * 255;
+    D[4 * k + 3] = a * 255;
+  }
+  canvas.W = null; canvas.A = null;
+  return canvas;
 }
 
 function polysBBox(polys) {
@@ -168,6 +227,7 @@ function renderPlain(canvas, words, sol, frame, align, tau) {
 function isRectQuad(q) { return Math.abs(q.tl[0] - q.bl[0]) < 1e-6 && Math.abs(q.tr[0] - q.br[0]) < 1e-6; }
 
 function trimCanvas(canvas) {
+  finalize(canvas);
   const { w, h, data } = canvas;
   let x0 = w, y0 = h, x1 = -1, y1 = -1;
   for (let y = 0; y < h; y++) {
@@ -188,4 +248,4 @@ function toDepth(data, bits) {
   return data;
 }
 
-module.exports = { hexToRgb, makeCanvas, composite, rasterLocal, fillPolys, lineGlyphs, lineMapper, mapContours, localScale, renderPlain, trimCanvas, toDepth, polysBBox };
+module.exports = { hexToRgb, makeCanvas, composite, compositePigment, finalize, rasterLocal, fillPolys, lineGlyphs, lineMapper, mapContours, localScale, renderPlain, trimCanvas, toDepth, polysBBox };

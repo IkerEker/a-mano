@@ -21,26 +21,31 @@ const { open } = require('./setup.js');
 
   // 2. cada forma con una herramienta y una letra distintas
   const combos = [
-    ['rect', 'rotulador', 'fino', 'adulta', 'minus'],
-    ['arco', 'pincel', 'gordo', 'rabiosa', 'mayus'],
-    ['bandera', 'boli', 'bic', 'elegante', 'cursiva'],
-    ['abanico', 'lapiz', 'hb', 'infantil', 'minus'],
-    ['circulo', 'carbon', 'suave', 'adulta', 'mayus']
+    ['rect', 'rotulador', 'fino', 'adulta', 'minus', 'a'],
+    ['arco', 'pincel', 'gordo', 'nerviosa', 'mayus', 'a'],
+    ['bandera', 'boli', 'bic', 'elegante', 'cursiva', 'b'],
+    ['abanico', 'lapiz', 'hb', 'infantil', 'mayus', 'a'],
+    ['circulo', 'carbon', 'suave', 'infantil', 'mayus', 'b'],
+    ['rect', 'pincel', 'humedo', 'nerviosa', 'mayus', 'b'],
+    ['rect', 'rotulador', 'gordo', 'adulta', 'mayus', 'b'],
+    ['rect', 'boli', 'fino', 'elegante', 'minus', 'a']
   ];
-  for (const [type, tool, preset, persona, mode] of combos) {
+  let ci = 0;
+  for (const [type, tool, preset, persona, mode, ver] of combos) {
+    ci++;
     await newDoc(3000, 1900);
     await refresh();
     const st = await shape(type);
     await rec('G1 forma ' + type, st);
-    await run(([tool, preset, persona, mode]) => { T.seg('toolSeg', tool); T.seg('presetSeg', preset); T.seg('fontSeg', persona); T.seg('caseSeg', mode); }, [tool, preset, persona, mode]);
+    await run(([tool, preset, persona, mode, ver]) => { T.seg('toolSeg', tool); T.seg('presetSeg', preset); T.seg('fontSeg', persona); T.seg('versionSeg', ver); T.seg('caseSeg', mode); }, [tool, preset, persona, mode, ver]);
     await refresh();
     console.log('ctx:', await run(() => document.getElementById('ctxGen').textContent));
     const t0 = Date.now();
     await click('btnGo');
     const s2 = await waitDone();
     console.log(type, Date.now() - t0, 'ms');
-    await rec('G2 escribir ' + type + ' (' + tool + ' ' + preset + ', ' + persona + ' ' + mode + ')', s2);
-    await snap('g_' + type + '_' + tool);
+    await rec('G2 escribir ' + type + ' (' + tool + ' ' + preset + ', ' + persona + ' ' + ver.toUpperCase() + ' ' + mode + ')', s2);
+    await snap('g_' + ci + '_' + type + '_' + tool + '_' + persona + ver);
   }
 
   // 3. selección de lazo
@@ -57,8 +62,10 @@ const { open } = require('./setup.js');
   // 4. girar, voltear y deformar la forma ya escrita y volver a escribir (se sustituye lo anterior)
   await newDoc(3000, 1900); await refresh();
   await shape('arco');
-  await run(() => { T.seg('toolSeg', 'rotulador'); T.seg('presetSeg', 'gordo'); T.seg('fontSeg', 'adulta'); T.seg('caseSeg', 'minus'); });
+  await run(() => { T.seg('toolSeg', 'rotulador'); T.seg('presetSeg', 'gordo'); T.seg('fontSeg', 'adulta'); T.seg('versionSeg', 'a'); T.seg('caseSeg', 'minus'); });
   await click('btnGo'); await waitDone();
+  const blend = await run(() => { const l = SIM.byName('^✍ (?!A mano)').map(SIM.layer)[0]; return l && l.blendMode; });
+  await rec('G4a capa de rotulador en Multiplicar (' + blend + ')', { text: String(blend), cls: blend === 'multiply' ? 'ok' : 'err' });
   for (const [name, op] of [['girada', 'rot'], ['volteada en vertical', 'flipv'], ['deformada', 'warp']]) {
     await run(op => {
       const id = SIM.byName('^◇ ')[0];
@@ -77,6 +84,17 @@ const { open } = require('./setup.js');
   await click('btnNew');
   await rec('G5 otra variación', await waitDone());
   await snap('g_arco_variacion');
+
+  // 5b. autoencajar (rectángulo y círculo)
+  await run(() => { T.text('You are single because you fall for people on the covers of the magazines'); T.seg('textModeSeg', 'auto'); T.seg('toolSeg', 'pincel'); T.seg('presetSeg', 'gordo'); T.seg('fontSeg', 'nerviosa'); T.seg('versionSeg', 'a'); T.seg('caseSeg', 'mayus'); });
+  for (const type of ['rect', 'circulo']) {
+    await newDoc(2000, 2600); await refresh();
+    await shape(type);
+    await click('btnGo');
+    await rec('G5b autoencajar en ' + type, await waitDone());
+    await snap('g_auto_' + type, 0.3);
+  }
+  await run(() => { T.seg('textModeSeg', 'importancia'); T.text('Nadie había cerrado\nla puerta del sótano (otra vez)'); });
 
   // 6. sin texto: aviso
   await run(() => T.text('   '));

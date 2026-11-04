@@ -9,6 +9,7 @@
 
 const FN = require('./fonts.js');
 const SH = require('./shapes.js');
+const R = require('./rng.js');
 
 // niveles: tamaño relativo, pasadas (repasado) y grosor del trazo
 const LEVELS = {
@@ -27,7 +28,8 @@ function levelOf(l, contrast) {
 // text: con saltos de línea; levels: nivel por palabra (en orden)
 function tokenize(text) {
   const out = [];
-  const lines = String(text || '').replace(/\r\n?/g, '\n').split('\n');
+  // cualquier salto de línea cuenta (Photoshop puede usar \r, \u2028, \u0003...)
+  const lines = String(text || '').replace(/\r\n?|[\u2028\u2029\u0003\u000b\u000c\u0085]/g, '\n').split('\n');
   lines.forEach((ln, li) => {
     const ws = ln.split(/[ \t]+/).filter(w => w.length);
     ws.forEach((w, k) => out.push({ text: w, brk: k === 0 && li > 0 && out.length > 0 }));
@@ -43,9 +45,11 @@ function measure(tokens, levels, o) {
     const lv = levelOf(levels[i] || 0, o.contrast);
     // el grosor de la herramienta también ocupa: más aire entre letras y entre líneas con trazo gordo
     const pad = o.inkPad || 0;
-    const sw = FN.setWord(o.persona, o.mode, FN.caseText(t.text, o.mode), o.track || 0, pad);
+    const sw = FN.setWord(o.persona, o.mode, FN.caseText(t.text, o.mode), o.track || 0, pad, i + 1);
     const caps = o.mode === 'mayus';
-    const asc = (caps ? FN.CAP + 0.12 : met.asc) + pad * 1.1, desc = (caps ? 0.1 : met.desc) + pad * 0.9;
+    // las letras de alturas desiguales (infantil, nerviosa) necesitan más aire entre líneas
+    const hv = FN.styleOf(o.persona).hVar || 0;
+    const asc = (caps ? FN.CAP * (1 + hv * 1.5) + 0.12 : met.asc) + pad * 1.1, desc = (caps ? 0.1 + hv * 0.12 : met.desc) + pad * 0.9;
     return { text: t.text, brk: t.brk, level: levels[i] || 0, lv, size: lv.size, set: sw, w: sw.width * lv.size, asc: asc * lv.size, desc: desc * lv.size };
   });
 }
@@ -157,6 +161,7 @@ function layoutInShape(text, levels, shape, o) {
   const met = FN.metrics(o.persona, o.mode);
   const space = met.space * (o.spaceMul || 1) + 2 * (o.inkPad || 0);
   const leading = o.leading || 1;
+  if (o.auto) return autoFit(words, shape, space, o, met);
   if (shape.kind === 'env') return inEnvelope(words, shape, space, leading, o);
   return inSilhouette(words, shape, space, leading, o, met);
 }
@@ -263,4 +268,218 @@ function inSilhouette(words, shape, space, leading, o, met) {
   return { letters, words, map, unit: K, lineCount: r2.lines.length };
 }
 
-module.exports = { LEVELS, levelOf, tokenize, measure, breakLines, bestBlock, placeBlock, layoutInShape };
+// ------------------------------------------------------------------ AUTOENCAJAR
+// Sin importancias: las letras llenan la forma al máximo. Cada línea ocupa todo el ancho (las líneas con
+// menos letras salen más grandes); cada letra sube a ocupar el hueco que dejan las de la línea de arriba
+// (perfil de lo ya colocado) y se estira hacia abajo hasta la línea siguiente. Los espacios entre palabras
+// se ven siempre; dentro de la palabra, todo apretado.
+function autoLines(words, space, aspect, o) {
+  // letras de cada palabra (ancho propio, altura de su tinta)
+  const isLower = o.mode !== 'mayus';
+  const ink = (o.inkPad || 0) * 1.8;               // el trazo ocupa: cada letra cuenta su grosor
+  const gapIn = 0.035, sp = space * 0.9;
+  const W = words.map(w => {
+    const ls = w.set.glyphs.map(q => {
+      const b = q.g.box, bd = q.g.body;
+      return { q, w: Math.max(0.06, bd.right - bd.left) + ink, ink, left: bd.left, top: -b.top, bottom: -b.bottom };
+    });
+    let width = 0; ls.forEach((l, k) => { width += l.w + (k ? gapIn : 0); });
+    return { ls, width };
+  });
+  const n = words.length;
+  const forced = words.filter(w => w.brk).length + 1;
+  let total = 0; for (const w of W) total += w.width + sp;
+  let best = null;
+  for (let L = forced; L <= Math.min(n, 12); L++) {
+    const target = Math.max(total / L, Math.max(...W.map(w => w.width)));
+    const ranges = breakLines(words.map((w, i) => Object.assign({}, w, { w: W[i].width, size: 1 })), target, sp);
+    const res = stackAuto(W, ranges, sp, gapIn, o.seed || 1, isLower);
+    const score = Math.abs(Math.log((res.W / res.H) / aspect)) + (res.lines.length > 1 ? 0 : 0.05);
+    if (!best || score < best.score) best = Object.assign({ score }, res);
+  }
+  return best;
+}
+function stackAuto(W, ranges, sp, gapIn, seed, isLower, band) {
+  // band(y, h) -> [x0, x1]: hueco disponible para una línea que empieza en y con altura h (siluetas)
+  const BW = band ? band.W : 10;                  // ancho del bloque (unidades)
+  const rnd = R.mulberry32(seed * 7 + ranges.length * 131);
+  const N = 400, sky = new Float64Array(N);        // perfil: lo más bajo ocupado en cada x
+  const lines = [];
+  let y0 = 0;
+  ranges.forEach(([a, b], li) => {
+    // cada letra con su escala horizontal propia (un poco distinta), y la línea llena el ancho
+    const items = [];
+    for (let k = a; k < b; k++) {
+      W[k].ls.forEach((l, j) => items.push({ l, word: k, first: j === 0, wf: Math.exp(R.gauss(rnd) * 0.12), hf: Math.exp(R.gauss(rnd) * 0.1) }));
+    }
+    // las letras de un solo palo (I, L, 1...) necesitan algo más de aire para no pegarse a la vecina
+    const narrow = it => it && it.l.w - (it.l.ink || 0) < 0.13;
+    items.forEach((it, i) => { it.gap = i ? (it.first ? sp : gapIn * (narrow(it) || narrow(items[i - 1]) ? 3 : 1)) : 0; });
+    let nat = 0; items.forEach((it, i) => { nat += it.l.w * it.wf + it.gap; });
+    let s = BW / nat, xs = 0;
+    if (band) {
+      // la línea va en su franja de la forma, con el ancho que hay ahí (y no más alta que la franja)
+      const pl = band.plan[li];
+      s = Math.min((pl.iv[1] - pl.iv[0]) / nat, pl.sMax);
+      xs = (pl.iv[0] + pl.iv[1]) / 2 - nat * s / 2;
+    }
+    let x = xs;
+    const Hl = 0.72 * s;                           // altura base de la línea (mayúscula a esa escala)
+    const placed = [];
+    items.forEach((it, i) => {
+      if (i) x += it.gap * s;
+      const w = it.l.w * it.wf * s;
+      const i0 = Math.max(0, Math.floor(x / BW * N)), i1 = Math.min(N - 1, Math.ceil((x + w) / BW * N));
+      let top = 0; for (let k = i0; k <= i1; k++) top = Math.max(top, sky[k]);
+      placed.push({ it, x, w, top });
+      x += w;
+    });
+    // fondo común de la línea: la letra más baja de arriba + la altura base; cada letra crece hacia arriba
+    // hasta el hueco que tenga encima (como mucho ×1,7)
+    const gapV = Hl * 0.08;
+    let base = 0; for (const p of placed) base = Math.max(base, p.top + gapV + Hl * p.it.hf);
+    if (li === 0) base = (band ? band.plan[0].y : 0) + Math.max(...placed.map(p => Hl * p.it.hf));
+    else if (band) base = Math.max(base, band.plan[li].y + Hl * 0.95);
+    for (const p of placed) {
+      const room = base - (li === 0 ? base - Hl * p.it.hf : p.top + gapV);
+      p.h = Math.min(room, Hl * p.it.hf * 1.7);
+      p.base = base;
+    }
+    for (const p of placed) {
+      const i0 = Math.max(0, Math.floor(p.x / BW * N)), i1 = Math.min(N - 1, Math.ceil((p.x + p.w) / BW * N));
+      for (let k = i0; k <= i1; k++) sky[k] = Math.max(sky[k], p.base);
+    }
+    lines.push({ placed, base, Hl });
+    y0 = base;
+  });
+  // las letras de una línea también bajan hasta la siguiente (rellenan el hueco de abajo)
+  for (let li = 0; li < lines.length - 1; li++) {
+    const nx = lines[li + 1];
+    for (const p of lines[li].placed) {
+      let lowTop = Infinity;
+      for (const q of nx.placed) if (q.x < p.x + p.w && q.x + q.w > p.x) lowTop = Math.min(lowTop, q.base - q.h);
+      if (!isFinite(lowTop)) continue;
+      const extra = Math.max(0, lowTop - nx.Hl * 0.08 - p.base);
+      if (extra > 0) { const add = Math.min(extra, p.h * 0.35); p.base += add; p.h += add; }
+    }
+  }
+  let H = 0; for (const ln of lines) for (const p of ln.placed) H = Math.max(H, p.base);
+  return { lines, W: BW, H, isLower };
+}
+// silueta: líneas en los huecos de la forma, tan grandes como quepan (búsqueda del ancho usado)
+function autoSilhouette(words, shape, space, o) {
+  const up = shape.up || [0, -1];
+  const ex = [-up[1], up[0]], ey = [-up[0], -up[1]];
+  const conv = p => { const q = new Array(p.length); for (let i = 0; i < p.length; i += 2) { q[i] = p[i] * ex[0] + p[i + 1] * ex[1]; q[i + 1] = p[i] * ey[0] + p[i + 1] * ey[1]; } return q; };
+  const poly = conv(shape.poly), holes = (shape.holes || []).map(conv);
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  for (let i = 0; i < poly.length; i += 2) { x0 = Math.min(x0, poly[i]); x1 = Math.max(x1, poly[i]); y0 = Math.min(y0, poly[i + 1]); y1 = Math.max(y1, poly[i + 1]); }
+  const Ws = x1 - x0, Hs = y1 - y0, m = (o.margin == null ? 0.04 : o.margin) * Math.min(Ws, Hs);
+  // en unidades del bloque: x desde x0, y desde y0
+  const at = (y, h) => {
+    const iv = SH.bandIntervals([poly], holes, y0 + y, y0 + y + h, 5).filter(a => a[1] - a[0] > 2 * m);
+    if (!iv.length) return null;
+    const w = iv.sort((a, b) => (b[1] - b[0]) - (a[1] - a[0]))[0];
+    return [w[0] - x0 + m, w[1] - x0 - m];
+  };
+  const isLower = o.mode !== 'mayus';
+  const ink = (o.inkPad || 0) * 1.8;
+  const gapIn = 0.035, sp = space * 0.9;
+  const Wd = words.map(w => { const ls = w.set.glyphs.map(q => { const b = q.g.box, bd = q.g.body; return { q, w: Math.max(0.06, bd.right - bd.left) + ink, ink, left: bd.left, top: -b.top, bottom: -b.bottom }; }); let width = 0; ls.forEach((l, k) => { width += l.w + (k ? gapIn : 0); }); return { ls, width }; });
+  let best = null;
+  const forced = words.filter(w => w.brk).length + 1;
+  let total = 0; for (const w of Wd) total += w.width + sp;
+  for (let L = forced; L <= Math.min(words.length, 12); L++) {
+    const target = Math.max(total / L, Math.max(...Wd.map(w => w.width)));
+    const ranges = breakLines(words.map((w, i) => Object.assign({}, w, { w: Wd[i].width, size: 1 })), target, sp);
+    // altura de línea que más llena: las líneas se reparten a lo alto de la forma y cada una toma su ancho
+    let sol = null, bestA = -1;
+    const nL = ranges.length;
+    for (let k = 1; k <= 14; k++) {
+      const Hl = (Hs - 2 * m) / (nL * 1.12) * (0.35 + 0.65 * k / 14);
+      const start = m + ((Hs - 2 * m) - nL * Hl * 1.12) / 2;
+      const plan = [];
+      let ok = true;
+      for (let i = 0; i < nL; i++) {
+        const y = start + i * Hl * 1.12;
+        const iv = at(y, Hl);
+        if (!iv) { ok = false; break; }
+        plan.push({ y, iv, sMax: Hl / 0.72 });
+      }
+      if (!ok) continue;
+      const res = stackAuto(Wd, ranges, sp, gapIn, o.seed || 1, isLower, { W: Ws, plan });
+      if (res.H > Hs - m * 0.5) continue;
+      // área ocupada por las letras (lo que más llena gana)
+      let area = 0; for (const ln of res.lines) for (const p of ln.placed) area += p.w * p.h;
+      if (area > bestA) { bestA = area; sol = res; }
+    }
+    if (!sol) continue;
+    let area = 0; for (const ln of sol.lines) for (const p of ln.placed) area += p.w * p.h;
+    const score = -area;
+    if (!best || score < best.score) best = Object.assign({ score }, sol);
+  }
+  if (!best) return null;
+  const letters = [];
+  const dy = 0;
+  best.lines.forEach((ln, li) => {
+    for (const p of ln.placed) {
+      const g = p.it.l.q.g, bd = g.body;
+      const desc = Math.max(0, g.box.bottom);
+      const capH = Math.max(0.2, -g.box.top + desc);
+      const inkW = p.it.l.ink, bodyW = Math.max(0.06, bd.right - bd.left);
+      const size = p.w / (bodyW + inkW);
+      const hIn = Math.max(p.h * 0.4, p.h - inkW * size);
+      const sy2 = Math.max(0.5, Math.min(2.4, hIn / (capH * size)));
+      letters.push({ g, x: x0 + p.x + inkW * size / 2 - bd.left * size, base: y0 + dy + p.base - inkW * size / 2 - desc * size * sy2, size, sx: 1, sy: sy2, word: p.it.word, line: li, level: 0, lv: { passes: 1, w: 1 } });
+    }
+  });
+  // a unidades de letra (como el resto de maquetas): K px por unidad
+  const sizes = letters.map(l => l.size).sort((a, b) => a - b);
+  const K = sizes[sizes.length >> 1] || 1;
+  for (const l of letters) { l.x /= K; l.base /= K; l.size /= K; }
+  const map = (u, v) => { u *= K; v *= K; return [u * ex[0] + v * ey[0], u * ex[1] + v * ey[1]]; };
+  return { letters, words, map, unit: K, lineCount: best.lines.length, auto: true };
+}
+function autoFit(words, shape, space, o, met) {
+  const m = o.margin == null ? 0.04 : o.margin;
+  let Wp, Hp;
+  if (shape.kind !== 'env') return autoSilhouette(words, shape, space, o);
+  if (shape.kind === 'env') { Wp = shape.W * (1 - 2 * m); Hp = shape.H * (1 - 2 * m); }
+  else {
+    // silueta: su caja (en el marco de la forma) y luego se recorta a la forma con el mapa
+    const up = shape.up || [0, -1];
+    const ex = [-up[1], up[0]], ey = [-up[0], -up[1]];
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    for (let i = 0; i < shape.poly.length; i += 2) { const X = shape.poly[i], Y = shape.poly[i + 1]; const u = X * ex[0] + Y * ex[1], v = X * ey[0] + Y * ey[1]; x0 = Math.min(x0, u); x1 = Math.max(x1, u); y0 = Math.min(y0, v); y1 = Math.max(y1, v); }
+    Wp = (x1 - x0) * 0.78; Hp = (y1 - y0) * 0.78;
+    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    shape = { kind: 'env', W: Wp, H: Hp, map: (u, v) => { const U = cx + (u - 0.5) * Wp, V = cy + (v - 0.5) * Hp; return [U * ex[0] + V * ey[0], U * ex[1] + V * ey[1]]; } };
+    Wp = shape.W; Hp = shape.H;
+  }
+  const res = autoLines(words, space, Wp / Hp, o);
+  if (!res) return null;
+  // el bloque llena el hueco (se estira lo que haga falta, hasta ×1,5 en un sentido)
+  let sx = Wp / res.W, sy = Hp / res.H;
+  const lim = Math.max(1.5, o.stretch || 1.3);
+  if (sx / sy > lim) sx = sy * lim; else if (sy / sx > lim) sy = sx * lim;
+  const ox = (shape.W - res.W * sx) / 2, oy = (shape.H - res.H * sy) / 2;
+  const map = (x, y) => shape.map((ox + x * sx) / shape.W, (oy + y * sy) / shape.H);
+  // a letras: cada una con su tamaño (em) y su escala vertical propia
+  const letters = [];
+  res.lines.forEach((ln, li) => {
+    for (const p of ln.placed) {
+      const g = p.it.l.q.g;
+      const bd = g.body;
+      const desc = Math.max(0, g.box.bottom);                         // descendente (p, g, y...)
+      const capH = Math.max(0.2, -g.box.top + desc);
+      const inkW = p.it.l.ink, bodyW = Math.max(0.06, bd.right - bd.left);
+      const size = p.w / (bodyW + inkW);                              // em por anchura (sin el grosor)
+      const hIn = Math.max(p.h * 0.4, p.h - inkW * size);
+      const sy2 = Math.max(0.5, Math.min(2.4, hIn / (capH * size)));  // estirado vertical
+      letters.push({ g, x: p.x + inkW * size / 2 - bd.left * size, base: p.base - inkW * size / 2 - desc * size * sy2, size, sx: 1, sy: sy2, word: p.it.word, line: li, level: 0, lv: { passes: 1, w: 1 } });
+    }
+  });
+  return { letters, words, map, unit: Math.sqrt(sx * sy), lineCount: res.lines.length, auto: true };
+}
+
+module.exports = { autoFit, LEVELS, levelOf, tokenize, measure, breakLines, bestBlock, placeBlock, layoutInShape };

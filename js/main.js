@@ -26,12 +26,14 @@ const store = {
   set(k, v) { try { localStorage.setItem('amano.' + k, JSON.stringify(v)); return true; } catch (e) { return false; } }
 };
 const DEF = {
-  tab: 'gen', tool: 'rotulador', preset: 'fino', fill: '', color: '#1d1d1f', persona: 'adulta', mode: 'minus', legib: 70,
+  tab: 'gen', tool: 'rotulador', preset: 'fino', fill: '', color: '#1d1d1f', persona: 'adulta', version: 'a', mode: 'mayus', textMode: 'importancia', repaso: 'auto', legib: 70,
   grosor: 0, tinta: 55, pulso: 40, repasado: 50, follow: 'auto', locura: 50, prisa: 15, tight: 0,
   contraste: 50, inter: 100, llenar: 30, margen: 5, align: 'center', kind: 'imagen',
   text: 'Nadie había cerrado\nla puerta del sótano', levels: [0, 2, 1, 0, 0, -1, 0]
 };
 const st = Object.assign({}, DEF, store.get('settings2', {}));
+if (st.persona === 'rabiosa') st.persona = 'nerviosa';
+if (!/^[ab]$/.test(st.version)) st.version = 'a';
 let saveTimer = null;
 function save() { clearTimeout(saveTimer); saveTimer = setTimeout(() => store.set('settings2', st), 250); }
 
@@ -82,18 +84,19 @@ const docKey = doc => String((doc && (doc.title || doc.id)) || '');
 function chaos() { return Math.max(0, 1 - st.legib / 100); }
 function genParams() {
   return {
-    persona: st.persona, mode: st.mode, tool: st.tool, preset: st.preset, color: st.color,
+    persona: st.persona + '_' + st.version, mode: st.mode, tool: st.tool, preset: st.preset, color: st.color,
+    auto: st.textMode === 'auto', repaso: st.repaso,
     legib: st.legib / 100, locura: st.locura / 50, pulso: st.pulso / 100, prisa: st.prisa / 100,
     width: Math.pow(2, st.grosor / 50), repasado: st.repasado / 50, tinta: st.tinta / 100,
     contrast: st.contraste / 50, leading: st.inter / 100, align: st.align, stretch: 1 + st.llenar / 100,
     xFill: st.llenar / 150, margin: st.margen / 100, track: st.tight / 50 * 0.07,
-    inkPad: INK.preset(st.tool, st.preset).w * Math.pow(2, st.grosor / 50)
+    inkPad: Math.max(INK.preset(st.tool, st.preset).w * FN.styleOf(st.persona + '_' + st.version).weight, FN.styleOf(st.persona + '_' + st.version).absW || 0) * Math.pow(2, st.grosor / 50)
   };
 }
 function handParams() {
   // la legibilidad manda; «locura» la escala (50 = normal)
   const loc = Math.min(1.4, chaos() * 1.8 * (st.locura / 50));
-  return { tool: st.tool, preset: st.preset, fill: st.fill || '', follow: st.follow, width: Math.pow(2, st.grosor / 50), locura: loc, pulso: st.pulso / 100, prisa: st.prisa / 100, tight: st.tight / 150, ink: st.tinta / 100 };
+  return { tool: st.tool, preset: st.preset, fill: st.fill || '', follow: st.follow, repaso: st.repaso, width: Math.pow(2, st.grosor / 50), locura: loc, pulso: st.pulso / 100, prisa: st.prisa / 100, tight: st.tight / 150, ink: st.tinta / 100 };
 }
 
 // ------------------------------------------------------------------ segmentados
@@ -208,7 +211,7 @@ async function refreshCtx() {
     else { ctxC.textContent = 'Selecciona en Capas las capas de texto que quieras pasar a mano (o un grupo que las contenga).'; ctxC.className = 'ctx'; }
   }
 }
-const SAVED_KEYS = ['text', 'levels', 'persona', 'mode', 'tool', 'preset', 'color', 'legib'];
+const SAVED_KEYS = ['text', 'levels', 'persona', 'version', 'mode', 'textMode', 'tool', 'preset', 'color', 'legib'];
 function loadSaved(saved) {
   for (const k of SAVED_KEYS) if (saved[k] != null) st[k] = Array.isArray(saved[k]) ? saved[k].slice() : saved[k];
   save(); syncControls();
@@ -282,6 +285,8 @@ async function doWrite(fresh) {
       if (!group) group = await doc.createLayerGroup({ name: P.GROUP_PREFIX + snippet(st.text), fromLayers: [target.shape] });
       else group.name = P.GROUP_PREFIX + snippet(st.text);
       layer.move(target.shape, constants.ElementPlacement.PLACEBEFORE);
+      // tinta transparente: la capa multiplica (sobre un fondo de color se ve como tinta de verdad)
+      if (INK.preset(st.tool, st.preset).blend === 'multiply') { try { layer.blendMode = constants.BlendMode.MULTIPLY; } catch (e) { /* nada */ } }
       // la forma se queda (para moverla o deformarla y volver a escribir), pero sin verse
       try { target.shape.opacity = 0; } catch (e) { /* nada */ }
       try { await P.selectLayer(group.id); } catch (e) { /* nada */ }
@@ -337,6 +342,7 @@ async function handText(doc, ctx, layer, hp, fresh, say) {
   const out = await handImage(doc, ctx, insts, hp, seed, P.HAND_PREFIX + layer.name.replace(/[\r\n]+/g, ' '), say);
   out.move(layer, constants.ElementPlacement.PLACEBEFORE);
   await P.copyLook(layer, out);
+  if (!hp.fill && INK.preset(hp.tool, hp.preset).blend === 'multiply' && /normal/i.test(String(out.blendMode || 'normal'))) { try { out.blendMode = constants.BlendMode.MULTIPLY; } catch (e) { /* nada */ } }
   layer.visible = false;
   return out;
 }
@@ -410,11 +416,17 @@ function setColor(hex) {
 const SLIDERS = { slLegib: 'legib', slGrosor: 'grosor', slTinta: 'tinta', slPulso: 'pulso', slRepasado: 'repasado', slLocura: 'locura', slPrisa: 'prisa', slTight: 'tight', slContraste: 'contraste', slInter: 'inter', slLlenar: 'llenar', slMargen: 'margen' };
 function syncControls() {
   segSet('toolSeg', st.tool); renderPresets(); segSet('fillSeg', st.fill || ''); segSet('fontSeg', st.persona); segSet('caseSeg', st.mode);
+  segSet('versionSeg', st.version); segSet('textModeSeg', st.textMode); segSet('repasoSeg', st.repaso); syncText();
   segSet('alignSeg', st.align); segSet('kindSeg', st.kind); segSet('followSeg', st.follow);
   for (const [id, k] of Object.entries(SLIDERS)) { const el = $(id); if (el) el.value = st[k]; }
   const t = $('txt'); if (t && t.value !== st.text) t.value = st.text;
   setColor(st.color);
   renderBoard();
+}
+function syncText() {
+  const auto = st.textMode === 'auto';
+  show($('levelBox'), !auto); show($('autoHint'), auto);
+  const vh = $('versionHint'); if (vh) vh.textContent = (FN.styleOf(st.persona + '_' + st.version).hint) || '';
 }
 function showAdv(on) { show($('viewMain'), !on); show($('viewAdv'), on); }
 function bind() {
@@ -423,13 +435,16 @@ function bind() {
   $('btnAdv').addEventListener('click', () => showAdv(true));
   $('btnBack').addEventListener('click', () => showAdv(false));
   $('btnReset').addEventListener('click', () => {
-    for (const k of ['grosor', 'tinta', 'pulso', 'repasado', 'follow', 'locura', 'prisa', 'tight', 'contraste', 'inter', 'llenar', 'margen', 'align', 'kind']) st[k] = DEF[k];
+    for (const k of ['grosor', 'tinta', 'pulso', 'repasado', 'repaso', 'follow', 'locura', 'prisa', 'tight', 'contraste', 'inter', 'llenar', 'margen', 'align', 'kind']) st[k] = DEF[k];
     save(); syncControls(); status('Ajustes avanzados restablecidos.', 'ok');
   });
   segBind('toolSeg', v => { st.tool = v; st.preset = Object.keys(INK.TOOLS[v].presets)[0]; save(); segSet('toolSeg', v); renderPresets(); });
   segBind('presetSeg', v => { st.preset = v; save(); segSet('presetSeg', v); });
   segBind('fillSeg', v => { st.fill = v; save(); segSet('fillSeg', v); });
-  segBind('fontSeg', v => { st.persona = v; save(); segSet('fontSeg', v); });
+  segBind('fontSeg', v => { st.persona = v; save(); segSet('fontSeg', v); syncText(); });
+  segBind('versionSeg', v => { st.version = v; save(); segSet('versionSeg', v); syncText(); });
+  segBind('textModeSeg', v => { st.textMode = v; save(); segSet('textModeSeg', v); syncText(); });
+  segBind('repasoSeg', v => { st.repaso = v; save(); segSet('repasoSeg', v); });
   segBind('caseSeg', v => { st.mode = v; save(); segSet('caseSeg', v); });
   segBind('alignSeg', v => { st.align = v; save(); segSet('alignSeg', v); });
   segBind('kindSeg', v => { st.kind = v; save(); segSet('kindSeg', v); });

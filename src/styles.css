@@ -121,3 +121,5 @@ sp-checkbox { margin-top: 6px; }
 .f-ele { font-family: Georgia, serif; font-style: italic; }
 .chip.c-hero { color: #b8321f; }
 #viewAdv sp-slider { margin-top: 8px; }
+#versionSeg { width: 70px; flex: 0 0 auto; }
+#versionHint { font-size: 10px; }

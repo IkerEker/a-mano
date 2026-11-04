@@ -61,8 +61,10 @@ function trimEnds(p, a, b) {
 // lay: layoutInShape(...). Devuelve [{ pts:[{x,y}], r, seed, P, box, alpha }]
 function plan(lay, p, seed) {
   const P = INK.preset(p.tool, p.preset);
-  const persona = FN.PERSONAS[p.persona] || FN.PERSONAS.adulta;
-  const c = chaosOf(p);
+  const persona = FN.styleOf(p.persona);
+  const auto = !!lay.auto;
+  // en «autoencajar» las letras ya están encajadas al milímetro: la variación es más contenida
+  const c = chaosOf(p) * (auto ? 0.55 : 1);
   const g = R.gauss;
   const out = [];
   const isScript = p.mode === 'cursiva';
@@ -108,7 +110,7 @@ function plan(lay, p, seed) {
       u -= v * shear;
       x = cx + cr * u - sr * v + ldx; y = cy + sr * u + cr * v + ldy;
       // a la línea
-      let X = L.x + x * em * L.sx, Y = L.base + y * em;
+      let X = L.x + x * em * L.sx, Y = L.base + y * em * (L.sy || 1);
       // palabra
       const wcx = (WC.x0 + WC.x1) / 2;
       let U = (X - wcx) * W.sc, V = (Y - L.base) * W.sc;
@@ -122,6 +124,7 @@ function plan(lay, p, seed) {
     const strokes = L.g.strokes.map((s, si) => {
       const rs = R.mulberry32(seed + li * 1009 + si * 97 + 5);
       let pts = s.pts;
+      if (s.fill) return { pts: pts.map(([x, y]) => [x + g(rs) * 0.006, y + g(rs) * 0.006]).map(tf), closed: true, fill: true, joinable: false, mark: !!s.mark };
       // trazo: pequeño desplazamiento y giro propio (las piezas de la letra no encajan perfecto)
       let mx = 0, my = 0; for (const q of pts) { mx += q[0]; my += q[1]; } mx /= pts.length; my /= pts.length;
       const jx = g(rs) * (0.004 + 0.028 * c), jy = g(rs) * (0.004 + 0.028 * c), jr = g(rs) * (0.012 + 0.07 * c);
@@ -138,14 +141,14 @@ function plan(lay, p, seed) {
         const e0 = Math.max(-0.05, Math.min(0.04, g(rs) * (0.008 + 0.03 * c))), e1 = Math.max(-0.06, Math.min(0.05, g(rs) * (0.01 + 0.035 * c) + (rs() < P.lift ? -0.025 : 0)));
         pts = trimEnds(pts, e0, e1);
       }
-      return { pts: pts.map(tf), closed: s.closed, joinable: true, mark: !!s.mark };
+      return { pts: pts.map(tf), closed: s.closed, joinable: true, mark: !!s.mark, extra: !!s.extra };
     });
     const letter = { strokes, joinable: L.g.script && /[a-zñáéíóúü]/i.test(L.g.ch), L, size: em, word: L.word };
     cursiveLetters.push(letter);
   });
   // ---- huecos reales dentro de cada palabra (ya con la variación): ni se tocan ni parecen espacios
-  if (!isScript) {
-    const inkW = P.w * (p.width == null ? 1 : p.width);
+  if (!isScript && !auto) {
+    const inkW = Math.max(P.w * (p.width == null ? 1 : p.width) * persona.weight, (persona.absW || 0) * (p.width == null ? 1 : p.width));
     const byW = new Map();
     for (const l of cursiveLetters) { if (!byW.has(l.word)) byW.set(l.word, []); byW.get(l.word).push(l); }
     for (const [, ls] of byW) {
@@ -204,22 +207,38 @@ function plan(lay, p, seed) {
     const emPx = ux * L.size;
     let passes = 1 + Math.round((lv.passes - 1) * passMul);
     if (P.extraPass) passes += P.extraPass;
+    // repasado: fundido (más pigmento, sin líneas sueltas) o visible (alguna pasada se separa un poco)
+    const fuse = p.repaso === 'fundido' ? true : p.repaso === 'visible' ? false : !!P.fuse;
+    // grosor: el de la herramienta (por el del estilo); las letras de piezas tienen grosor propio
+    const wEm = Math.max(P.w * widthMul * persona.weight, (persona.absW || 0) * widthMul);
+    const hw = wEm * (lv.w || 1) * Math.sqrt(L.size); // medio ancho en unidades de maqueta
     l.strokes.forEach((s, si) => {
       if (!s.pts || s.pts.length < 2) return;
-      for (let pass = 0; pass < passes; pass++) {
+      const np = s.fill ? 1 : passes;
+      for (let pass = 0; pass < np; pass++) {
         const rs = R.mulberry32(seed + li * 3301 + si * 211 + pass * 7919 + 11);
         let pts = s.pts;
         if (pass > 0) {
-          // repasado: otra pasada casi encima (se desvía un poco, no empieza ni acaba en el mismo sitio)
-          const amp = (0.012 + 0.02 * c) * (pass === 1 ? 1 : 1.35);
-          const dx = g(rs) * amp, dy = g(rs) * amp, rr = g(rs) * 0.03;
-          let mx = 0, my = 0; for (const q of pts) { mx += q[0]; my += q[1]; } mx /= pts.length; my /= pts.length;
-          const cr = Math.cos(rr), sr = Math.sin(rr);
-          pts = pts.map(([x, y]) => [mx + cr * (x - mx) - sr * (y - my) + dx * L.size, my + sr * (x - mx) + cr * (y - my) + dy * L.size]);
-          if (pts.length > 3) pts = trimEnds(pts, g(rs) * 0.02 * L.size, g(rs) * 0.025 * L.size);
+          // la otra pasada va casi encima: se desvía despacio y menos que el grosor (no es una copia movida)
+          const A = fuse ? 0.35 * hw : Math.max(0.9 * hw, 0.012 * L.size);
+          const lam = (0.18 + 0.2 * rs()) * L.size, ns = (seed + li * 31 + si * 7 + pass * 101) | 0;
+          let acc = 0;
+          pts = pts.map((q, k) => {
+            if (k) acc += Math.hypot(q[0] - pts[k - 1][0], q[1] - pts[k - 1][1]);
+            const a = pts[Math.max(0, k - 1)], b = pts[Math.min(pts.length - 1, k + 1)];
+            const tx = b[0] - a[0], ty = b[1] - a[1], tl = Math.hypot(tx, ty) || 1;
+            const o = A * R.noise1(acc / lam, ns);
+            return [q[0] - ty / tl * o, q[1] + tx / tl * o];
+          });
+          // a veces solo se repasa un tramo
+          if (!s.closed && pts.length > 8 && rs() < (fuse ? 0.25 : 0.4)) {
+            const t0 = Math.floor(pts.length * rs() * 0.3), t1 = Math.ceil(pts.length * (0.7 + rs() * 0.3));
+            pts = pts.slice(t0, Math.max(t0 + 3, t1));
+          }
+          if (pts.length > 3) pts = trimEnds(pts, g(rs) * 0.012 * L.size, g(rs) * 0.016 * L.size);
         }
         // pincel: algunos trazos verticales empiezan por abajo
-        if (P.up && pts.length > 2) {
+        if (P.up && !s.fill && pts.length > 2) {
           const a = pts[0], b = pts[pts.length - 1];
           if (Math.abs(b[1] - a[1]) > 1.6 * Math.abs(b[0] - a[0]) && b[1] > a[1] && rs() < P.up) pts = pts.slice().reverse();
         }
@@ -234,11 +253,13 @@ function plan(lay, p, seed) {
           const nn = tremA * R.noise1(acc / tremL, seed + li * 3 + si * 17 + pass);
           return { x: q[0] - ty / tl * nn, y: q[1] + tx / tl * nn };
         });
-        const r = Math.max(0.5, P.w * emPx * widthMul * lv.w / Math.max(0.5, Math.sqrt(L.size)) * (pass > 0 ? 0.92 + 0.12 * rs() : 1));
+        let r = Math.max(0.5, wEm * emPx * (lv.w || 1) / Math.max(0.5, Math.sqrt(L.size)));
+        if (pass > 0) r *= fuse ? 1.04 + 0.08 * rs() : 0.85 + 0.1 * rs();
+        if (s.extra) r *= 0.8;
         let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
         for (const q of fin) { if (q.x < x0) x0 = q.x; if (q.x > x1) x1 = q.x; if (q.y < y0) y0 = q.y; if (q.y > y1) y1 = q.y; }
         const m = r * 2.5 + 3;
-        out.push({ pts: fin, r, seed: (seed + li * 7 + si * 131 + pass * 1777) >>> 0, P, box: { left: x0 - m, top: y0 - m, right: x1 + m, bottom: y1 + m }, alpha: pass > 0 ? 0.92 : 1 });
+        out.push({ pts: fin, r, fill: !!s.fill, seed: (seed + li * 7 + si * 131 + pass * 1777) >>> 0, P, box: { left: x0 - m, top: y0 - m, right: x1 + m, bottom: y1 + m }, alpha: pass > 0 ? (fuse ? 0.75 : 0.85) : 1 });
       }
     });
   });
@@ -253,7 +274,9 @@ function paint(canvas, strokes, p) {
   for (const s of strokes) {
     const b = s.box;
     if (b.right < canvas.x0 || b.left > canvas.x0 + canvas.w || b.bottom < canvas.y0 || b.top > canvas.y0 + canvas.h) continue;
-    INK.paintStroke(canvas, s.pts, s.P, s.r, rgb, s.seed, { inkMul: 0.88 + 0.24 * ink, dryMul: 0.45 + 1.1 * ink, alphaMul: s.alpha });
+    const o = { inkMul: 0.88 + 0.24 * ink, dryMul: 0.45 + 1.1 * ink, alphaMul: s.alpha };
+    if (s.fill) INK.paintFill(canvas, s.pts.map(q => [q.x, q.y]), s.P, s.r, rgb, s.seed, o);
+    else INK.paintStroke(canvas, s.pts, s.P, s.r, rgb, s.seed, o);
     n++;
   }
   return n;

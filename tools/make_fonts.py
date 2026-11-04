@@ -18,11 +18,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, 'fonts', 'svg')
 
 # nombre interno -> (archivo, es cursiva en orden de escritura)
+# (desde la 2.1 las mayúsculas y minúsculas se dibujan en js/skeleton.js; aquí quedan las cursivas ligadas
+#  y una fuente de respaldo para signos raros)
 FONTS = {
     'readability': ('EMSReadability', False),
-    'tech': ('EMSTech', False),
-    'felix': ('EMSFelix', False),
-    'elfin': ('EMSElfin', False),
     'script': ('HersheyScript1', True),
     'allure': ('EMSAllure', True),
 }

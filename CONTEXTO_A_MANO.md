@@ -7,7 +7,7 @@ pinta a mano, encima, el texto de capas de texto que ya existen (CALCAR).
 Este documento sirve para continuar el trabajo en una conversación nueva sin perder nada.
 
 - Usuario: escribe en español. Las respuestas, el panel y los textos van en español.
-- Versión actual: **A mano 2.0.0** (`dist/A_mano_v2.0.0.ccx`), id `com.amano.handlettering`.
+- Versión actual: **A mano 2.1.0** (`dist/A_mano_v2.1.0.ccx`), id `com.amano.handlettering`.
 - Repositorio: **github.com/IkerEker/a-mano** (privado). El usuario sube material a `TRAZOS/` desde la web.
 - Cartelator es otro plugin, con su propia conversación (id `com.cartelator.handlettering`); se pueden instalar los dos.
 - **Ojo:** solo se ha probado en un Photoshop simulado y en vistas previas sin Photoshop, **nunca en Photoshop de verdad**.
@@ -50,9 +50,27 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
   lápiz, carboncillo, bolis, rotuladores, pincel seco. Se le dieron prompts de Gemini (fondo blanco plano,
   negro, 16:9, hojas de rectas, curvas, inicios/finales y repasado).
 
+### 4 de noviembre de 2026, tarde: correcciones sobre la 2.0 → 2.1
+- «Los repasados funcionan fatal, se ven muy feos.» (eran copias rígidas desplazadas del trazo)
+- «Cuando se escribe en color, sobre todo en pincel, la gracia es que conserve la veta interior, el registro,
+  un cambio de tono, saturación, más pigmentado por partes.»
+- «El bolígrafo igual: la gracia está en que cambie un poco el tono en las letras, más oscuro por donde aprieta.»
+- «La tipografía rabiosa es una mierda, se ve muy formal.» «Las tipografías (las autogeneradas) no me gustan mucho.»
+- «La función de calcar todavía funciona mal, la línea no va por donde debería.» «El calco de lápiz resulta
+  ilegible, le falta intensidad.»
+- Mandó referencias de letra (en `referencias/` no están; se describen aquí): póster TONYA HARDINGS (mayúsculas
+  altas y estrechas, desbordadas), abecedario de niño, abecedario geométrico de piezas (triángulos, medios
+  círculos), «Sorry for the late reply» (mayúsculas temblonas), pimiento y Doodle Club (letra de ilustrador),
+  Good Room (letras huecas), «You're single because…» (pincel, letras encajadas llenando el cartel).
+  Pidió **«2 versiones de cada una (adulta, infantil, nerviosa y elegante)»**; la rabiosa pasa a llamarse nerviosa.
+- **Autoencajar:** «en la casilla de texto una opción "Autoencajar" que ignore lo de palabras importantes y que
+  se concentre en que las letras llenen el mayor espacio posible, jugando con los tamaños entre ellas,
+  encajándolas en los huecos de las de arriba y abajo, dejando claros los espacios de barra espaciadora, pero lo
+  demás encajándolo al máximo».
+
 ---
 
-## 2. Cómo se usa (2.0)
+## 2. Cómo se usa (2.1)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -62,7 +80,11 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
    marcarlas. Al editar el texto, cada palabra conserva su importancia.
 3. **Estilo**: herramienta + pack (lápiz HB/blando/nervioso, carboncillo suave/fuerte/cera, boli BIC/fino/gel,
    rotulador fino/gordo/gastado, pincel fino/gordo/seco/húmedo) + color (toma el color frontal).
-4. **Letra**: infantil, adulta, rabiosa, elegante × MAYÚSCULAS, minúsculas, cursiva.
+4. **Letra**: infantil, adulta, nerviosa, elegante, cada una en **versión A o B**, × MAYÚSCULAS, minúsculas,
+   cursiva. Adulta A segura y compacta (pimiento), Adulta B suelta y saltarina (Doodle Club), Infantil A de niño,
+   Infantil B de piezas (triángulos y medios círculos rellenos), Nerviosa A alta, estrecha y desbordada (Tonya),
+   Nerviosa B temblona (Sorry…), Elegante A alta y tranquila, Elegante B fina de ilustrador.
+- **Texto: «Por importancia» o «Autoencajar»** (este último ignora las importancias y llena la forma).
 - **Legibilidad** (garabato ↔ muy legible).
 - **Escribir en la forma**: crea el grupo `✍ A mano · <texto>` con la capa de píxeles `✍ <texto>` encima de la
   forma, que pasa a opacidad 0. Volver a pulsar con el grupo seleccionado lo rehace (lee la forma tal como esté).
@@ -74,7 +96,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 pintado nuevo y las mismas herramientas; Relleno: brocha o sello (de la 1.0). Resultado imagen o editable (en
 Avanzado).
 
-**Avanzado ›**: grosor, tinta, pulso, repasado, locura, prisa, apretadas/sueltas; en GENERAR además diferencia
+**Avanzado ›**: grosor, tinta, pulso, repasado (cantidad y tipo: auto, fundido, visible), locura, prisa, apretadas/sueltas; en GENERAR además diferencia
 de tamaño entre importancias, interlineado, llenar la forma, margen y alineación; en CALCAR, resultado y grosor
 (de la herramienta o de la letra).
 
@@ -87,10 +109,13 @@ de tamaño entre importancias, interlineado, llenar la forma, margen y alineaci�
 | `main.js` | Panel: pestañas, vista avanzada, ajustes (`amano.settings2`), casilla de texto con niveles, crear forma, escribir, calcar. |
 | `ps.js` | Puente con Photoshop. Nuevo en 2.0: `vectorMaskOf` (lee y calibra unidades), `resolveShape` (forma/grupo desde la selección), `makeShapeLayer` (prueba px y pt y comprueba límites y máscara), `selectionToWorkPath`, `deselect`. |
 | `shapes.js` | Genera las formas (anclas en orden conocido: empieza arriba a la izquierda, sentido horario) y las lee: **envolventes** (4 esquinas → parche de Coons; si está volteada no escribe en espejo: elige cambiar izq/der o arriba/abajo según hacia dónde quede «arriba») y **siluetas** (círculo con su «arriba», selección, formas libres). |
-| `layout.js` | Texto → palabras con nivel (tamaño, pasadas, grosor) → cortes de línea por programación dinámica buscando la proporción de la forma → bloque dentro de la envolvente (estira hasta ×1,3) o líneas que caben en la silueta (búsqueda binaria del tamaño, prueba varias alturas de arranque). Reserva el grosor de la herramienta (`inkPad`). |
-| `fonts.js` + `fontdata.js` | Tipografías de trazo. 4 personalidades (`PERSONAS`) sobre 6 fuentes base. Suavizado con esquinas, letra angulosa (rabiosa), altura de x propia, tildes de mayúscula pegadas, espaciado por el cuerpo de la letra (sin tildes), unión de cursiva. |
-| `writer.js` | GENERAR: variación por línea/palabra/letra/trazo según la legibilidad, recorte de extremos en em, óvalos que no cierran, corrección de huecos tras la variación (dentro de la palabra y entre palabras), repasado, pincel que empieza por abajo, temblor, plan de trazos en px y pintado por franjas. |
-| `ink.js` + `texdata.js` | **Motor de pintado**: cada trazo es una cinta continua (triángulos con coordenadas a lo largo/a lo ancho) forrada con una cinta real de `TRAZOS/`; inicio real, final real, medio sin costuras; presión (entrada/salida, ondulación, engorda al bajar); grano de papel pegado al papel; borde húmedo; carga al empezar; sequedad progresiva. Packs en `TOOLS`. |
+| `layout.js` | (2.1: **autoencajar** —`autoFit`/`stackAuto`/`autoSilhouette`: cada línea llena el ancho, cada letra sube al hueco de la de arriba y baja hasta la siguiente, el grosor del trazo cuenta; en siluetas cada línea toma el ancho de su franja—; cualquier salto de línea cuenta) Texto → palabras con nivel (tamaño, pasadas, grosor) → cortes de línea por programación dinámica buscando la proporción de la forma → bloque dentro de la envolvente (estira hasta ×1,3) o líneas que caben en la silueta (búsqueda binaria del tamaño, prueba varias alturas de arranque). Reserva el grosor de la herramienta (`inkPad`). |
+| `skeleton.js` | **Letras dibujadas a mano trazo a trazo** en un mini lenguaje (`M/L/S/F/Z`): mayúsculas, minúsculas, números, signos, alternativas (a y g de dos pisos) y marcas (tildes, diéresis, virgulilla, cedilla). |
+| `fonts.js` | 8 estilos (`STYLES`: `adulta_a` … `elegante_b`) que transforman el esqueleto: anchura, inclinación, alturas desiguales, deformación, temblor, curvas angulosas o geométricas, travesaños que se pasan, palos que sobresalen, óvalos que no cierran, trazos dobles, letras propias (`OVR`: kid, geo, tonya, fine). 3 variantes por letra. Cursiva con `fontdata.js` (Hershey Script y EMS Allure). `templates(ch)` da la letra neutra para el calco. |
+| `calco.js` | **Calco guiado** (CALCAR): plantilla del carácter → encaje afín al esqueleto real de la letra (puntos cercanos en los dos sentidos, con rigidez) → ajuste fino por punto → grosor de la propia letra. Si no cubre bien la letra (calidad < 0,9), se usa el esqueleto antiguo. |
+| `writer.js` | GENERAR: variación por línea/palabra/letra/trazo según la legibilidad, corrección de huecos tras la variación, **repasado nuevo** (pasadas casi encima con desviación lenta menor que el grosor, a veces parciales; fundido en pincel y rotulador), rellenos (`paintFill`), grosor del estilo, escala vertical por letra (autoencajar), temblor, plan y pintado por franjas. |
+| `render.js` | Desde 2.1 el lienzo es **de pigmento**: guarda cómo se ve sobre blanco (transmitancia por canal) y la cobertura; las tintas se acumulan como veladuras (`compositePigment`, modo multiplicar) o tapan (guache/óleo); `finalize` lo pasa a RGBA. |
+| `ink.js` + `texdata.js` | **Motor de pintado** (2.1: pigmento por presión —aprieta al bajar, en curvas y al frenar— y por carga del pincel; textura sin recortar, conserva la veta; `blend` multiply/over por pack; `fuse` para el repasado; `paintFill` rellena a pinceladas): cada trazo es una cinta continua (triángulos con coordenadas a lo largo/a lo ancho) forrada con una cinta real de `TRAZOS/`; inicio real, final real, medio sin costuras; presión (entrada/salida, ondulación, engorda al bajar); grano de papel pegado al papel; borde húmedo; carga al empezar; sequedad progresiva. Packs en `TOOLS`. |
 | `hand.js` | CALCAR: variación sin mover la maqueta (de la 1.0). Los trazos se pintan con `ink.js`; brocha y sello siguen con el motor de relleno de la 1.0. |
 | `strokes.js`, `glyphs.js`, `instances.js`, `handmade.js` | CALCAR (de la 1.0): esqueleto de las letras de la fuente, contornos de la capa de texto, modo editable. |
 | `render.js`, `geom.js`, `raster.js`, `rng.js` | Lienzo y composición, trazados y Coons, rasterizado, azar reproducible. |
@@ -104,9 +129,11 @@ de tamaño entre importancias, interlineado, llenar la forma, margen y alineaci�
 - Para añadir material: subirlo a `TRAZOS/`, añadirlo a `SOURCES` y `python3 tools/extract_textures.py --preview DIR`
   (tarda unos 2 minutos; mirar las hojas `fam_*.png`).
 
-### Tipografías (`tools/make_fonts.py` → `js/fontdata.js`, ~125 KB)
-- Base: EMS Readability (infantil), EMS Tech (adulta; de *Architects Daughter*), EMS Felix (rabiosa),
-  EMS Elfin (elegante), Hershey Script (cursiva de las tres primeras), EMS Allure (cursiva elegante).
+### Tipografías
+- Desde 2.1 las mayúsculas y minúsculas son propias (`js/skeleton.js` + estilos en `js/fonts.js`).
+  Para ver todas: `node` con el muestrario (ver `tests/node/preview.js` y el patrón de `estado_actual.png`).
+- `tools/make_fonts.py` → `js/fontdata.js` (~66 KB) solo genera ya las cursivas ligadas (Hershey Script, EMS Allure)
+  y una fuente de respaldo para signos raros (EMS Readability).
   Licencias en `src/LICENCIAS.txt` (SIL OFL / Hershey). SVG en `fonts/svg/` (de github.com/techninja/hersheytextjs).
 - El conversor une tramos partidos, da dirección de escritura (vertical de arriba abajo, horizontal de izquierda a
   derecha, óvalos antihorarios desde arriba a la derecha; las cursivas conservan su orden), parte en los picos
@@ -143,22 +170,19 @@ python3 tests/node/sheet.py DIR hoja.png 2 800   # hoja de contactos
   selección), forma girada/volteada/deformada y reescrita (queda un solo resultado), otra variación, avisos sin
   forma y sin texto, los 16 packs, CALCAR con 5 herramientas + brocha + sello (sin copias duplicadas), otra
   variación, volver al original, editable, grupo con texto girado, aviso sin selección y 16 bits.
-- Último resultado: **34/34 bien, sin errores de modal**; 0,1–0,3 s por escritura (1 s el primer calco).
+- 2.1 añade: 8 combinaciones de estilo y versión, capa en Multiplicar, autoencajar en rectángulo y círculo.
+- Último resultado: **43/43 bien, sin errores de modal**; 0,1–0,5 s por escritura (1–1,4 s el primer calco).
 
 ---
 
 ## 5. Pendiente e ideas
 
-1. **Probar en Photoshop real**, sobre todo:
-   - crear la capa de forma (`make contentLayer` con el trazado activo) y sus unidades;
-   - leer la máscara vectorial después de **Deformar** (si Photoshop añade anclas, `quadFromSub` busca las 4
-     esquinas más marcadas; si falla, cae a `G.analyzeShape`);
-   - `make path` desde la selección; `createLayerGroup` con `fromLayers`; mover la capa dentro del grupo;
-   - el selector de texto (`selectionStart` de la casilla) en UXP (si no funciona, los chips sí).
-2. CALCAR: el esqueleto de algunas letras (b, n, M, N) sale raro con boli/rotulador (viene de la 1.0).
-3. Goteo de la brocha (The New Pop) y papel rasgado (AVONAT): aún no.
-4. Más carácter: variantes de letra (2–3 por carácter) en vez de solo deformarlas; ligaduras de cursiva entre
-   mayúscula y minúscula.
-5. Más texturas: las manchas, salpicaduras y curvas de TRAZOS (garabatos) aún no se usan; se podrían usar para
-   goteos, puntos y remates.
-6. Si el usuario escanea su propio alfabeto, se puede convertir en una quinta letra.
+1. **Probar en Photoshop real** (sigue sin probarse): crear la capa de forma y leerla tras Deformar, `make path`
+   desde la selección, `createLayerGroup`, `blendMode = MULTIPLY`, la casilla de texto en UXP.
+2. Letra hueca de bloque (referencia Good Room) como estilo o versión aparte: no está.
+3. Cursivas: siguen saliendo de fuentes de plóter (Hershey/Allure) con el comportamiento del estilo; si no
+   gustan, dibujarlas también en `skeleton.js` con entradas y salidas para ligar.
+4. CALCAR: el calco guiado acepta ~92 % de las letras de prueba; las decorativas (cursiva de Chorus) caen al
+   esqueleto. La variación de CALCAR (planVariation) puede subir o bajar letras sueltas de más con legibilidad baja.
+5. Goteo de la brocha (The New Pop), papel rasgado (AVONAT) y las manchas de TRAZOS: aún no.
+6. Si el usuario escribe su propio alfabeto, se puede convertir al mini lenguaje de `skeleton.js`.

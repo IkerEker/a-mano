@@ -13,6 +13,7 @@ const ST = require('./strokes.js');
 const RD = require('./render.js');
 const G = require('./geom.js');
 const INK = require('./ink.js');
+const CA = require('./calco.js');
 
 const TOOLS = {
   boli: { kind: 'stroke', width: 0.03, useFont: false, density: 0.84, inP: 0.75, inLen: 2, outP: 0.55, outLen: 3, pVar: 0.12, bead: 1.45, edgeDark: 0.06, soft: 0.6, grain: 0.45, skip: 0.5, bristles: 0, dry: 0, rough: 0.04, tremor: 1 },
@@ -338,7 +339,10 @@ function drawStrokes(canvas, it, f, tool, p, seed) {
   // (como haría una mano: el esqueleto se estira, el grosor de la herramienta no)
   const P = INK.preset(p.tool, p.preset);
   const ax = it.ax || 1, useNat = ax !== 1 && it.natContours;
-  const gs0 = useNat ? ST.strokesForContours(it.natContours, it.natBbox, it.em, it.ch) : ST.strokesForContours(it.contours, it.bbox, it.em, it.ch);
+  // calco guiado (letra de trazo correcta ajustada a la forma de la fuente); si no encaja, el esqueleto
+  const cs = useNat ? it.natContours : it.contours, cb = useNat ? it.natBbox : it.bbox;
+  let gs0 = p.guided === false ? null : (() => { const g = CA.guidedStrokes(cs, cb, it.em, it.ch); return g ? { strokes: g } : null; })();
+  if (!gs0) gs0 = ST.strokesForContours(cs, cb, it.em, it.ch);
   const rf = Math.min(1, ax);
   const gs = useNat ? { strokes: gs0.strokes.map(st => Object.assign({}, st, { pts: st.pts.map(q => ({ x: q.x * ax, y: q.y, r: q.r * rf })) })) } : gs0;
   const em = it.em, L = p.locura, pulso = p.pulso;

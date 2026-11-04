@@ -1,56 +1,116 @@
 'use strict';
-// Tipografías propias de A mano: cada letra es una lista de trazos de escritura (orden y dirección de la
-// mano), no un contorno. Aquí se decodifican, se suavizan sin perder las esquinas y se les da la
-// personalidad de cada tipografía (infantil, adulta, rabiosa, elegante).
-// Unidades: em (1 = cuerpo), y hacia abajo, línea base en y = 0.
+// Letras de A mano. Mayúsculas y minúsculas: dibujadas trazo a trazo (skeleton.js) y transformadas por el
+// estilo (proporciones, curvas redondas o angulosas o geométricas, travesaños que se pasan, palos que
+// sobresalen, óvalos que no cierran, temblor, letras propias del estilo). Cada letra tiene 3 variantes.
+// Cursiva: fuentes de trazo ligado (fontdata.js) con el comportamiento del estilo.
+// Unidades de salida: em, y hacia abajo, línea base en y = 0. Mayúscula = CAP.
 // Sin dependencias de Photoshop.
 
+const SK = require('./skeleton.js');
 const FD = require('./fontdata.js');
+const R = require('./rng.js');
 
-// personalidad de cada tipografía
-//  print / script: fuente base para mayúsculas-minúsculas y para la cursiva
-//  slant: inclinación (tangente), wide: anchura, xh: altura de x deseada (proporción de la mayúscula)
-//  angular: las curvas se vuelven tramos rectos; round: más redonda; track: espacio entre letras (em)
-//  bounce: baile de línea base y tamaño (propio de la tipografía, además de la variación general)
-const PERSONAS = {
-  infantil: { label: 'Infantil', print: 'readability', script: 'script', slant: -0.02, slantS: 0.05, wide: 1.1, xh: 0.74, xhS: 0.62, angular: 0, round: 1, track: 0.06, trackS: 0, bounce: 1.6, sizeVar: 1.5, open: 0 },
-  adulta: { label: 'Adulta', print: 'tech', script: 'script', slant: 0.04, slantS: 0.22, wide: 1, xh: 0.66, xhS: 0.52, angular: 0, round: 0, track: 0.025, trackS: 0, bounce: 0.8, sizeVar: 0.8, open: 0.2 },
-  rabiosa: { label: 'Rabiosa', print: 'felix', script: 'script', slant: 0.16, slantS: 0.34, wide: 1.04, xh: 0.66, xhS: 0.55, angular: 1, round: 0, track: 0.035, trackS: -0.01, bounce: 1.4, sizeVar: 1.3, open: 0.6 },
-  elegante: { label: 'Elegante', print: 'elfin', script: 'allure', slant: 0.08, slantS: 0.12, wide: 1, xh: 0.62, xhS: 0.48, angular: 0, round: 0, track: 0.03, trackS: 0, bounce: 0.5, sizeVar: 0.5, open: 0 }
+const CAP = 0.7;
+const NVAR = 3;
+
+// ------------------------------------------------------------------ estilos (4 personalidades × 2 versiones)
+// wide: anchura; slant (+ slantVar por letra): inclinación; hVar/wVar: tamaños desiguales entre letras;
+// wob: deformación de la letra; wobF: temblor fino; angular: 0 redonda .. 1 angulosa; geo: piezas geométricas;
+// os/osVar: travesaños que se pasan; stem: palos que sobresalen; cb: altura de travesaños variable;
+// cbShift: travesaños altos (+) o bajos (-); open: óvalos sin cerrar; xh: altura de x (de la mayúscula);
+// track/minGap: espacio entre letras; weight: grosor relativo del trazo; bounce/sizeVar: baile al escribir;
+// double: trazos dobles sueltos; ovr: letras propias
+const STYLES = {
+  adulta_a: { label: 'Adulta A', hint: 'segura y compacta', wide: 0.9, slant: 0.04, slantVar: 0.025, hVar: 0.05, wVar: 0.06, wob: 0.012, wobF: 0.005, angular: 0.1, geo: 0, os: 0.02, osVar: 0.03, stem: 0.02, cb: 0.04, cbShift: 0, open: 0.25, xh: 0.72, track: 0.07, minGap: 0.035, weight: 1, bounce: 0.6, sizeVar: 0.6, double: 0, ovr: null, script: 'script', xhS: 0.55, slantS: 0.2, trackS: 0 },
+  adulta_b: { label: 'Adulta B', hint: 'suelta y saltarina', wide: 0.86, slant: 0, slantVar: 0.09, hVar: 0.13, wVar: 0.1, wob: 0.02, wobF: 0.009, angular: 0.25, geo: 0, os: 0.03, osVar: 0.05, stem: 0.04, cb: 0.08, cbShift: 0.02, open: 0.3, xh: 0.74, track: 0.08, minGap: 0.04, weight: 1.1, bounce: 1.5, sizeVar: 1.3, double: 0, ovr: null, script: 'script', xhS: 0.6, slantS: 0.12, trackS: 0 },
+  infantil_a: { label: 'Infantil A', hint: 'de niño', wide: 0.95, slant: 0, slantVar: 0.14, hVar: 0.27, wVar: 0.18, wob: 0.045, wobF: 0.014, angular: 0.15, geo: 0, os: 0.02, osVar: 0.06, stem: 0.05, cb: 0.14, cbShift: 0, open: 0.45, xh: 0.78, track: 0.13, minGap: 0.06, weight: 1, bounce: 1.8, sizeVar: 1.4, double: 0, ovr: 'kid', script: 'script', xhS: 0.66, slantS: 0.02, trackS: 0.02 },
+  infantil_b: { label: 'Infantil B', hint: 'de piezas', wide: 1.0, slant: 0, slantVar: 0.03, hVar: 0.07, wVar: 0.06, wob: 0.008, wobF: 0.002, angular: 0, geo: 1, os: 0, osVar: 0.01, stem: 0, cb: 0.03, cbShift: 0, open: 0, xh: 0.8, track: 0.09, minGap: 0.04, weight: 1, absW: 0.06, bounce: 0.8, sizeVar: 0.7, double: 0, ovr: 'geo', script: 'script', xhS: 0.66, slantS: 0, trackS: 0.02 },
+  nerviosa_a: { label: 'Nerviosa A', hint: 'alta, estrecha, desbordada', wide: 0.6, slant: 0.02, slantVar: 0.07, hVar: 0.2, wVar: 0.16, wob: 0.02, wobF: 0.006, angular: 1, geo: 0, os: 0.13, osVar: 0.1, stem: 0.1, cb: 0.12, cbShift: -0.04, open: 0.3, xh: 0.84, track: 0.03, minGap: 0.012, weight: 0.9, bounce: 1.2, sizeVar: 1.3, double: 0.12, ovr: 'tonya', script: 'script', xhS: 0.6, slantS: 0.3, trackS: -0.01 },
+  nerviosa_b: { label: 'Nerviosa B', hint: 'temblona y desigual', wide: 0.8, slant: 0.03, slantVar: 0.1, hVar: 0.16, wVar: 0.13, wob: 0.03, wobF: 0.02, angular: 0.6, geo: 0, os: 0.04, osVar: 0.06, stem: 0.06, cb: 0.1, cbShift: 0, open: 0.35, xh: 0.8, track: 0.08, minGap: 0.045, weight: 1, bounce: 1.6, sizeVar: 1.3, double: 0.05, ovr: null, script: 'script', xhS: 0.6, slantS: 0.24, trackS: 0 },
+  elegante_a: { label: 'Elegante A', hint: 'alta y tranquila', wide: 0.55, slant: 0.03, slantVar: 0.015, hVar: 0.03, wVar: 0.03, wob: 0.005, wobF: 0.003, angular: 0.05, geo: 0, os: 0.05, osVar: 0.02, stem: 0.03, cb: 0.03, cbShift: -0.08, open: 0.12, xh: 0.66, track: 0.1, minGap: 0.06, weight: 0.85, bounce: 0.4, sizeVar: 0.35, double: 0, ovr: null, script: 'allure', xhS: 0.5, slantS: 0.12, trackS: 0 },
+  elegante_b: { label: 'Elegante B', hint: 'fina, de ilustrador', wide: 0.72, slant: 0.07, slantVar: 0.02, hVar: 0.03, wVar: 0.03, wob: 0.006, wobF: 0.003, angular: 0, geo: 0, os: 0.03, osVar: 0.02, stem: 0.02, cb: 0.03, cbShift: 0.1, open: 0.15, xh: 0.6, track: 0.09, minGap: 0.05, weight: 0.7, bounce: 0.5, sizeVar: 0.45, double: 0, ovr: 'fine', script: 'allure', xhS: 0.48, slantS: 0.14, trackS: 0 }
 };
+// compatibilidad con ajustes guardados de la 2.0
+const ALIAS = { infantil: 'infantil_a', adulta: 'adulta_a', rabiosa: 'nerviosa_a', nerviosa: 'nerviosa_a', elegante: 'elegante_a' };
+const PERSONAS = new Proxy(STYLES, { get: (t, k) => t[k] || t[ALIAS[k]] || undefined });
+function styleOf(k) { return STYLES[k] || STYLES[ALIAS[k]] || STYLES.adulta_a; }
 
-// base64 -> nada; los datos ya vienen como números
-const CAP = 0.7; // altura de mayúscula en em, igual en todas las fuentes
+// letras propias de cada estilo (sustituyen al esqueleto). 'lower:x' = usar la minúscula x a tamaño de mayúscula
+const OVR = {
+  kid: {
+    I: [0.46, 'M 0.02 1 L 0.44 1 M 0.23 1 L 0.23 0 M 0 0 L 0.46 0'],
+    J: [0.56, 'M 0.08 1 L 0.56 1 M 0.36 1 L 0.36 0.22 S 0.26 0.02 S 0.08 0.04 S 0 0.2'],
+    K: [0.58, 'M 0 1 L 0 0 M 0.52 1 L 0.06 0.5 L 0.58 0'],
+    M: [0.8, 'M 0 0 L 0 1 L 0.4 0.4 L 0.8 1 L 0.8 0'],
+    G: [0.7, 'M 0.66 0.84 S 0.46 1 S 0.18 0.95 S 0.02 0.66 S 0.06 0.24 S 0.3 0.02 S 0.56 0.04 S 0.7 0.3 L 0.4 0.32'],
+    Q: [0.82, 'M 0.42 1 S 0.12 0.9 S 0 0.5 S 0.12 0.08 S 0.4 0 S 0.68 0.1 S 0.78 0.5 S 0.68 0.9 S 0.42 1 Z M 0.5 0.16 L 0.66 -0.24'],
+    a: [0.62, 'M 0.56 0.82 S 0.38 1 S 0.12 0.92 S 0.02 0.5 S 0.12 0.08 S 0.3 0 S 0.5 0.1 S 0.58 0.4 M 0.6 1 L 0.6 0.1 S 0.64 0 S 0.72 0.02'],
+    y: [0.6, 'M 0 1 L 0.3 0.1 M 0.6 1 L 0.26 -0.55']
+  },
+  geo: {
+    A: [0.8, 'F 0 0 L 0.4 1 L 0.8 0 Z'],
+    M: [0.98, 'F 0 0 L 0.28 1 L 0.56 0 Z F 0.42 0 L 0.7 1 L 0.98 0 Z'],
+    V: [0.76, 'F 0 1 L 0.76 1 L 0.38 0 Z'],
+    W: [1.08, 'F 0 1 L 0.58 1 L 0.29 0 Z F 0.5 1 L 1.08 1 L 0.79 0 Z'],
+    D: [0.66, 'M 0.02 1 L 0.02 0 F 0.14 1 S 0.46 0.94 S 0.66 0.5 S 0.46 0.06 S 0.14 0 Z'],
+    E: 'lower:e', H: 'lower:h', I: 'lower:i', J: 'lower:j', U: 'lower:u',
+    C: [0.6, 'M 0.58 0.88 S 0.36 1 S 0.1 0.86 S 0 0.5 S 0.1 0.14 S 0.36 0 S 0.58 0.12'],
+    O: [0.8, 'M 0.4 1 S 0.12 0.88 S 0 0.5 S 0.12 0.12 S 0.4 0 S 0.68 0.12 S 0.8 0.5 S 0.68 0.88 S 0.4 1 Z'],
+    i: [0.16, 'M 0.08 1 L 0.08 0 F 0.08 1.5 S 0.0 1.42 S 0.08 1.34 S 0.16 1.42 Z'],
+    j: [0.34, 'M 0.26 1 L 0.26 -0.25 S 0.18 -0.5 S 0.02 -0.48 F 0.26 1.5 S 0.18 1.42 S 0.26 1.34 S 0.34 1.42 Z'],
+    '.': [0.18, 'F 0.09 0.18 S 0 0.09 S 0.09 0 S 0.18 0.09 Z']
+  },
+  tonya: {
+    A: [0.62, 'M 0 0 L 0.32 1 L 0.62 0 M 0.08 0.3 L 0.58 0.34'],
+    M: [0.78, 'M 0 0 L 0.06 1 L 0.38 0.28 L 0.72 1 L 0.78 0'],
+    N: [0.6, 'M 0 0 L 0.02 1 L 0.58 0 L 0.6 1'],
+    O: [0.62, 'M 0.32 1 S 0.06 0.86 S 0 0.5 S 0.08 0.1 S 0.3 0 S 0.54 0.1 S 0.62 0.5 S 0.56 0.88 S 0.32 1 Z'],
+    S: [0.56, 'M 0.54 0.9 L 0.3 1 L 0.04 0.86 L 0.06 0.62 L 0.5 0.42 L 0.56 0.14 L 0.3 0 L 0 0.1'],
+    G: [0.64, 'M 0.6 0.9 S 0.4 1 S 0.12 0.9 S 0 0.5 S 0.1 0.08 S 0.34 0 S 0.6 0.12 L 0.62 0.46 L 0.36 0.46'],
+    D: [0.6, 'M 0.02 1 L 0 0 M 0.02 1 L 0.26 0.98 S 0.52 0.82 S 0.6 0.46 S 0.5 0.12 S 0.24 0 L 0 0.02'],
+    E: [0.5, 'M 0.5 1 L 0.02 1 L 0 0 L 0.5 0.02 M 0.02 0.5 L 0.46 0.52'],
+    R: [0.56, 'M 0 0 L 0 1 L 0.26 1 S 0.5 0.9 S 0.54 0.72 S 0.44 0.55 S 0.24 0.5 L 0 0.5 M 0.2 0.5 L 0.56 0']
+  },
+  fine: {
+    B: [0.58, 'M 0 1 L 0 0 M 0 1 L 0.26 1 S 0.44 0.95 S 0.48 0.82 S 0.4 0.7 L 0.24 0.66 L 0 0.66 M 0.24 0.66 S 0.52 0.58 S 0.58 0.3 S 0.48 0.06 L 0.28 0 L 0 0'],
+    K: [0.58, 'M 0 1 L 0 0 M 0.56 1 L 0.02 0.5 M 0.2 0.62 L 0.58 0'],
+    R: [0.6, 'M 0 0 L 0 1 L 0.28 1 S 0.48 0.94 S 0.54 0.8 S 0.46 0.66 S 0.28 0.6 L 0 0.6 M 0.24 0.6 L 0.6 0']
+  }
+};
 
 const cache = new Map();
 
-function fontOf(key) { return FD[key] || FD.tech; }
-
-// ------------------------------------------------------------------ suavizado con esquinas
-function turnAt(p, k) {
-  const ax = p[k][0] - p[k - 1][0], ay = p[k][1] - p[k - 1][1], bx = p[k + 1][0] - p[k][0], by = p[k + 1][1] - p[k][1];
-  const la = Math.hypot(ax, ay), lb = Math.hypot(bx, by);
-  if (la < 1e-9 || lb < 1e-9) return 0;
-  return Math.acos(Math.max(-1, Math.min(1, (ax * bx + ay * by) / (la * lb))));
+// ------------------------------------------------------------------ mini lenguaje de trazos
+function parsePath(d) {
+  const t = d.trim().split(/\s+/);
+  const strokes = [];
+  let cur = null;
+  for (let i = 0; i < t.length;) {
+    const c = t[i++];
+    if (c === 'Z') { if (cur) cur.closed = true; continue; }
+    const x = parseFloat(t[i++]), y = parseFloat(t[i++]);
+    if (c === 'M' || c === 'F') { cur = { pts: [[x, y, true]], closed: false, fill: c === 'F' }; strokes.push(cur); }
+    else if (cur) cur.pts.push([x, y, c === 'L']);
+  }
+  for (const s of strokes) { const n = s.pts.length; if (n) { s.pts[0][2] = true; s.pts[n - 1][2] = true; } }
+  return strokes;
 }
 
-// Catmull-Rom centrípeto por tramos entre esquinas, remuestreado cada `step`
-function smoothPolyline(p, closed, step, cornerDeg) {
-  if (p.length < 3) return resample(p, step);
-  const lim = (cornerDeg || 52) * Math.PI / 180;
-  const cuts = [0];
-  for (let k = 1; k < p.length - 1; k++) if (turnAt(p, k) > lim) cuts.push(k);
-  cuts.push(p.length - 1);
-  const out = [];
-  for (let c = 0; c < cuts.length - 1; c++) {
-    const seg = p.slice(cuts[c], cuts[c + 1] + 1);
-    const sm = catmull(seg, step);
-    if (out.length) sm.shift();
+// Catmull-Rom entre esquinas, remuestreado cada `step`
+function densify(pts, step) {
+  if (pts.length < 2) return pts.map(p => [p[0], p[1]]);
+  const out = [[pts[0][0], pts[0][1]]];
+  let a = 0;
+  for (let k = 1; k < pts.length; k++) {
+    if (!pts[k][2] && k < pts.length - 1) continue;
+    const seg = pts.slice(a, k + 1);
+    const sm = catmull(seg.map(p => [p[0], p[1]]), step);
+    sm.shift();
     for (const q of sm) out.push(q);
+    a = k;
   }
   return out;
 }
-
 function catmull(P, step) {
   if (P.length < 3) return resample(P, step);
   const out = [P[0].slice()];
@@ -59,20 +119,17 @@ function catmull(P, step) {
     const p0 = P[Math.max(0, i - 1)], p1 = P[i], p2 = P[i + 1], p3 = P[Math.min(n - 1, i + 2)];
     const L = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]);
     const m = Math.max(1, Math.ceil(L / step));
-    // tangentes (centrípeto simplificado: Catmull-Rom uniforme con tensión 0.5 y extremos reflejados)
-    const t1 = [(p2[0] - p0[0]) * 0.5, (p2[1] - p0[1]) * 0.5], t2 = [(p3[0] - p1[0]) * 0.5, (p3[1] - p1[1]) * 0.5];
-    // limita las tangentes para que no se pasen en tramos de longitudes muy distintas
-    const lim = (t, Lr) => { const l = Math.hypot(t[0], t[1]); const mx = Lr * 1.2; return l > mx ? [t[0] / l * mx, t[1] / l * mx] : t; };
-    const a = lim(t1, L), b = lim(t2, L);
+    let t1 = [(p2[0] - p0[0]) * 0.5, (p2[1] - p0[1]) * 0.5], t2 = [(p3[0] - p1[0]) * 0.5, (p3[1] - p1[1]) * 0.5];
+    const lim = t => { const l = Math.hypot(t[0], t[1]), mx = L * 1.2; return l > mx ? [t[0] / l * mx, t[1] / l * mx] : t; };
+    t1 = lim(t1); t2 = lim(t2);
     for (let k = 1; k <= m; k++) {
-      const t = k / m, t2_ = t * t, t3 = t2_ * t;
-      const h1 = 2 * t3 - 3 * t2_ + 1, h2 = -2 * t3 + 3 * t2_, h3 = t3 - 2 * t2_ + t, h4 = t3 - t2_;
-      out.push([h1 * p1[0] + h2 * p2[0] + h3 * a[0] + h4 * b[0], h1 * p1[1] + h2 * p2[1] + h3 * a[1] + h4 * b[1]]);
+      const t = k / m, tt = t * t, ttt = tt * t;
+      const h1 = 2 * ttt - 3 * tt + 1, h2 = -2 * ttt + 3 * tt, h3 = ttt - 2 * tt + t, h4 = ttt - tt;
+      out.push([h1 * p1[0] + h2 * p2[0] + h3 * t1[0] + h4 * t2[0], h1 * p1[1] + h2 * p2[1] + h3 * t1[1] + h4 * t2[1]]);
     }
   }
   return out;
 }
-
 function resample(p, step) {
   if (p.length < 2) return p.map(q => q.slice());
   const out = [p[0].slice()];
@@ -83,180 +140,255 @@ function resample(p, step) {
   }
   return out;
 }
-
-// Douglas-Peucker: para la letra rabiosa (curvas -> tramos rectos con esquinas)
-function simplify(p, tol) {
-  if (p.length < 3) return p;
-  const keep = new Uint8Array(p.length); keep[0] = keep[p.length - 1] = 1;
-  const st = [[0, p.length - 1]];
-  while (st.length) {
-    const [a, b] = st.pop();
-    let md = 0, mi = -1;
-    const ax = p[a][0], ay = p[a][1], dx = p[b][0] - ax, dy = p[b][1] - ay, L2 = dx * dx + dy * dy || 1e-12;
-    for (let k = a + 1; k < b; k++) {
-      let t = ((p[k][0] - ax) * dx + (p[k][1] - ay) * dy) / L2; t = Math.max(0, Math.min(1, t));
-      const d = Math.hypot(p[k][0] - ax - dx * t, p[k][1] - ay - dy * t);
-      if (d > md) { md = d; mi = k; }
-    }
-    if (md > tol && mi > 0) { keep[mi] = 1; st.push([a, mi], [mi, b]); }
-  }
-  return p.filter((q, k) => keep[k]);
+function plen(p) { let L = 0; for (let i = 1; i < p.length; i++) L += Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]); return L; }
+function cutEnd(p, frac) {
+  const L = plen(p) * frac; let acc = 0, k = p.length - 1;
+  while (k > 1 && acc < L) { acc += Math.hypot(p[k][0] - p[k - 1][0], p[k][1] - p[k - 1][1]); k--; }
+  return p.slice(0, k + 1);
 }
 
-// ------------------------------------------------------------------ glifos
-// Devuelve { adv, strokes: [{ pts: [[x,y]...], closed }], box } en em, ya con la personalidad aplicada
-function glyph(personaKey, mode, ch) {
-  const P = PERSONAS[personaKey] || PERSONAS.adulta;
-  const isScript = mode === 'cursiva';
-  const fk = isScript ? P.script : P.print;
-  const key = personaKey + '|' + mode + '|' + ch;
-  if (cache.has(key)) return cache.get(key);
-  let F = fontOf(fk), g = F.g[ch];
-  if (!g) { F = fontOf(isScript ? 'script' : 'readability'); g = F.g[ch]; }
-  if (!g) { const r = ch === ' ' ? null : fallbackGlyph(personaKey, mode, ch); cache.set(key, r); return r; }
-  const m = F.m;
-  const s0 = CAP / m.cap;                       // unidades de fuente -> em
-  // alturas: la x se lleva a la proporción de la tipografía; ascendentes y descendentes se ajustan
-  const xhWant = (isScript ? P.xhS : P.xh) * CAP;
-  const xh = m.xh * s0, asc = Math.max(m.asc, m.cap) * s0, desc = m.desc * s0;
+// ------------------------------------------------------------------ definición de cada carácter
+function defFor(st, base) {
+  const ov = st.ovr && OVR[st.ovr] ? OVR[st.ovr][base] : null;
+  if (ov) {
+    if (typeof ov === 'string' && ov.indexOf('lower:') === 0) { const l = SK.LOWER[ov.slice(6)]; return l ? { w: l[0], d: l[1], lower: true, asCap: true } : null; }
+    return { w: ov[0], d: ov[1], lower: /[a-zñ]/.test(base) };
+  }
+  if (SK.LOWER[base]) return { w: SK.LOWER[base][0], d: SK.LOWER[base][1], lower: true };
+  if (SK.CAPS[base]) return { w: SK.CAPS[base][0], d: SK.CAPS[base][1], lower: false };
+  return null;
+}
+
+// glifo de molde (mayúsculas/minúsculas), variante v. Devuelve null si el carácter no está.
+function printGlyph(styleKey, ch, v, altIdx) {
+  const st = styleOf(styleKey);
+  const nfd = ch.normalize ? ch.normalize('NFD') : ch;
+  let base = nfd[0];
+  const marks = Array.from(nfd.slice(1));
+  if (ch === 'ñ' || ch === 'Ñ') { base = ch === 'ñ' ? 'n' : 'N'; if (!marks.length) marks.push('̃'); }
+  let def = altIdx != null && SK.ALT[base] && SK.ALT[base][altIdx] ? { w: SK.ALT[base][altIdx][0], d: SK.ALT[base][altIdx][1], lower: true } : defFor(st, base);
+  if (!def) return null;
+  const rnd = R.mulberry32((hashStr(styleKey + '|' + ch) + v * 7919 + 13) >>> 0);
+  const g = () => R.gauss(rnd);
+  let strokes = parsePath(def.d);
+  // sin punto si lleva tilde (í, ï)
+  if (marks.length && (base === 'i' || base === 'j')) strokes = strokes.filter(s => !(s.pts.length === 2 && Math.hypot(s.pts[1][0] - s.pts[0][0], s.pts[1][1] - s.pts[0][1]) < 0.05) && !(s.fill && s.pts[0][1] > 1.2));
+  // ---- variación estructural (propia de la variante)
+  const H = def.lower && !def.asCap ? 1 : 1;
+  const wob = st.wob, seedW = (rnd() * 1e6) | 0;
+  for (const s of strokes) {
+    const P = s.pts;
+    const n = P.length;
+    if (n === 2 && !s.fill) {
+      const dx = P[1][0] - P[0][0], dy = P[1][1] - P[0][1], L = Math.hypot(dx, dy) || 1;
+      const horiz = Math.abs(dy) < 0.3 * Math.abs(dx), vert = Math.abs(dx) < 0.3 * Math.abs(dy);
+      if (horiz && L > 0.15) {
+        // travesaño: altura variable y se pasa de largo
+        const midY = (P[0][1] + P[1][1]) / 2;
+        if (midY > 0.12 * H && midY < 0.88 * H) { const sh = g() * st.cb + st.cbShift * (1 - Math.abs(midY - 0.5) * 2); P[0][1] += sh; P[1][1] += sh + g() * st.cb * 0.4; }
+        const o0 = Math.max(0, st.os + g() * st.osVar), o1 = Math.max(0, st.os + g() * st.osVar);
+        P[0][0] -= dx / L * o0 * (0.4 + rnd()); P[0][1] -= dy / L * o0 * 0.3;
+        P[1][0] += dx / L * o1 * (0.4 + rnd()); P[1][1] += dy / L * o1 * 0.3;
+      } else if (vert && st.stem) {
+        const e0 = st.stem * (rnd() * 1.3 - 0.3), e1 = st.stem * (rnd() * 1.3 - 0.3);
+        P[0][0] -= dx / L * e0; P[0][1] -= dy / L * e0; P[1][0] += dx / L * e1; P[1][1] += dy / L * e1;
+      }
+    }
+    // deformación de la letra (por puntos de control)
+    for (const q of P) {
+      q[0] += wob * R.noise2(q[0] * 2.2, q[1] * 2.2, seedW) * 1.4;
+      q[1] += wob * R.noise2(q[0] * 2.2 + 7.7, q[1] * 2.2, seedW + 1) * 1.4;
+    }
+    // angulosa: las curvas se vuelven tramos rectos
+    if (st.angular) for (let k = 1; k < n - 1; k++) if (!P[k][2] && rnd() < st.angular) P[k][2] = true;
+  }
+  // tildes y marcas
+  let bx0 = Infinity, bx1 = -Infinity, by1 = -Infinity;
+  for (const s of strokes) for (const q of s.pts) { if (q[0] < bx0) bx0 = q[0]; if (q[0] > bx1) bx1 = q[0]; if (q[1] > by1) by1 = q[1]; }
+  const bodyTop = def.lower && !def.asCap ? Math.min(by1, 1.05) : Math.min(by1, 1.02);
+  const markStrokes = [];
+  for (const mk of marks) {
+    const md = SK.MARKS[mk]; if (!md) continue;
+    const cx = (bx0 + bx1) / 2 + (def.lower ? 0.02 : 0);
+    const below = mk === '̧';
+    for (const s of parsePath(md)) {
+      for (const q of s.pts) { q[0] = cx + q[0] * (def.lower ? 1 : 1.1); q[1] = below ? q[1] : bodyTop + q[1] * (def.lower ? 1.05 : 0.9) + (def.lower ? 0.08 : 0.04); q[0] += g() * st.wob; }
+      s.mark = !below;
+      markStrokes.push(s);
+    }
+  }
+  strokes = strokes.concat(markStrokes);
+  // ---- a em
+  const unit = def.lower && !def.asCap ? CAP * st.xh : CAP;
+  const hS = Math.exp(g() * st.hVar), wS = Math.exp(g() * st.wVar) * st.wide;
+  const slant = st.slant + g() * st.slantVar;
+  const step = 0.012 / unit;
+  const out = [];
+  for (const s of strokes) {
+    let pts = st.angular >= 1 && !st.geo ? resample(s.pts.map(p => [p[0], p[1]]), step) : densify(s.pts, step);
+    if (s.closed && !s.fill && st.open && rnd() < 0.7) pts = cutEnd(pts, st.open * (0.05 + 0.12 * rnd()));
+    // temblor fino (la mano, al trazar)
+    if (st.wobF) { let acc = 0; pts = pts.map((q, k) => { if (k) acc += Math.hypot(q[0] - pts[k - 1][0], q[1] - pts[k - 1][1]); return [q[0] + st.wobF * R.noise1(acc * 9, seedW + 5), q[1] + st.wobF * R.noise1(acc * 9 + 40, seedW + 6)]; }); }
+    pts = pts.map(([x, y]) => { const Y = y * unit * hS; return [x * unit * wS + Y * slant, -Y]; });
+    const o = { pts, closed: s.closed, fill: !!s.fill, mark: !!s.mark };
+    out.push(o);
+    // trazo doble suelto (nerviosa)
+    if (st.double && !s.fill && !s.mark && rnd() < st.double && pts.length > 3) {
+      const off = 0.018 + 0.02 * rnd(), ang = rnd() * 6.28;
+      out.push({ pts: pts.map(([x, y]) => [x + Math.cos(ang) * off, y + Math.sin(ang) * off]), closed: s.closed, fill: false, mark: false, extra: true });
+    }
+  }
+  return finishGlyph(out, def.w * unit * wS, ch, false, def.lower && !def.asCap);
+}
+
+function finishGlyph(strokes, adv, ch, script, lower) {
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity, bx0 = Infinity, bx1 = -Infinity;
+  for (const s of strokes) for (const [x, y] of s.pts) {
+    if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+    if (!s.mark) { if (x < bx0) bx0 = x; if (x > bx1) bx1 = x; }
+  }
+  if (!strokes.length) { x0 = 0; x1 = adv; y0 = -CAP; y1 = 0; }
+  if (!isFinite(bx0)) { bx0 = x0; bx1 = x1; }
+  // avance: la anchura dibujada manda (las letras se colocan por su tinta)
+  return { adv: Math.max(adv, bx1 - Math.min(0, bx0)), strokes, box: { left: x0, top: y0, right: x1, bottom: y1 }, body: { left: bx0, right: bx1 }, script, lower, ch };
+}
+
+// ------------------------------------------------------------------ cursiva (fuentes ligadas)
+function fontOf(key) { return FD[key] || FD.script; }
+function scriptGlyph(styleKey, ch, v) {
+  const st = styleOf(styleKey);
+  let F = fontOf(st.script), g = F.g[ch];
+  if (!g) { F = FD.script; g = F.g[ch]; }
+  if (!g) { const nfd = ch.normalize ? ch.normalize('NFD') : ch; if (nfd.length > 1 && nfd[0] !== ch) return scriptGlyph(styleKey, nfd[0], v); return null; }
+  const m = F.m, s0 = CAP / m.cap;
+  const xhWant = st.xhS * CAP, xh = m.xh * s0, asc = Math.max(m.asc, m.cap) * s0;
   const kx = xhWant / xh;
   const isLower = ch !== ch.toUpperCase() || /[a-zñ]/.test(ch);
   const capE = m.cap * s0;
   const mapY = y => {
-    // y en em, hacia arriba
-    if (!isLower) {
-      // tildes y diéresis de mayúscula: pegadas a la letra (las fuentes originales las ponen altísimas)
-      if (y > capE * 1.04) return capE * 1.04 + (y - capE * 1.04) * 0.5 - Math.min(0.08, (y - capE * 1.04) * 0.25);
-      return y;
-    }
+    if (!isLower) { if (y > capE * 1.04) return capE * 1.04 + (y - capE * 1.04) * 0.5 - Math.min(0.08, (y - capE * 1.04) * 0.25); return y; }
     if (y <= 0) return y * Math.min(1.25, 0.6 + 0.4 * kx);
     if (y <= xh) return y * kx;
     const top = Math.max(asc, xh + 0.05);
     return xhWant + (y - xh) * Math.max(0.45, (top - xhWant) / Math.max(1e-6, top - xh));
   };
-  const slant = isScript ? P.slantS : P.slant;
-  const wide = P.wide * (isScript ? 1 : 1);
-  const step = 0.012;
+  const rnd = R.mulberry32((hashStr(styleKey + '|s|' + ch) + v * 7919) >>> 0);
+  const seedW = (rnd() * 1e6) | 0;
+  const slant = st.slantS + R.gauss(rnd) * st.slantVar * 0.6;
+  const hS = Math.exp(R.gauss(rnd) * st.hVar * 0.5);
   const strokes = [];
   for (const [closed, flat] of g[1]) {
     let pts = [];
-    for (let i = 0; i < flat.length; i += 2) pts.push([flat[i] * s0, flat[i + 1] * s0]);
-    // personalidad: angulosa o redonda
-    if (P.angular && pts.length > 3) pts = simplify(pts, 0.022);
-    pts = P.angular ? resample(pts, step) : smoothPolyline(pts, !!closed, step, P.round ? 75 : 52);
-    // proporciones: altura de x, anchura e inclinación; y pasa a ir hacia abajo
-    pts = pts.map(([x, y]) => { const Y = mapY(y); return [x * wide + Y * slant, -Y]; });
-    if (pts.length >= 2) strokes.push({ pts, closed: !!closed });
+    for (let i = 0; i < flat.length; i += 2) pts.push([flat[i] * s0, flat[i + 1] * s0, false]);
+    if (pts.length) { pts[0][2] = true; pts[pts.length - 1][2] = true; }
+    for (let k = 1; k < pts.length - 1; k++) if (st.angular && rnd() < st.angular * 0.5) pts[k][2] = true;
+    pts = densify(pts.map(p => [p[0] + st.wob * 0.5 * R.noise2(p[0] * 3, p[1] * 3, seedW), p[1] + st.wob * 0.5 * R.noise2(p[0] * 3 + 5, p[1] * 3, seedW + 1), p[2]]), 0.012);
+    pts = pts.map(([x, y]) => { const Y = mapY(y) * hS; return [x * (0.9 + 0.1 * st.wide) + Y * slant, -Y]; });
+    if (pts.length >= 2) strokes.push({ pts, closed: !!closed, fill: false, mark: false });
   }
-  // tildes, puntos y diéresis: trazos enteros por encima del cuerpo de la letra (no cuentan para el espaciado)
   const bodyTop = -(isLower ? xhWant * 0.93 : CAP * 1.02);
   for (const s of strokes) { let lowest = -Infinity; for (const q of s.pts) if (q[1] > lowest) lowest = q[1]; s.mark = lowest < bodyTop && strokes.length > 1; }
-  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-  for (const s of strokes) for (const [x, y] of s.pts) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
-  if (!strokes.length) { x0 = 0; x1 = g[0] * s0 * wide; y0 = -xhWant; y1 = 0; }
-  let bx0 = Infinity, bx1 = -Infinity;
-  for (const s of strokes) if (!s.mark) for (const q of s.pts) { if (q[0] < bx0) bx0 = q[0]; if (q[0] > bx1) bx1 = q[0]; }
-  if (!isFinite(bx0)) { bx0 = x0; bx1 = x1; }
-  const adv = g[0] * s0 * wide;
-  const r = { adv, strokes, box: { left: x0, top: y0, right: x1, bottom: y1 }, body: { left: bx0, right: bx1 }, script: isScript, lower: isLower, ch };
+  return finishGlyph(strokes, g[0] * s0 * (0.9 + 0.1 * st.wide), ch, true, isLower);
+}
+
+// ------------------------------------------------------------------ API
+function hashStr(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+
+// glifo de un carácter en un estilo y modo; v: variante (0..NVAR-1)
+function glyph(styleKey, mode, ch, v) {
+  v = (v || 0) % NVAR;
+  const key = styleKey + '|' + mode + '|' + ch + '|' + v;
+  if (cache.has(key)) return cache.get(key);
+  let r = null;
+  if (ch === ' ') r = null;
+  else if (mode === 'cursiva') r = scriptGlyph(styleKey, ch, v) || printGlyph(styleKey, ch, v);
+  else r = printGlyph(styleKey, ch, v) || scriptFallback(ch);
+  if (cache.size > 6000) cache.clear();
   cache.set(key, r);
   return r;
 }
-
-// carácter que no está: se compone (letra + tilde) o se omite
-function fallbackGlyph(personaKey, mode, ch) {
-  const base = ch.normalize ? ch.normalize('NFD') : ch;
-  if (base.length > 1 && base[0] !== ch) {
-    const g = glyph(personaKey, mode, base[0]);
-    if (g) return g;
-  }
-  return null;
-}
-
-// métricas de la tipografía en em (y hacia abajo: cap y xh negativos)
-function metrics(personaKey, mode) {
-  const P = PERSONAS[personaKey] || PERSONAS.adulta;
-  const isScript = mode === 'cursiva';
-  const F = fontOf(isScript ? P.script : P.print);
+function scriptFallback(ch) {
+  const F = FD.readability || FD.script; const g = F && F.g[ch];
+  if (!g) return null;
   const s0 = CAP / F.m.cap;
-  const xh = (isScript ? P.xhS : P.xh) * CAP;
-  return { cap: CAP, xh, asc: Math.max(CAP, xh + (Math.max(F.m.asc, F.m.cap) * s0 - F.m.xh * s0) * 0.9), desc: Math.min(0.42, -F.m.desc * s0), space: (isScript ? 0.27 : mode === 'mayus' ? 0.5 : 0.36) * P.wide };
+  const strokes = g[1].map(([closed, flat]) => { const pts = []; for (let i = 0; i < flat.length; i += 2) pts.push([flat[i] * s0, -flat[i + 1] * s0]); return { pts, closed: !!closed, fill: false, mark: false }; }).filter(s => s.pts.length > 1);
+  return finishGlyph(strokes, g[0] * s0, ch, false, false);
 }
 
-// texto según el modo: MAYÚSCULAS, minúsculas (tal cual) o cursiva (tal cual, ligada)
-function caseText(text, mode) {
-  return mode === 'mayus' ? text.toLocaleUpperCase('es') : text;
+// métricas (em, y hacia arriba en los valores)
+function metrics(styleKey, mode) {
+  const st = styleOf(styleKey);
+  if (mode === 'cursiva') {
+    const F = fontOf(st.script), s0 = CAP / F.m.cap;
+    const xh = st.xhS * CAP;
+    return { cap: CAP, xh, asc: Math.max(CAP, xh + (Math.max(F.m.asc, F.m.cap) * s0 - F.m.xh * s0) * 0.9), desc: Math.min(0.42, -F.m.desc * s0), space: 0.27 * (0.8 + 0.2 * st.wide) };
+  }
+  const xh = st.xh * CAP;
+  const hv = 1 + st.hVar * 1.2;
+  return { cap: CAP, xh, asc: Math.max(CAP * hv, xh * 1.55 * hv), desc: xh * 0.58, space: (mode === 'mayus' ? 0.42 : 0.32) * (0.55 + 0.45 * st.wide) };
 }
 
-// ------------------------------------------------------------------ palabra
-// Coloca las letras de una palabra; en cursiva une la salida de cada letra con la entrada de la siguiente.
-// Devuelve { glyphs: [{ g, x }], width, joins: [[i, i+1]...] }
-function setWord(personaKey, mode, word, trackExtra, inkW) {
-  const P = PERSONAS[personaKey] || PERSONAS.adulta;
+function caseText(text, mode) { return mode === 'mayus' ? text.toLocaleUpperCase('es') : text; }
+
+// palabra: coloca las letras por su tinta (ningún hueco parece un espacio ni se pisan de más)
+// seedW: para escoger variantes distintas en cada palabra
+function setWord(styleKey, mode, word, trackExtra, inkW, seedW) {
+  const st = styleOf(styleKey);
   const isScript = mode === 'cursiva';
-  const track = (isScript ? P.trackS : P.track) + (trackExtra || 0) * (isScript ? 0.3 : 1);
+  const track = (isScript ? st.trackS : st.track) + (trackExtra || 0) * (isScript ? 0.3 : 1);
   const out = [];
-  let x = 0;
+  let x = 0, i = 0;
+  const s0 = (seedW || 0) * 31;
   for (const ch of Array.from(word)) {
-    const g = glyph(personaKey, mode, ch);
+    const v = (s0 + i * 7 + ch.charCodeAt(0)) % NVAR;
+    i++;
+    const g = glyph(styleKey, mode, ch, v);
     if (!g) { x += 0.3; continue; }
-    // dentro de la palabra ningún hueco entre letras parece un espacio (ni se pisan): se mide la tinta
     if (out.length && !isScript && g.strokes.length) {
       const pv = out[out.length - 1];
       const gap = (x + g.body.left) - (pv.x + pv.g.body.right);
-      // el hueco que se ve es el de los centros menos el grosor del trazo (inkW: medio ancho en em)
-      const w2 = 2 * (inkW || 0);
-      const maxGap = 0.07 + w2 + Math.max(0, trackExtra || 0) * 0.6 + Math.max(0, P.track) * 0.5;
-      // las letras de un solo palo (I, l, i, 1) se confunden con el palo de la vecina: más aire
+      const w2 = 2 * (inkW || 0) * st.weight;
       const narrow = gg => gg.body.right - gg.body.left < 0.12;
-      const minGap = -0.02 + w2 * 0.8 + Math.min(0, trackExtra || 0) + (narrow(pv.g) || narrow(g) ? 0.035 : 0);
+      const maxGap = st.track + 0.05 + w2 + Math.max(0, trackExtra || 0) * 0.6;
+      const minGap = st.minGap + w2 * 0.8 + Math.min(0, trackExtra || 0) + (narrow(pv.g) || narrow(g) ? 0.03 : 0);
       if (gap > maxGap) x -= gap - maxGap; else if (gap < minGap) x += minGap - gap;
     }
     out.push({ g, x });
     x += g.adv + track;
   }
-  const width = out.length ? Math.max(x - track, out[out.length - 1].x + out[out.length - 1].g.box.right) : 0;
+  const last = out[out.length - 1];
+  const width = out.length ? Math.max(last.x + last.g.body.right, last.x + last.g.box.right * 0.5) - Math.min(0, out[0].g.body.left) : 0;
   return { glyphs: out, width };
 }
 
-// En cursiva: une el último trazo de una letra con el primero de la siguiente si se tocan
-// (glyphs ya colocados en el espacio de la línea: [{ strokes: [{pts}], ch }])
+// cursiva: une la salida de cada letra con la entrada de la siguiente
 function joinCursive(letters, emTol) {
   const tol = emTol || 0.09;
-  const res = [];
-  for (let i = 0; i < letters.length; i++) {
-    const L = letters[i];
-    res.push(L);
-    if (i === 0) continue;
-    const A = letters[i - 1];
+  for (let i = 1; i < letters.length; i++) {
+    const L = letters[i], A = letters[i - 1];
     if (!A.joinable || !L.joinable) continue;
-    // salida de A: el trazo cuyo final está más a la derecha y abajo; entrada de L: el que empieza más a la izquierda
     let ai = -1, best = -Infinity;
-    A.strokes.forEach((s, k) => { const e = s.pts[s.pts.length - 1]; const sc = e[0] + e[1] * 0.2; if (!s.closed && sc > best) { best = sc; ai = k; } });
+    A.strokes.forEach((s, k) => { if (s.closed || s.fill || s.mark) return; const e = s.pts[s.pts.length - 1]; const sc = e[0] + e[1] * 0.2; if (sc > best) { best = sc; ai = k; } });
     let bi = -1, bestb = Infinity;
-    L.strokes.forEach((s, k) => { const e = s.pts[0]; const sc = e[0] - e[1] * 0.2; if (!s.closed && sc < bestb) { bestb = sc; bi = k; } });
+    L.strokes.forEach((s, k) => { if (s.closed || s.fill || s.mark) return; const e = s.pts[0]; const sc = e[0] - e[1] * 0.2; if (sc < bestb) { bestb = sc; bi = k; } });
     if (ai < 0 || bi < 0) continue;
     const sa = A.strokes[ai], sb = L.strokes[bi];
     const e = sa.pts[sa.pts.length - 1], b0 = sb.pts[0];
     const d = Math.hypot(b0[0] - e[0], b0[1] - e[1]);
     if (d > tol * (L.size || 1) * 2.2) continue;
-    // puente suave (Hermite con las tangentes de llegada y salida)
     const ta = tangent(sa.pts, true), tb = tangent(sb.pts, false);
     const bridge = [];
-    const n = Math.max(2, Math.ceil(d / 0.01));
-    const k = d * 0.6;
+    const n = Math.max(2, Math.ceil(d / 0.01)), k = d * 0.6;
     for (let j = 1; j < n; j++) {
       const t = j / n, t2 = t * t, t3 = t2 * t;
       const h1 = 2 * t3 - 3 * t2 + 1, h2 = -2 * t3 + 3 * t2, h3 = t3 - 2 * t2 + t, h4 = t3 - t2;
       bridge.push([h1 * e[0] + h2 * b0[0] + h3 * ta[0] * k + h4 * tb[0] * k, h1 * e[1] + h2 * b0[1] + h3 * ta[1] * k + h4 * tb[1] * k]);
     }
-    // el trazo de entrada de L pasa a continuar el de salida de A (un solo trazo, sin levantar)
     sa.pts = sa.pts.concat(bridge, sb.pts);
     sa.joined = true;
     L.strokes.splice(bi, 1);
-    // los trazos sueltos de L (puntos, tildes, travesaños) se quedan en L
   }
-  return res;
+  return letters;
 }
 function tangent(p, atEnd) {
   const n = p.length;
@@ -265,4 +397,20 @@ function tangent(p, atEnd) {
   return [dx / l, dy / l];
 }
 
-module.exports = { PERSONAS, CAP, glyph, metrics, caseText, setWord, joinCursive, smoothPolyline, resample, simplify };
+// plantillas para el calco (sin estilo ni variación), con alternativas: [{ strokes, box }]
+function templates(ch) {
+  const out = [];
+  const nfd = ch.normalize ? ch.normalize('NFD') : ch;
+  const base = (ch === 'ñ' ? 'n' : ch === 'Ñ' ? 'N' : nfd[0]);
+  const mk = (alt) => {
+    const g = printGlyph('__plantilla', ch, 0, alt);
+    return g;
+  };
+  const g0 = mk(null); if (g0) out.push(g0);
+  if (SK.ALT[base]) SK.ALT[base].forEach((a, i) => { const g = mk(i); if (g) out.push(g); });
+  return out;
+}
+STYLES.__plantilla = { label: '', wide: 1, slant: 0, slantVar: 0, hVar: 0, wVar: 0, wob: 0, wobF: 0, angular: 0, geo: 0, os: 0, osVar: 0, stem: 0, cb: 0, cbShift: 0, open: 0, xh: 0.7, track: 0.05, minGap: 0.03, weight: 1, bounce: 0, sizeVar: 0, double: 0, ovr: null, script: 'script', xhS: 0.55, slantS: 0, trackS: 0 };
+
+const STYLE_KEYS = ['infantil', 'adulta', 'nerviosa', 'elegante'];
+module.exports = { STYLES, PERSONAS, STYLE_KEYS, CAP, NVAR, styleOf, glyph, metrics, caseText, setWord, joinCursive, templates, resample, parsePath, densify };

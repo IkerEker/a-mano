@@ -20,6 +20,7 @@ function writePNG(file, w, h, rgba) {
 }
 // lienzo RGBA con transparencia -> sobre papel blanco
 function flatten(canvas, bg) {
+  if (canvas.W) require('../js/render.js').finalize(canvas);
   const { w, h, data } = canvas, out = new Uint8ClampedArray(w * h * 4), b = bg || [255, 255, 255];
   for (let i = 0; i < w * h; i++) { const a = data[4 * i + 3] / 255; for (let c = 0; c < 3; c++) out[4 * i + c] = data[4 * i + c] * a + b[c] * (1 - a); out[4 * i + 3] = 255; }
   return out;
