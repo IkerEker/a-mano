@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.5)
+## 2. Cómo se usa (2.6)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -216,6 +216,27 @@ en azul, pincel en azul y burdeos, autoencajar en arco con líneas montadas)
   rotulador fino, pincel fino), pegado a la letra (su canto interior la toca: no la come).
 - El relleno no sale de su caja (máscara con borde a mano, ondulado a dos escalas): no se come las palabras vecinas.
 
+### Tras probar la 2.5 (captura: cajas en arco que cortaban la última letra, rayado en rejilla, letras finas)
+- Mandó cómo debe verse un negativo (`referencias/negativo_bien_hecho_NOTA.png`): «mira las direcciones de los
+  trazos», «la letra más gruesa y más recta para poder pintar alrededor», «los cuadros tienen los vértices un poco
+  movidos, no rectos». Pidió buscar cómo se hace: en el *negative lettering* a mano primero se perfilan las letras
+  por fuera, pegado a ellas, y después se rellena hacia fuera (lettering.org/negative-lettering).
+
+### Qué se hizo en la 2.6
+- La caja salía más corta que la palabra: el escritor corrige huecos y mueve letras después de maquetar; ahora la
+  caja se mide con los trazos reales de la palabra (`wordExt` en `writer.plan`).
+- Letras del negativo: estilo interno `bloque` (gruesa y recta, sin temblor) y grosor de máscara 0,062 em.
+- Caja = cuadrilátero con las cuatro esquinas movidas (±7 % de su alto), bordes casi rectos, perfilada lado a lado
+  con trazos que se pasan en las esquinas.
+- Orden de pintado como a mano: 1) perfil de cada letra con uno o dos trazos que siguen su borde; 2) caja;
+  3) relleno a **parches orientados**: la dirección de cada parche es la del borde más cercano (campo de distancia
+  a las letras o a la caja → tangente), con una segunda capa cruzada en ~30 % de los parches. Lápiz y cera en
+  zigzag con vueltas redondas, carboncillo/rotulador/pincel con trazos paralelos en vaivén, boli con bucles
+  pequeños. Las tintas que se montan van algo más ligeras (si no, la caja se vuelve un bloque) y sin carga en los
+  extremos (si no, cada trazo corto deja un punto).
+- Las letras vecinas que se meten en la caja se respetan (el relleno las rodea); en autoencajar las letras en
+  negativo no se meten en otras líneas.
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -274,7 +295,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.5.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.6.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)

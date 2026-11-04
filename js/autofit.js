@@ -26,7 +26,7 @@ function lettersOf(words, ink) {
     const ul = w.under && !w.neg ? 0.2 : 0;
     // todas las letras cuentan al menos con la altura de mayúscula (signos y minúsculas cortas no se agigantan)
     const ht = Math.max(0.7 * 0.97, top + desc) + ik + ul;
-    return { q, g: q.g, word: wi, first: j === 0, bw, ht, a: bw / ht, desc: desc + ul, ink: ik, bold: !!w.bold };
+    return { q, g: q.g, word: wi, first: j === 0, bw, ht, a: bw / ht, desc: desc + ul, ink: ik, bold: !!w.bold, neg: !!w.neg };
   }));
 }
 
@@ -107,7 +107,7 @@ function solve(frame, words, L, ranges, o, seed) {
           dn = Math.min(dn, frame.colBot[c], below && isFinite(below[c]) ? below[c] - vg : Infinity);
         }
         // cada letra puede meterse en la franja de al lado, pero no ocupar dos líneas
-        const reach = t === 0 ? 0 : 0.32 * bandH;
+        const reach = t === 0 || it.l.neg ? 0 : 0.32 * bandH;   // (la caja de un negativo no se mete en otra línea)
         up = Math.max(up, ln.y0 - reach); dn = Math.min(dn, ln.y1 + reach);
         // primera y última línea: no se pegan al borde de la forma más de la cuenta
         const avail = Math.max(bandH * 0.15, dn - up);

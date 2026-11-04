@@ -422,7 +422,14 @@ function plan(lay, p, seed) {
     });
   });
   // palabras en negativo: en vez de escribirlas, se pinta su caja alrededor de ellas (con la misma técnica)
-  return NG.planWords(lay, out, p, seed);
+  const wordExt = new Map();
+  for (const l of cursiveLetters) {
+    if (l.under) continue;
+    const e = wordExt.get(l.word) || { x0: Infinity, x1: -Infinity, y0: Infinity, y1: -Infinity };
+    for (const st of l.strokes) for (const q of st.pts) { if (q[0] < e.x0) e.x0 = q[0]; if (q[0] > e.x1) e.x1 = q[0]; if (q[1] < e.y0) e.y0 = q[1]; if (q[1] > e.y1) e.y1 = q[1]; }
+    wordExt.set(l.word, e);
+  }
+  return NG.planWords(lay, out, p, seed, wordExt);
 }
 
 // pinta el plan en un lienzo (solo los trazos que caen en él)

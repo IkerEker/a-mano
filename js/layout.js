@@ -50,7 +50,9 @@ function measure(tokens, levels, o) {
     // el grosor de la herramienta también ocupa: más aire entre letras y entre líneas con trazo gordo
     const mk0 = (o.marks && o.marks[i]) || '';
     const pad = (o.inkPad || 0) * (mk0.indexOf('b') >= 0 ? 1.8 : 1) + (mk0.indexOf('n') >= 0 ? 0.05 : 0);
-    const sw = FN.setWord(o.persona, o.mode, FN.caseText(t.text, o.mode), o.track || 0, pad, i + 1);
+    // (negativo: letra de bloque, gruesa y recta, con aire para el perfil)
+    const isNeg = mk0.indexOf('n') >= 0;
+    const sw = FN.setWord(isNeg ? 'bloque' : o.persona, isNeg && o.mode === 'cursiva' ? 'mayus' : o.mode, FN.caseText(t.text, isNeg && o.mode === 'cursiva' ? 'mayus' : o.mode), o.track || 0, isNeg ? pad + 0.07 : pad, i + 1);
     const caps = o.mode === 'mayus';
     // las letras de alturas desiguales (infantil, nerviosa) necesitan más aire entre líneas
     const hv = FN.styleOf(o.persona).hVar || 0;
