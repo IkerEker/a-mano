@@ -196,6 +196,8 @@ async function copyLook(src, dst) {
 const BLOCK_RE = /#([a-z0-9]{4,8})$/;
 const HAND_PREFIX = '✍ ';
 const isHandCopy = l => !!(l && l.name && l.name.indexOf(HAND_PREFIX) === 0);
+// nombre de capa sin saltos de línea (las capas de párrafo los llevan en el nombre)
+const cleanName = n => String(n || '').replace(/[\r\n]+/g, ' ');
 function allLayers(doc) {
   const out = [];
   const walk = ls => { for (const l of ls) { out.push(l); if (l.layers) walk(Array.from(l.layers)); } };
@@ -210,18 +212,18 @@ function textLayersIn(layer, out) {
   return out;
 }
 function originalOf(doc, copy) {
-  const want = copy.name.slice(HAND_PREFIX.length);
+  const want = cleanName(copy.name.slice(HAND_PREFIX.length));
   const sib = siblingsOf(doc, copy);
   const i = sib.findIndex(l => l.id === copy.id);
-  if (i >= 0 && sib[i + 1] && sib[i + 1].name === want) return sib[i + 1];
-  return sib.find(l => l.id !== copy.id && l.name === want) || null;
+  if (i >= 0 && sib[i + 1] && cleanName(sib[i + 1].name) === want) return sib[i + 1];
+  return sib.find(l => l.id !== copy.id && cleanName(l.name) === want) || null;
 }
 function handCopyOf(doc, orig) {
-  const want = HAND_PREFIX + orig.name;
+  const want = HAND_PREFIX + cleanName(orig.name);
   const sib = siblingsOf(doc, orig);
   const i = sib.findIndex(l => l.id === orig.id);
-  if (i > 0 && sib[i - 1] && sib[i - 1].name === want) return sib[i - 1];
-  return sib.find(l => l.name === want) || null;
+  if (i > 0 && sib[i - 1] && cleanName(sib[i - 1].name) === want) return sib[i - 1];
+  return sib.find(l => cleanName(l.name) === want) || null;
 }
 // lo seleccionado -> capas de texto (dentro de grupos también; una copia a mano cuenta como su original)
 function resolveTargets(doc, selected) {
@@ -257,16 +259,104 @@ async function handEditable(doc, orig, p, seed) {
   const tk = await getTextKey(orig.id);
   if (!tk) throw new UserError('«' + orig.name + '» no es una capa de texto.');
   const copy = await orig.duplicate();
-  copy.name = HAND_PREFIX + orig.name;
+  copy.name = HAND_PREFIX + cleanName(orig.name);
   copy.visible = true;
   orig.visible = false;
   const ranges = HM.varyTextStyles(String(tk.textKey || ''), tk.textStyleRange || [], { pulso: Math.min(1, p.locura * 1.4), prisa: p.prisa, alternates: true }, seed);
   await setTextStyles(copy.id, tk, ranges);
   return copy;
 }
+// ------------------------------------------------------------------ GENERAR: formas
+const SH = require('./shapes.js');
+const GROUP_PREFIX = '✍ A mano · ';
+const isShapeName = n => String(n || '').indexOf(SH.SHAPE_PREFIX) === 0;
+const isGenGroup = l => !!(l && l.kind === constants.LayerKind.GROUP && String(l.name || '').indexOf(GROUP_PREFIX) === 0);
+const isFillKind = k => /solid|gradient|pattern|fill/i.test(String(k || ''));
+
+// trazado de la máscara vectorial de una capa (px del documento), o null
+async function vectorMaskOf(doc, layer) {
+  const r = await tryGet([{ _ref: 'path', _enum: 'path', _value: 'vectorMask' }, { _ref: 'layer', _id: layer.id }]);
+  if (!r || !r.pathContents) return null;
+  const comps = G.readPathContents(r.pathContents, doc.resolution || 72);
+  if (!comps.length) return null;
+  // unidades: se comprueba con los límites de la capa (si no casan, se corrige la escala)
+  try {
+    const b = bounds(layer);
+    const polys = [];
+    for (const c of comps) for (const s of c.subpaths) polys.push(G.flattenSegs(G.segmentsOf(Object.assign({}, s, { closed: true })), 1));
+    const bb = G.polyBBox(polys);
+    const lw = b.right - b.left, pw = bb.right - bb.left;
+    if (lw > 1 && pw > 0) {
+      const k = lw / pw, res = doc.resolution || 72;
+      for (const cand of [res / 72, 72 / res]) if (Math.abs(cand - 1) > 0.02 && Math.abs(k / cand - 1) < 0.04) { G.scaleComponents(comps, cand, 0, 0); break; }
+    }
+  } catch (e) { /* sin límites: se usa tal cual */ }
+  return comps;
+}
+
+// la forma (y su grupo, si ya se ha escrito) a partir de lo seleccionado
+async function resolveShape(doc, selected) {
+  const sel = Array.from(selected || []);
+  const pick = async (l) => {
+    if (!l) return null;
+    if (isGenGroup(l)) {
+      const kids = Array.from(l.layers || []);
+      const s = kids.find(k => isShapeName(k.name)) || kids.find(k => isFillKind(k.kind));
+      return s ? { shape: s, group: l } : null;
+    }
+    const par = l.parent && isGenGroup(l.parent) ? l.parent : null;
+    if (par && !isShapeName(l.name)) return pick(par);
+    if (isShapeName(l.name) || isFillKind(l.kind)) {
+      if (!isShapeName(l.name) && !(await vectorMaskOf(doc, l))) return null;
+      return { shape: l, group: par };
+    }
+    return null;
+  };
+  for (const l of sel) { const r = await pick(l); if (r) return r; }
+  return null;
+}
+
+// crea una capa de forma con las anclas dadas (px). Comprueba las unidades con los límites resultantes.
+async function makeShapeLayer(doc, anchors, name, rgbHex) {
+  const res = doc.resolution || 72;
+  const want = SH.anchorsBBox(anchors);
+  const c = RD.hexToRgb(rgbHex || '#e0533d');
+  let layer = null;
+  for (const unit of ['px', 'pt']) {
+    await bp({ _obj: 'set', _target: [{ _ref: 'path', _property: 'workPath' }], to: SH.toPathContents(anchors, res, unit) });
+    try { await bp({ _obj: 'select', _target: [{ _ref: 'path', _property: 'workPath' }] }); } catch (e) { /* ya está activo */ }
+    await bp({ _obj: 'make', _target: [{ _ref: 'contentLayer' }], using: { _obj: 'contentLayer', type: { _obj: 'solidColorLayer', color: { _obj: 'RGBColor', red: c[0], grain: c[1], blue: c[2] } } } });
+    try { await bp({ _obj: 'delete', _target: [{ _ref: 'path', _property: 'workPath' }] }); } catch (e) { /* nada */ }
+    layer = Array.from(doc.activeLayers || [])[0] || null;
+    if (!layer) break;
+    const b = bounds(layer);
+    const ok = Math.abs((b.right - b.left) - (want.right - want.left)) < Math.max(4, 0.06 * (want.right - want.left));
+    if (ok || unit === 'pt') break;
+    try { layer.delete(); } catch (e) { /* nada */ }
+    layer = null;
+  }
+  if (!layer) throw new UserError('Photoshop no ha creado la forma.');
+  if (!(await vectorMaskOf(doc, layer))) {
+    try { layer.delete(); } catch (e) { /* nada */ }
+    throw new UserError('Photoshop no ha creado la forma vectorial (¿hay una herramienta o un trazado en uso?). Pulsa Esc y vuelve a probar.');
+  }
+  layer.name = name;
+  try { layer.opacity = 35; } catch (e) { /* nada */ }
+  return layer;
+}
+
+// selección activa -> trazado de trabajo (para «desde la selección»)
+async function selectionToWorkPath(tolPx) {
+  await bp({ _obj: 'make', _target: [{ _ref: 'path' }], from: { _ref: 'selectionClass', _property: 'selection' }, tolerance: { _unit: 'pixelsUnit', _value: tolPx || 2 } });
+  const r = await tryGet([{ _ref: 'path', _property: 'workPath' }]);
+  return r && r.pathContents ? r.pathContents : null;
+}
+async function deselect() { try { await bp({ _obj: 'set', _target: [{ _ref: 'channel', _property: 'selection' }], to: { _enum: 'ordinal', _value: 'none' } }); } catch (e) { /* nada */ } }
+
 module.exports = {
   UserError, runModal, bp, tryGet, bounds, hexToRgb, colorHex, withWorkPath, outlinesOf, getTextKey, textLayerData,
-  selectLayer, selectLayers, putBands, putInto, copyLook,
+  selectLayer, selectLayers, putBands, putInto, copyLook, getSelectionBounds,
   allLayers, textLayersIn, originalOf, handCopyOf, resolveTargets, isHandCopy, handEditable, setTextStyles,
+  vectorMaskOf, resolveShape, makeShapeLayer, selectionToWorkPath, deselect, isGenGroup, isShapeName, GROUP_PREFIX,
   HAND_PREFIX, constants, app, core, action
 };

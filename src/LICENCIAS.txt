@@ -1,0 +1,17 @@
+A MANO · licencias de terceros
+==============================
+
+Las tipografías de A mano se han construido a partir de estas fuentes de trazo único, modificadas
+(trazos unidos, dirección y orden de escritura, proporciones e inclinación propias de cada letra):
+
+- EMS Readability, EMS Tech, EMS Felix, EMS Elfin, EMS Allure
+  Sheldon B. Michaels; conversión SVG de Windell H. Oskay (Evil Mad Scientist Laboratories).
+  Derivadas de Source Sans Pro, Architects Daughter, Felipa, Mountains of Christmas y Allura.
+  Licencia: SIL Open Font License 1.1 (https://scripts.sil.org/OFL).
+
+- Hershey Script (Hershey Fonts)
+  Dr. A. V. Hershey, U.S. National Bureau of Standards. Uso libre con este aviso de origen.
+
+- Archivos SVG obtenidos de hersheytextjs (James T, licencia MIT).
+
+Las texturas de trazo salen de las imágenes de la carpeta TRAZOS del proyecto.

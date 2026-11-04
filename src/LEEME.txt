@@ -1,29 +1,41 @@
-A MANO 1.0 · plugin para Photoshop (2024 o posterior)
+A MANO 2.0 · plugin para Photoshop (2024 o posterior)
 =====================================================
 
 INSTALAR
-- Doble clic en A_mano_v1.0.0.ccx -> Creative Cloud avisa de que no viene del
-  Marketplace -> "Instalar". Es independiente de Cartelator: se pueden tener los dos.
+- Doble clic en A_mano_v2.0.0.ccx -> Creative Cloud avisa de que no viene del
+  Marketplace -> "Instalar". Sustituye a A mano 1.0. Es independiente de Cartelator.
 - En Photoshop: Plugins > A mano.
 
-USO
-1. Selecciona en Capas capas de texto (cualquier fuente; también texto de párrafo,
-   varias columnas o texto girado) o un grupo que las contenga (por ejemplo, un
-   bloque editable de Cartelator).
-2. Herramienta: Trazo (boli, rotulador, pincel, lápiz) o Relleno (brocha seca, sello).
-   Grosor del trazo: Auto / Fuente / Fino / Medio / Grueso.
-3. Locura (variación de letras y palabras), Pulso (temblor), Prisa (inclinación),
-   Letras apretadas/sueltas, Tinta (textura y sequedad).
-4. Resultado: Imagen (trazos reales) o Editable (sigue siendo texto: varían tamaño,
-   altura y espaciado de cada letra).
-5. "Aplicar a lo seleccionado": cada letra se pinta ENCIMA de donde está. Se respetan
-   las líneas, las columnas, el tamaño, el color y el orden. Los espacios entre
-   palabras siguen claros. El original queda oculto debajo.
-   "Otra variación" cambia la mano; "Volver al original" lo deshace.
+DOS PESTAÑAS
+- GENERAR: escribe a mano, desde cero, el texto que pongas, dentro de una forma.
+- CALCAR: pinta a mano, encima, el texto de capas de texto que ya tienes.
 
-NOTAS
-- Las letras las da el propio Photoshop (como "Crear trazado de trabajo"), así que
-  funciona con cualquier tipografía. Si tenías un trazado de trabajo, se respeta.
-- La copia a mano copia la opacidad, el modo de fusión y el estilo de capa del original.
-- Documentos muy grandes se dibujan por franjas para no cargar la memoria.
-- El resultado en imagen necesita un documento RGB o en escala de grises (8, 16 o 32 bits).
+GENERAR, de arriba abajo
+1. FORMA: pulsa Recto, Arco, Bandera, Abanico o Círculo. Aparece en el documento
+   (naranja y semitransparente). Muévela, gírala, voltéala o defórmala como
+   cualquier forma (Ctrl/Cmd+T; clic derecho > Deformar, con su cuadrícula).
+   "Selección": antes haz una selección (lazo, marco...) y el texto irá dentro.
+   Si hay una selección hecha, las demás formas se ajustan a ella.
+2. TEXTO: escribe (Intro = otra línea). Toca palabras en el recuadro de abajo
+   (o selecciónalas en la casilla) y elige: pequeña, normal, importante o ¡LA MÁS!
+   Las importantes salen más grandes y repasadas (varias pasadas encima).
+3. ESTILO: lápiz, carboncillo, boli, rotulador o pincel, y su pack
+   (por ejemplo, pincel fino, gordo, seco o húmedo). Color: pulsa el cuadrado
+   para tomar el color frontal de Photoshop.
+4. LETRA: infantil, adulta, rabiosa o elegante; MAYÚSCULAS, minúsculas o cursiva.
+- LEGIBILIDAD: de garabato a muy legible.
+- "Escribir en la forma": crea un grupo "✍ A mano · ..." con lo escrito y la forma
+  (invisible). Para cambiarlo, selecciona el grupo, deforma la forma o cambia
+  ajustes y vuelve a pulsar. "Otra variación": la misma idea, otra mano.
+  "Mostrar / ocultar la forma" la enseña para colocarla mejor.
+- Cualquier capa de forma tuya también vale como forma.
+
+CALCAR
+Selecciona capas de texto (o un grupo) y pulsa "Aplicar a lo seleccionado".
+Se crea una copia "✍ ..." encima y el original queda oculto. "Volver al original"
+lo deshace. Relleno (brocha, sello) rellena la letra en vez de trazarla.
+
+AVANZADO ›  grosor, tinta, pulso, repasado, locura, prisa, apretadas/sueltas,
+interlineado, tamaño de las importancias, llenar la forma, margen y alineación.
+
+Todo es un solo paso de historial (Ctrl/Cmd+Z lo deshace entero).

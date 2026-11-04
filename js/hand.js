@@ -12,6 +12,7 @@ const R = require('./rng.js');
 const ST = require('./strokes.js');
 const RD = require('./render.js');
 const G = require('./geom.js');
+const INK = require('./ink.js');
 
 const TOOLS = {
   boli: { kind: 'stroke', width: 0.03, useFont: false, density: 0.84, inP: 0.75, inLen: 2, outP: 0.55, outLen: 3, pVar: 0.12, bead: 1.45, edgeDark: 0.06, soft: 0.6, grain: 0.45, skip: 0.5, bristles: 0, dry: 0, rough: 0.04, tremor: 1 },
@@ -165,7 +166,7 @@ function paintStroke(canvas, pts, tool, rgb, seed, opts) {
 // ------------------------------------------------------------------ variación (sin mover la maqueta)
 function planVariation(insts, p, seed) {
   const L = p.locura, pr = p.prisa;
-  const fillTool = (TOOLS[p.tool] || {}).kind === 'fill';
+  const fillTool = !!(p.fill && TOOLS[p.fill]);
   const g = R.gauss;
   // líneas: línea base
   const lines = new Map();
@@ -335,6 +336,7 @@ function letterTransform(pv, insts, i) {
 function drawStrokes(canvas, it, f, tool, p, seed) {
   // letras estiradas o estrechadas: los trazos salen de la letra sin deformar y luego se estiran
   // (como haría una mano: el esqueleto se estira, el grosor de la herramienta no)
+  const P = INK.preset(p.tool, p.preset);
   const ax = it.ax || 1, useNat = ax !== 1 && it.natContours;
   const gs0 = useNat ? ST.strokesForContours(it.natContours, it.natBbox, it.em, it.ch) : ST.strokesForContours(it.contours, it.bbox, it.em, it.ch);
   const rf = Math.min(1, ax);
@@ -343,16 +345,17 @@ function drawStrokes(canvas, it, f, tool, p, seed) {
   const full = (x, y) => { const q = f(x, y); return it.map(q[0], q[1]); };
   const cx = (it.bbox.left + it.bbox.right) / 2, cy = (it.bbox.top + it.bbox.bottom) / 2;
   const ls = RD.localScale(full, cx, cy, em * 0.05).s;
-  const useFont = p.width === 'fuente' ? true : p.width && p.width !== 'auto' ? false : tool.useFont;
-  const wMul = p.width === 'fino' ? 0.6 : p.width === 'grueso' ? 1.45 : 1;
-  const toolR = tool.width * (it.strokeEm || em) * wMul; // letras estrechadas: trazo más fino
+  // grosor: el de la herramienta o el de la letra (p.follow: 'auto' | 'letra' | 'herramienta')
+  const follow = p.follow === 'letra' ? true : p.follow === 'herramienta' ? false : !!P.useFont;
+  const wMul = p.width == null ? 1 : p.width;
+  const toolR = P.w * (it.strokeEm || em) * wMul;
   const rgb = RD.hexToRgb(it.color);
   gs.strokes.forEach((s, si) => {
     const r = R.mulberry32(seed * 13 + si * 977 + 1);
     let mx = 0, my = 0; for (const q of s.pts) { mx += q.x; my += q.y; } mx /= s.pts.length; my /= s.pts.length;
     const jx = R.gauss(r) * em * (0.006 + 0.03 * L), jy = R.gauss(r) * em * (0.006 + 0.03 * L), jr = R.gauss(r) * (0.015 + 0.07 * L);
     const cj = Math.cos(jr), sj = Math.sin(jr);
-    let pts = s.pts.map(q => { const dx = q.x - mx, dy = q.y - my; return { x: mx + cj * dx - sj * dy + jx, y: my + sj * dx + cj * dy + jy, r: useFont ? q.r : toolR }; });
+    let pts = s.pts.map(q => { const dx = q.x - mx, dy = q.y - my; return { x: mx + cj * dx - sj * dy + jx, y: my + sj * dx + cj * dy + jy, r: q.r }; });
     const trim = (arr, rad) => { let acc = 0, k = arr.length - 1; while (k > 2 && acc < rad) { acc += Math.hypot(arr[k].x - arr[k - 1].x, arr[k].y - arr[k - 1].y); k--; } return arr.slice(0, k + 1); };
     if (!s.closed && s.endJ && pts.length > 4) pts = trim(pts, pts[pts.length - 1].r * 0.6);
     if (!s.closed && s.startJ && pts.length > 4) pts = trim(pts.reverse(), pts[0].r * 0.6).reverse();
@@ -372,7 +375,13 @@ function drawStrokes(canvas, it, f, tool, p, seed) {
       pts = extend(pts, e1).reverse();
       pts = extend(pts, e0).reverse();
     }
-    const tremA = em * (0.002 + 0.009 * pulso) * tool.tremor, tremL = em * 0.05;
+    // pincel: algunos trazos verticales empiezan por abajo
+    if (P.up && pts.length > 2) {
+      const a = pts[0], b = pts[pts.length - 1];
+      if (Math.abs(b.y - a.y) > 1.6 * Math.abs(b.x - a.x) && r() < P.up) pts = pts.slice().reverse();
+    }
+    const tremA = em * (0.002 + 0.009 * pulso) * P.tremor, tremL = em * 0.05;
+    const rMed = follow ? pts.map(q => q.r).sort((a, b) => a - b)[pts.length >> 1] || toolR : toolR;
     let acc = 0;
     const doc = pts.map((q, k) => {
       if (k > 0) acc += Math.hypot(q.x - pts[k - 1].x, q.y - pts[k - 1].y);
@@ -380,9 +389,15 @@ function drawStrokes(canvas, it, f, tool, p, seed) {
       const tx = b.x - a.x, ty = b.y - a.y, tl = Math.hypot(tx, ty) || 1;
       const n = tremA * R.noise1(acc / tremL, seed + si * 3);
       const d = full(q.x - ty / tl * n, q.y + tx / tl * n);
-      return { x: d[0], y: d[1], r: Math.max(0.5, q.r * ls) };
+      return { x: d[0], y: d[1], w: follow ? Math.max(0.3, q.r / Math.max(1e-6, rMed)) : 1 };
     });
-    paintStroke(canvas, doc, tool, rgb, seed * 7 + si, { paperSeed: p.paperSeed, inkMul: 0.85 + 0.3 * p.ink, dryness: 0.4 + 1.2 * p.ink });
+    INK.paintStroke(canvas, doc, P, Math.max(0.5, rMed * ls * (follow ? wMul : 1)), rgb, (seed * 7 + si) >>> 0, { inkMul: 0.88 + 0.24 * p.ink, dryMul: 0.45 + 1.1 * p.ink });
+    // repasado (pack «nervioso»)
+    if (P.extraPass) {
+      const off = em * 0.012;
+      const d2 = doc.map(q => ({ x: q.x + R.gauss(r) * 0 + off * ls, y: q.y - off * ls * 0.6, w: q.w }));
+      INK.paintStroke(canvas, d2, P, Math.max(0.5, rMed * ls * (follow ? wMul : 1)) * 0.9, rgb, (seed * 11 + si) >>> 0, { inkMul: 0.8, alphaMul: 0.9 });
+    }
   });
 }
 
@@ -485,7 +500,7 @@ function drawFill(canvas, it, f, tool, p, seed) {
 // p: { tool, width, locura, pulso, prisa, tight, ink, paperSeed }
 // only(i): opcional, dibuja solo algunas letras (para pintar por franjas sin cambiar la variación)
 function renderHand(canvas, insts, p, seed, only, pvIn) {
-  const tool = TOOLS[p.tool] || TOOLS.rotulador;
+  const tool = p.fill && TOOLS[p.fill] ? TOOLS[p.fill] : { kind: 'stroke' };
   const pv = pvIn || planVariation(insts, p, seed);
   const q = Object.assign({ paperSeed: seed + 5 }, p);
   let n = 0;

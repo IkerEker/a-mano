@@ -98,3 +98,26 @@ sp-checkbox { margin-top: 6px; }
 .morebox .row { margin-top: 6px; }
 #widthBox { display: flex; flex-direction: column; }
 .title { padding: 8px 0 6px 0; margin: 0 0 8px 0; font-weight: bold; border-bottom: 2px solid #e0533d; }
+
+/* ---------------- A mano 2 ---------------- */
+.tabs { align-items: center; }
+.advlink { font-size: 11px; color: var(--uxp-host-text-color-secondary); cursor: pointer; padding: 4px 2px; }
+.advlink:hover { color: var(--uxp-host-text-color); }
+.sec { margin: 12px 0 5px 0; font-size: 11px; font-weight: bold; letter-spacing: 1px; color: var(--uxp-host-text-color); display: flex; flex-direction: row; align-items: center; }
+.sec .num { display: inline-block; width: 16px; height: 16px; line-height: 16px; text-align: center; border-radius: 8px; background-color: #e0533d; color: #ffffff; font-size: 10px; margin-right: 6px; }
+.sec .sub { font-weight: normal; letter-spacing: 0; color: var(--uxp-host-text-color-secondary); margin-left: 6px; font-size: 10px; }
+.shapes { display: flex; flex-direction: row; flex-wrap: wrap; margin: 0 -2px; }
+.shp { flex: 0 0 30%; width: 30%; box-sizing: border-box; margin: 2px 1.6%; padding: 5px 0 3px 0; border: 1px solid var(--uxp-host-border-color); border-radius: 5px; cursor: pointer; display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--uxp-host-text-color-secondary); }
+.shp:hover { border-color: #e0533d; color: var(--uxp-host-text-color); }
+.shp.on { border-color: #e0533d; background-color: rgba(224, 83, 61, 0.15); color: var(--uxp-host-text-color); }
+.shp svg { width: 40px; height: 26px; }
+.shp svg rect, .shp svg path, .shp svg ellipse { fill: rgba(224, 83, 61, 0.35); stroke: #e0533d; stroke-width: 1.2; }
+.ctx { margin-top: 6px; }
+.row.tiny { margin-top: 3px; font-size: 10px; }
+.mt4 { margin-top: 4px; }
+.legend { display: flex; flex-direction: row; justify-content: space-between; font-size: 9px; color: var(--uxp-host-text-color-secondary); margin-top: -2px; }
+.f-inf { font-family: 'Comic Sans MS', 'Chalkboard', sans-serif; }
+.f-rab { font-style: italic; font-weight: bold; }
+.f-ele { font-family: Georgia, serif; font-style: italic; }
+.chip.c-hero { color: #b8321f; }
+#viewAdv sp-slider { margin-top: 8px; }

@@ -5,7 +5,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 JS = os.path.join(ROOT, 'js')
 SRC = os.path.join(ROOT, 'src')
 OUT = os.path.join(ROOT, 'dist')
-MODS = ['rng', 'raster', 'geom', 'glyphs', 'render', 'strokes', 'hand', 'handmade', 'instances', 'ps', 'main']
+MODS = ['rng', 'raster', 'geom', 'glyphs', 'render', 'strokes', 'texdata', 'ink', 'hand', 'handmade', 'instances', 'fontdata', 'fonts', 'shapes', 'layout', 'writer', 'ps', 'main']
 
 def bundle():
     parts = ["'use strict';", '(function () {', '  const __mods = {}, __cache = {};',
@@ -35,7 +35,7 @@ def main():
     if os.path.isdir(OUT): shutil.rmtree(OUT)
     stage = os.path.join(OUT, 'plugin')
     os.makedirs(os.path.join(stage, 'icons'))
-    for f in ['index.html', 'styles.css', 'manifest.json', 'LEEME.txt']:
+    for f in ['index.html', 'styles.css', 'manifest.json', 'LEEME.txt', 'LICENCIAS.txt']:
         shutil.copy(os.path.join(SRC, f), os.path.join(stage, f))
     for f in os.listdir(os.path.join(ROOT, 'icons')):
         shutil.copy(os.path.join(ROOT, 'icons', f), os.path.join(stage, 'icons', f))

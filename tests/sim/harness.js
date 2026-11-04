@@ -1,10 +1,108 @@
-// Pruebas de extremo a extremo de A mano (panel real + Photoshop simulado). node tests/sim/harness.js
+// Pruebas de extremo a extremo de A mano 2 (panel real + Photoshop simulado). node tests/sim/harness.js
 const { open } = require('./setup.js');
 
 (async () => {
   const S = await open(3000, 1900);
   const { run, waitDone, refresh, snap, newDoc, rec } = S;
-  const go = async (name, fn) => { await run(fn); await refresh(); };
+  const click = id => run(i => T.click(i), id);
+  const shape = async (type) => { await run(v => document.querySelector('#shapeGrid [data-v="' + v + '"]').click(), type); return waitDone(); };
+  const sel = (re) => run(r => { const ids = SIM.byName(r); SIM.select(...ids); return ids; }, re);
+
+  // ================================================================ GENERAR
+  await run(() => T.click('tab-gen'));
+  await run(() => { T.text('Nadie había cerrado\nla puerta del sótano (otra vez)'); });
+  await run(() => { T.style('había', 'hero'); T.style('cerrado', 'bold'); T.style('del', 'small'); });
+  console.log('chips:', (await run(() => T.chips())).join(' '));
+
+  // 1. sin forma: aviso
+  await newDoc(3000, 1900); await refresh();
+  await click('btnGo');
+  await rec('G0 sin forma (aviso)', await waitDone(), true);
+
+  // 2. cada forma con una herramienta y una letra distintas
+  const combos = [
+    ['rect', 'rotulador', 'fino', 'adulta', 'minus'],
+    ['arco', 'pincel', 'gordo', 'rabiosa', 'mayus'],
+    ['bandera', 'boli', 'bic', 'elegante', 'cursiva'],
+    ['abanico', 'lapiz', 'hb', 'infantil', 'minus'],
+    ['circulo', 'carbon', 'suave', 'adulta', 'mayus']
+  ];
+  for (const [type, tool, preset, persona, mode] of combos) {
+    await newDoc(3000, 1900);
+    await refresh();
+    const st = await shape(type);
+    await rec('G1 forma ' + type, st);
+    await run(([tool, preset, persona, mode]) => { T.seg('toolSeg', tool); T.seg('presetSeg', preset); T.seg('fontSeg', persona); T.seg('caseSeg', mode); }, [tool, preset, persona, mode]);
+    await refresh();
+    console.log('ctx:', await run(() => document.getElementById('ctxGen').textContent));
+    const t0 = Date.now();
+    await click('btnGo');
+    const s2 = await waitDone();
+    console.log(type, Date.now() - t0, 'ms');
+    await rec('G2 escribir ' + type + ' (' + tool + ' ' + preset + ', ' + persona + ' ' + mode + ')', s2);
+    await snap('g_' + type + '_' + tool);
+  }
+
+  // 3. selección de lazo
+  await newDoc(3000, 1900); await refresh();
+  await run(() => { const P = []; for (let k = 0; k < 48; k++) { const a = k / 48 * 6.283, r = 520 + 140 * Math.sin(3 * a) + 60 * Math.cos(5 * a); P.push([1500 + r * 1.45 * Math.cos(a), 950 + r * Math.sin(a)]); } SIM.setSelection(P); });
+  await rec('G3 forma desde la selección', await shape('lazo'));
+  await run(() => { T.seg('toolSeg', 'pincel'); T.seg('presetSeg', 'seco'); T.seg('fontSeg', 'adulta'); T.seg('caseSeg', 'minus'); });
+  await click('btnGo');
+  await rec('G3b escribir en la selección', await waitDone());
+  await snap('g_lazo');
+  // lazo sin selección: aviso
+  await rec('G3c lazo sin selección (aviso)', await shape('lazo'), true);
+
+  // 4. girar, voltear y deformar la forma ya escrita y volver a escribir (se sustituye lo anterior)
+  await newDoc(3000, 1900); await refresh();
+  await shape('arco');
+  await run(() => { T.seg('toolSeg', 'rotulador'); T.seg('presetSeg', 'gordo'); T.seg('fontSeg', 'adulta'); T.seg('caseSeg', 'minus'); });
+  await click('btnGo'); await waitDone();
+  for (const [name, op] of [['girada', 'rot'], ['volteada en vertical', 'flipv'], ['deformada', 'warp']]) {
+    await run(op => {
+      const id = SIM.byName('^◇ ')[0];
+      if (op === 'rot') SIM.rotateShape(id, -20); else if (op === 'flipv') SIM.flipShape(id, 'v'); else SIM.warpShape(id, 60, 120);
+      SIM.select(SIM.byName('^✍ A mano')[0]);
+    }, op);
+    await refresh();
+    await click('btnGo');
+    await rec('G4 forma ' + name + ' y reescrita', await waitDone());
+    await snap('g_arco_' + op);
+  }
+  const nInGroup = await run(() => SIM.tree().split('\n').filter(l => /\[pixel\]/.test(l)).length);
+  await rec('G4b solo queda un resultado (' + nInGroup + ')', { text: 'capas de píxeles: ' + nInGroup, cls: nInGroup === 1 ? 'ok' : 'err' });
+
+  // 5. otra variación
+  await click('btnNew');
+  await rec('G5 otra variación', await waitDone());
+  await snap('g_arco_variacion');
+
+  // 6. sin texto: aviso
+  await run(() => T.text('   '));
+  await click('btnGo');
+  await rec('G6 sin texto (aviso)', await waitDone(), true);
+  await run(() => T.text('Nadie había cerrado\nla puerta del sótano (otra vez)'));
+
+  // 7. todas las herramientas y packs, misma forma (hoja de muestras)
+  await newDoc(2400, 1000); await refresh();
+  await shape('rect');
+  const tools = await run(() => Array.from(document.querySelectorAll('#toolSeg .segb')).map(b => b.getAttribute('data-v')));
+  for (const tool of tools) {
+    await run(t => T.seg('toolSeg', t), tool);
+    const presets = await run(() => Array.from(document.querySelectorAll('#presetSeg .segb')).map(b => b.getAttribute('data-v')));
+    for (const pk of presets) {
+      await run(pk => { T.seg('presetSeg', pk); SIM.select(SIM.byName('^✍ A mano|^◇ ')[0]); }, pk);
+      await click('btnGo');
+      const s = await waitDone();
+      if (!/ok/.test(s.cls)) await rec('G7 ' + tool + ' ' + pk, s);
+      await snap('t_' + tool + '_' + pk, 0.5);
+    }
+  }
+  await rec('G7 todas las herramientas', { text: 'hecho', cls: 'ok' });
+
+  // ================================================================ CALCAR
+  await run(() => T.click('tab-calc'));
   const para = 'Y entonces me di cuenta\rde que nadie había cerrado\rla puerta del sótano.\r(Otra vez.)';
   const para2 = 'El gato llevaba tres días\rsin aparecer y la vecina\rjuraba que lo había visto\ren el tejado hablando solo.';
   const setup = async () => {
@@ -15,42 +113,48 @@ const { open } = require('./setup.js');
       SIM.addText({ text: 'NOTAS DEL MARTES', name: 'Titular', x: 160, y: 1450, ranges: [{ from: 0, to: 16, font: 'TeXGyreHerosCn-Bold', sizePx: 230, color: '#222222' }] })
     ], [para, para2]);
   };
-  // 1. cada herramienta sobre tres capas (dos columnas y un titular)
   let ids = await setup();
-  await snap('00_original');
-  for (const [seg, tool] of [['toolSeg', 'boli'], ['toolSeg', 'rotulador'], ['toolSeg', 'pincel'], ['toolSeg', 'lapiz'], ['toolSeg2', 'brocha'], ['toolSeg2', 'sello']]) {
-    await run(([ids, seg, tool]) => { SIM.select(...ids); T.seg(seg, tool); T.seg('kindSeg', 'imagen'); }, [ids, seg, tool]);
+  await snap('c_00_original');
+  for (const [tool, pk, fill] of [['boli', 'bic', ''], ['rotulador', 'gordo', ''], ['pincel', 'gordo', ''], ['lapiz', 'hb', ''], ['carbon', 'fuerte', ''], ['pincel', 'seco', 'brocha'], ['pincel', 'fino', 'sello']]) {
+    await run(([ids, tool, pk, fill]) => { SIM.select(...ids); T.seg('toolSeg', tool); T.seg('presetSeg', pk); T.seg('fillSeg', fill); T.seg('kindSeg', 'imagen'); }, [ids, tool, pk, fill]);
     await refresh();
     const t0 = Date.now();
-    await run(() => T.click('btnHand'));
-    const st = await waitDone();
-    console.log(tool, Date.now() - t0, 'ms');
-    await rec('1 ' + tool, st); await snap('01_' + tool);
+    await click('btnGo');
+    const s = await waitDone();
+    console.log('calcar', tool, pk, fill, Date.now() - t0, 'ms');
+    await rec('C1 ' + tool + ' ' + pk + (fill ? ' + ' + fill : ''), s); await snap('c_01_' + tool + '_' + pk + (fill ? '_' + fill : ''));
+    const nPix = await run(() => SIM.tree().split('\n').filter(l => /\[pixel\]/.test(l)).length);
+    if (nPix !== 3) await rec('C1 copias duplicadas tras ' + tool + ' (' + nPix + ')', { text: nPix + ' capas de píxeles', cls: 'err' });
   }
-  // 2. otra variación, volver al original, editable
-  await run(ids => SIM.select(ids[0]), ids); await run(() => T.click('btnHandNew'));
-  await rec('2 otra variación', await waitDone()); await snap('02_otra_variacion');
-  await run(ids => SIM.select(...ids), ids); await run(() => T.click('btnHandUndo'));
-  await rec('2b volver al original', await waitDone()); await snap('02b_original');
-  await run(ids => { SIM.select(ids[1]); T.seg('kindSeg', 'editable'); }, ids); await run(() => T.click('btnHand'));
-  await rec('2c editable', await waitDone()); await snap('02c_editable');
+  await run(() => T.seg('fillSeg', ''));
+  await run(ids => SIM.select(ids[0]), ids); await click('btnNew');
+  await rec('C2 otra variación', await waitDone());
+  await run(ids => SIM.select(...ids), ids); await click('btnUndo');
+  await rec('C2b volver al original', await waitDone());
+  await run(ids => { SIM.select(ids[1]); T.seg('kindSeg', 'editable'); }, ids); await click('btnGo');
+  await rec('C2c editable', await waitDone());
   await run(() => T.seg('kindSeg', 'imagen'));
-  // 3. grupo con capas de texto (como un bloque editable de Cartelator) y texto girado
   ids = await setup();
-  await run(ids => { SIM.rotate(ids[2], -12); const g = SIM.group('Cartel · notas #abc123', [ids[0], ids[1]]); SIM.select(g, ids[2]); T.seg('toolSeg', 'rotulador'); }, ids);
+  await run(ids => { SIM.rotate(ids[2], -12); const g = SIM.group('Cartel · notas #abc123', [ids[0], ids[1]]); SIM.select(g, ids[2]); T.seg('toolSeg', 'rotulador'); T.seg('presetSeg', 'fino'); }, ids);
   await refresh();
-  console.log('ctx:', await run(() => document.getElementById('ctx').textContent));
-  await run(() => T.click('btnHand'));
-  await rec('3 grupo + texto girado', await waitDone()); await snap('03_grupo_girado');
-  // 4. sin nada seleccionado
+  await click('btnGo');
+  await rec('C3 grupo + texto girado', await waitDone()); await snap('c_03_grupo_girado');
   await newDoc(1000, 800); await run(() => SIM.select()); await refresh();
-  await run(() => T.click('btnHand'));
-  await rec('4 sin selección', await waitDone());
-  // 5. documento de 16 bits
+  await click('btnGo');
+  await rec('C4 sin selección (aviso)', await waitDone(), true);
   ids = await setup(); await run(() => { SIM.doc().bitsPerChannel = 'bitDepth16'; });
-  await run(ids => SIM.select(...ids), ids); await run(() => T.click('btnHand'));
-  await rec('5 16 bits', await waitDone());
-  await S.page.screenshot({ path: S.OUT + '/panel.png', fullPage: true });
+  await run(ids => SIM.select(...ids), ids); await click('btnGo');
+  await rec('C5 16 bits', await waitDone());
+
+  // panel
+  await run(() => T.click('tab-gen'));
+  await S.page.screenshot({ path: S.OUT + '/panel_generar.png', fullPage: true });
+  await run(() => T.click('tab-calc'));
+  await S.page.screenshot({ path: S.OUT + '/panel_calcar.png', fullPage: true });
+  await run(() => { T.click('tab-gen'); T.click('btnAdv'); });
+  await S.page.screenshot({ path: S.OUT + '/panel_avanzado.png', fullPage: true });
   const rep = await S.close();
-  console.log('\nfallos:', rep.filter(r => !r.ok).map(r => r.name), 'errores modal:', rep.reduce((a, r) => a + r.errors.length, 0));
+  const bad = rep.filter(r => !r.ok);
+  console.log('\nresultado:', rep.length - bad.length, '/', rep.length, 'bien. fallos:', bad.map(r => r.name + ' → ' + r.status), 'errores modal:', rep.reduce((a, r) => a + r.errors.length, 0));
+  if (S.logs.some(l => /PAGEERROR/.test(l))) console.log(S.logs.filter(l => /PAGEERROR|error/i.test(l)).slice(0, 10).join('\n'));
 })().catch(e => { console.error(e); process.exit(1); });

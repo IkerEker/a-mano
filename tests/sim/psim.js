@@ -218,8 +218,23 @@
       doc.workPath = textOutlines(l).pc; return {};
     }
     if (o === 'delete' && t0._ref === 'path' && t0._property === 'workPath') { doc.workPath = null; return {}; }
-    if (o === 'set' && t0._ref === 'path' && t0._property === 'workPath') { doc.workPath = toPx(d.to); return {}; }
-    if (o === 'set' && t0._ref === 'channel' && t0._property === 'selection') { doc.selection = null; return {}; }
+    if (o === 'select' && t0._ref === 'path' && t0._property === 'workPath') { if (!doc.workPath) return err('sin trazado de trabajo'); doc.pathActive = true; return {}; }
+    if (o === 'make' && t0._ref === 'contentLayer') {
+      if (!doc.workPath || !doc.pathActive) return err('sin trazado activo');
+      const c = d.using.type.color;
+      const l = new Layer('solidColor', 'Relleno de color 1');
+      l._path = JSON.parse(JSON.stringify(doc.workPath)); l._color = hexOf(c);
+      insertAbove(l); SIM.log.push('make shape'); return {};
+    }
+    if (o === 'make' && t0._ref === 'path' && d.from && d.from._ref === 'selectionClass') {
+      if (!doc.selection) return err('sin selección');
+      const P = doc.selPoly || [[doc.selection.left, doc.selection.top], [doc.selection.right, doc.selection.top], [doc.selection.right, doc.selection.bottom], [doc.selection.left, doc.selection.bottom]];
+      const pt = q => ({ _obj: 'paint', horizontal: { _unit: 'pixelsUnit', _value: q[0] }, vertical: { _unit: 'pixelsUnit', _value: q[1] } });
+      doc.workPath = { _obj: 'pathClass', pathComponents: [{ _obj: 'pathComponent', shapeOperation: { _enum: 'shapeOperation', _value: 'add' }, subpathListKey: [{ _obj: 'subpathsList', closedSubpath: true, points: P.map(q => ({ _obj: 'pathPoint', anchor: pt(q), forward: pt(q), backward: pt(q) })) }] }] };
+      doc.pathActive = true; return {};
+    }
+    if (o === 'set' && t0._ref === 'path' && t0._property === 'workPath') { doc.workPath = toPx(d.to); doc.pathActive = true; return {}; }
+    if (o === 'set' && t0._ref === 'channel' && t0._property === 'selection') { doc.selection = null; doc.selPoly = null; return {}; }
     if (o === 'set' && t0._ref === 'textLayer') {
       const l = byId(t0._id); if (!l || l.kind !== 'text') return err('no es texto');
       if (d.to.textKey != null) l._t.text = String(d.to.textKey);
@@ -280,6 +295,14 @@
   SIM.select = (...ids) => { for (const x of allLayers()) x._sel = false; for (const id of ids) { const l = byId(id); if (l) l._sel = true; } };
   SIM.setTargetPath = (name, pcPx) => { doc.targetPath = pcPx ? { name, pc: pcPx } : null; };
   SIM.layer = id => byId(id);
+  const mapShape = (id, f) => { const l = byId(id); l._path = mapPC(l._path, (x, y) => { const r = f(x, y); return [r[0], r[1], 'pixelsUnit']; }); };
+  const shapeC = id => { const b = pcBBox(byId(id)._path); return [(b.left + b.right) / 2, (b.top + b.bottom) / 2]; };
+  SIM.rotateShape = (id, deg) => { const [cx, cy] = shapeC(id), a = deg * Math.PI / 180, c = Math.cos(a), s = Math.sin(a); mapShape(id, (x, y) => [cx + c * (x - cx) - s * (y - cy), cy + s * (x - cx) + c * (y - cy)]); };
+  SIM.flipShape = (id, how) => { const [cx, cy] = shapeC(id); mapShape(id, (x, y) => how === 'h' ? [2 * cx - x, y] : [x, 2 * cy - y]); };
+  SIM.moveShape = (id, dx, dy) => mapShape(id, (x, y) => [x + dx, y + dy]);
+  SIM.warpShape = (id, ax, ay) => { const [cx, cy] = shapeC(id); mapShape(id, (x, y) => [x + ax * Math.sin((y - cy) / 150), y + ay * Math.sin((x - cx) / 300)]); };
+  SIM.setSelection = (poly) => { if (!poly) { doc.selection = null; doc.selPoly = null; return; } let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity; for (const [x, y] of poly) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); } doc.selection = { left: x0, top: y0, right: x1, bottom: y1 }; doc.selPoly = poly; };
+  SIM.byName = (re) => allLayers().filter(l => new RegExp(re).test(l.name)).map(l => l.id);
   SIM.tree = () => { const out = []; const w = (ls, d) => { for (const l of ls) { out.push('  '.repeat(d) + (l._sel ? '*' : ' ') + (l._visible ? ' ' : '(oculta) ') + '[' + l.kind + '] ' + l.name + (l._patches.length ? ' {' + l._patches.length + ' parches}' : '')); if (l._children) w(l._children, d + 1); } }; w(doc._top, 0); return out.join('\n'); };
   SIM.doc = () => doc;
   SIM.render = (scale) => {

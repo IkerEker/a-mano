@@ -5,51 +5,119 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="title">A mano</div>
+  <div class="tabs">
+    <div class="tab active" id="tab-gen" data-tab="gen">GENERAR</div>
+    <div class="tab" id="tab-calc" data-tab="calc">CALCAR</div>
+    <div class="grow"></div>
+    <div class="advlink" id="btnAdv" title="Opciones avanzadas">Avanzado ›</div>
+  </div>
 
-  <div class="pane" id="pane-mano">
-    <div class="ctx" id="ctx">Selecciona en Capas las capas de texto que quieras pasar a mano (o un grupo que las contenga).</div>
-
-    <div class="label">Herramienta</div>
-    <div class="row nomargin">
-      <div class="lbl">Trazo</div>
-      <div class="seg grow" id="toolSeg">
-        <div class="segb" data-v="boli">Boli</div><div class="segb" data-v="rotulador">Rotulador</div><div class="segb" data-v="pincel">Pincel</div><div class="segb" data-v="lapiz">Lápiz</div>
+  <!-- ================================================================ ventana principal -->
+  <div id="viewMain">
+    <!-- ---------------- GENERAR ---------------- -->
+    <div id="pane-gen">
+      <div class="sec"><span class="num">1</span>FORMA <span class="sub">dónde va el texto</span></div>
+      <div class="shapes" id="shapeGrid">
+        <div class="shp" data-v="rect" title="Rectángulo"><svg viewBox="0 0 40 26"><rect x="3" y="5" width="34" height="16" rx="1"/></svg><div>Recto</div></div>
+        <div class="shp" data-v="arco" title="Arco"><svg viewBox="0 0 40 26"><path d="M3 12 Q20 -2 37 12 L33 22 Q20 11 7 22 Z"/></svg><div>Arco</div></div>
+        <div class="shp" data-v="bandera" title="Bandera"><svg viewBox="0 0 40 26"><path d="M3 8 C12 0 20 14 37 6 L37 18 C20 26 12 12 3 20 Z"/></svg><div>Bandera</div></div>
+        <div class="shp" data-v="abanico" title="Abanico"><svg viewBox="0 0 40 26"><path d="M2 14 Q20 -6 38 14 L28 24 Q20 15 12 24 Z"/></svg><div>Abanico</div></div>
+        <div class="shp" data-v="circulo" title="Círculo"><svg viewBox="0 0 40 26"><ellipse cx="20" cy="13" rx="11" ry="11"/></svg><div>Círculo</div></div>
+        <div class="shp" data-v="lazo" title="Desde la selección (lazo)"><svg viewBox="0 0 40 26"><path d="M8 6 C16 1 30 2 33 9 C36 16 28 24 18 21 C10 19 2 14 8 6 Z" stroke-dasharray="2.2 1.6"/></svg><div>Selección</div></div>
       </div>
+      <div class="ctx" id="ctxGen">Elige una forma: aparece en el documento y la puedes mover, girar, voltear o deformar.</div>
+      <div class="row tiny"><div class="link" id="btnToggleShape">Mostrar / ocultar la forma</div></div>
+
+      <div class="sec"><span class="num">2</span>TEXTO</div>
+      <textarea id="txt" placeholder="Escribe aquí el texto (Intro = nueva línea)"></textarea>
+      <div class="styles-bar">
+        <div class="sbtn s-small" id="stSmall" title="Más pequeña">pequeña</div>
+        <div class="sbtn" id="stNormal">normal</div>
+        <div class="sbtn s-bold" id="stBold" title="Más grande y repasada">importante</div>
+        <div class="sbtn s-hero" id="stHero" title="La que más se lee: grande y muy repasada">¡LA MÁS!</div>
+      </div>
+      <div class="board" id="board"><span class="empty">Toca palabras aquí (o selecciónalas arriba) y elige su importancia.</span></div>
     </div>
-    <div class="row">
+
+    <!-- ---------------- CALCAR ---------------- -->
+    <div id="pane-calc" class="hidden">
+      <div class="ctx" id="ctxCalc">Selecciona en Capas las capas de texto que quieras pasar a mano (o un grupo que las contenga).</div>
+      <div class="hint">Pinta a mano, encima, el texto que ya tienes: respeta líneas, tamaño, columnas y color.</div>
+    </div>
+
+    <!-- ---------------- compartido: estilo ---------------- -->
+    <div class="sec"><span class="num" id="numStyle">3</span>ESTILO <span class="sub">con qué se escribe</span></div>
+    <div class="seg" id="toolSeg">
+      <div class="segb" data-v="lapiz">Lápiz</div><div class="segb" data-v="carbon">Carbón</div><div class="segb" data-v="boli">Boli</div><div class="segb" data-v="rotulador">Rotu</div><div class="segb" data-v="pincel">Pincel</div>
+    </div>
+    <div class="seg mt4" id="presetSeg"></div>
+    <div class="row" id="colorRow">
+      <div class="lbl">Color</div>
+      <div class="swatch" id="swColor" title="Pulsa para usar el color frontal de Photoshop"></div>
+      <div class="hint inline">pulsa para tomar el color frontal</div>
+    </div>
+    <div class="row hidden" id="fillRow">
       <div class="lbl">Relleno</div>
-      <div class="seg grow" id="toolSeg2">
-        <div class="segb" data-v="brocha" title="Brocha seca: la forma de la letra con vetas">Brocha</div><div class="segb" data-v="sello" title="Sello / linograbado: tinta irregular">Sello</div>
-      </div>
-    </div>
-    <div id="widthBox">
-      <div class="label">Grosor del trazo</div>
-      <div class="seg" id="widthSeg">
-        <div class="segb" data-v="auto">Auto</div><div class="segb" data-v="fuente" title="Sigue el grosor de la letra">Fuente</div><div class="segb" data-v="fino">Fino</div><div class="segb" data-v="medio">Medio</div><div class="segb" data-v="grueso">Grueso</div>
+      <div class="seg grow" id="fillSeg">
+        <div class="segb" data-v="">No</div><div class="segb" data-v="brocha" title="Rellena la letra con brocha seca">Brocha</div><div class="segb" data-v="sello" title="Sello / linograbado">Sello</div>
       </div>
     </div>
 
-    <sp-slider id="slLocura" min="0" max="100" value="55" show-value="true"><sp-label slot="label">Locura (variación de letras y palabras)</sp-label></sp-slider>
-    <sp-slider id="slPulso" min="0" max="100" value="45" show-value="true"><sp-label slot="label">Pulso (temblor del trazo)</sp-label></sp-slider>
-    <sp-slider id="slPrisa" min="0" max="100" value="20" show-value="true"><sp-label slot="label">Prisa (inclinación)</sp-label></sp-slider>
-    <sp-slider id="slTight" min="-50" max="50" value="0" show-value="true"><sp-label slot="label">Letras apretadas ↔ sueltas</sp-label></sp-slider>
-    <sp-slider id="slTinta" min="0" max="100" value="55" show-value="true"><sp-label slot="label">Tinta (textura y sequedad)</sp-label></sp-slider>
-
-    <div class="label">Resultado</div>
-    <div class="seg" id="kindSeg">
-      <div class="segb" data-v="imagen">Imagen (trazos reales)</div><div class="segb" data-v="editable">Editable (solo variación)</div>
+    <!-- ---------------- GENERAR: tipografía ---------------- -->
+    <div id="pane-gen2">
+      <div class="sec"><span class="num">4</span>LETRA</div>
+      <div class="seg" id="fontSeg">
+        <div class="segb f-inf" data-v="infantil">Infantil</div><div class="segb f-adu" data-v="adulta">Adulta</div><div class="segb f-rab" data-v="rabiosa">Rabiosa</div><div class="segb f-ele" data-v="elegante">Elegante</div>
+      </div>
+      <div class="seg mt4" id="caseSeg">
+        <div class="segb" data-v="mayus">MAYÚSCULAS</div><div class="segb" data-v="minus">minúsculas</div><div class="segb" data-v="cursiva"><i>cursiva</i></div>
+      </div>
     </div>
-    <div class="hint">Cada letra se pinta encima de donde está: se respetan las líneas, el tamaño, las columnas y el orden.</div>
+
+    <sp-slider id="slLegib" min="0" max="100" value="70" show-value="true"><sp-label slot="label">Legibilidad</sp-label></sp-slider>
+    <div class="legend"><span>garabato</span><span>muy legible</span></div>
 
     <div class="actions">
-      <sp-button variant="cta" id="btnHand">Aplicar a lo seleccionado</sp-button>
+      <sp-button variant="cta" id="btnGo">Escribir en la forma</sp-button>
       <div class="row">
-        <sp-button variant="secondary" id="btnHandNew" class="grow">Otra variación</sp-button>
-        <sp-button variant="secondary" id="btnHandUndo" class="grow">Volver al original</sp-button>
+        <sp-button variant="secondary" id="btnNew" class="grow">Otra variación</sp-button>
+        <sp-button variant="secondary" id="btnUndo" class="grow hidden">Volver al original</sp-button>
       </div>
     </div>
     <div class="status" id="status"></div>
+  </div>
+
+  <!-- ================================================================ ventana avanzada -->
+  <div id="viewAdv" class="hidden">
+    <div class="row"><div class="link" id="btnBack">‹ Volver</div><div class="grow"></div><div class="link" id="btnReset">Restablecer</div></div>
+    <div class="sec">TRAZO</div>
+    <sp-slider id="slGrosor" min="-50" max="50" value="0" show-value="true"><sp-label slot="label">Grosor (fino ↔ grueso)</sp-label></sp-slider>
+    <sp-slider id="slTinta" min="0" max="100" value="55" show-value="true"><sp-label slot="label">Tinta (carga, sequedad, textura)</sp-label></sp-slider>
+    <sp-slider id="slPulso" min="0" max="100" value="40" show-value="true"><sp-label slot="label">Pulso (temblor de la mano)</sp-label></sp-slider>
+    <sp-slider id="slRepasado" min="0" max="100" value="50" show-value="true"><sp-label slot="label">Repasado de las palabras importantes</sp-label></sp-slider>
+    <div class="row hidden" id="followRow"><div class="lbl">Grosor</div>
+      <div class="seg grow" id="followSeg"><div class="segb" data-v="auto">Auto</div><div class="segb" data-v="herramienta">De la herramienta</div><div class="segb" data-v="letra">De la letra</div></div>
+    </div>
+
+    <div class="sec">LETRAS</div>
+    <sp-slider id="slLocura" min="0" max="100" value="50" show-value="true"><sp-label slot="label">Locura (cuánto varía cada letra y palabra)</sp-label></sp-slider>
+    <sp-slider id="slPrisa" min="0" max="100" value="15" show-value="true"><sp-label slot="label">Prisa (inclinación)</sp-label></sp-slider>
+    <sp-slider id="slTight" min="-50" max="50" value="0" show-value="true"><sp-label slot="label">Letras apretadas ↔ sueltas</sp-label></sp-slider>
+
+    <div id="advGen">
+      <div class="sec">MAQUETA</div>
+      <sp-slider id="slContraste" min="0" max="100" value="50" show-value="true"><sp-label slot="label">Diferencia de tamaño entre importancias</sp-label></sp-slider>
+      <sp-slider id="slInter" min="70" max="150" value="100" show-value="true"><sp-label slot="label">Interlineado</sp-label></sp-slider>
+      <sp-slider id="slLlenar" min="0" max="60" value="30" show-value="true"><sp-label slot="label">Llenar la forma (estirar el texto)</sp-label></sp-slider>
+      <sp-slider id="slMargen" min="0" max="25" value="5" show-value="true"><sp-label slot="label">Margen dentro de la forma</sp-label></sp-slider>
+      <div class="label">Alineación</div>
+      <div class="seg" id="alignSeg"><div class="segb" data-v="left">Izquierda</div><div class="segb" data-v="center">Centro</div><div class="segb" data-v="right">Derecha</div><div class="segb" data-v="justify">Llenar líneas</div></div>
+    </div>
+    <div id="advCalc" class="hidden">
+      <div class="sec">RESULTADO</div>
+      <div class="seg" id="kindSeg"><div class="segb" data-v="imagen">Imagen (trazos reales)</div><div class="segb" data-v="editable">Editable (solo variación)</div></div>
+    </div>
+    <div class="hint">Estos ajustes se guardan y valen para las dos pestañas (salvo los de cada una).</div>
   </div>
 
   <script src="main.js"></script>

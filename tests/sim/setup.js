@@ -12,7 +12,7 @@ body{font-family:sans-serif;width:300px} sp-button{display:block;padding:6px;mar
 async function open(docW, docH) {
   fs.mkdirSync(OUT, { recursive: true });
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: 320, height: 1500 } });
+  const page = await browser.newPage({ viewport: { width: 330, height: 1250 } });
   const logs = [];
   page.on('console', m => logs.push(m.type() + ': ' + m.text()));
   page.on('pageerror', e => logs.push('PAGEERROR: ' + e.message));
@@ -48,7 +48,7 @@ async function open(docW, docH) {
       slider(id, v) { const e = $(id); e.value = v; e.dispatchEvent(new Event('input')); },
       status() { const e = $('status'); return { text: e.textContent, cls: e.className }; },
       chips() { return Array.from(document.querySelectorAll('#board .chip')).map(c => c.className.replace('chip ', '') + ':' + c.textContent); },
-      busy() { const b = $('btnFit') || $('btnHand'); return b.hasAttribute('disabled'); },
+      busy() { const b = $('btnGo'); return b.hasAttribute('disabled'); },
       font(q, which) { const p = which || 'fp1'; $(p + '-btn').click(); const i = $(p + '-q'); i.value = q; i.dispatchEvent(new Event('input')); },
       pickFirst(which) { const r = document.querySelector('#' + (which || 'fp1') + '-list .fp-row'); if (r) r.click(); return r && r.textContent; },
       color(i, hex) { require('photoshop').app.foregroundColor = { rgb: { hexValue: hex.replace('#', '') } }; $('fg' + i).click(); }
@@ -71,9 +71,9 @@ async function open(docW, docH) {
   const newDoc = async (w, h, bits) => run(([w, h, b]) => { SIM.newDoc(w, h, 300); if (b) SIM.doc().bitsPerChannel = b; SIM.calls = 0; }, [w, h, bits]);
   const font = async (q, which) => { await run(([q, w]) => T.font(q, w), [q, which]); await page.waitForTimeout(260); return run(w => T.pickFirst(w), which); };
   const report = [];
-  const rec = async (name, st) => {
+  const rec = async (name, st, expectErr) => {
     const info = await run(() => ({ tree: SIM.tree(), errors: SIM.errors.splice(0) }));
-    report.push({ name, status: st.text, ok: /ok/.test(st.cls), errors: info.errors });
+    report.push({ name, status: st.text, ok: expectErr ? /err/.test(st.cls) : /ok/.test(st.cls), errors: info.errors });
     console.log('\n== ' + name + ' :: ' + st.text + '\n' + info.tree + (info.errors.length ? '\nERRORES: ' + info.errors.join(' | ') : ''));
   };
   const close = async () => {
