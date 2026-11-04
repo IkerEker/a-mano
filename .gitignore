@@ -1,0 +1,6 @@
+dist/plugin/
+tests/sim/sim.js
+tests/sim/out/
+node_modules/
+__pycache__/
+.DS_Store

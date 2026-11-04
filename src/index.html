@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="title">A mano</div>
+
+  <div class="pane" id="pane-mano">
+    <div class="ctx" id="ctx">Selecciona en Capas las capas de texto que quieras pasar a mano (o un grupo que las contenga).</div>
+
+    <div class="label">Herramienta</div>
+    <div class="row nomargin">
+      <div class="lbl">Trazo</div>
+      <div class="seg grow" id="toolSeg">
+        <div class="segb" data-v="boli">Boli</div><div class="segb" data-v="rotulador">Rotulador</div><div class="segb" data-v="pincel">Pincel</div><div class="segb" data-v="lapiz">Lápiz</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="lbl">Relleno</div>
+      <div class="seg grow" id="toolSeg2">
+        <div class="segb" data-v="brocha" title="Brocha seca: la forma de la letra con vetas">Brocha</div><div class="segb" data-v="sello" title="Sello / linograbado: tinta irregular">Sello</div>
+      </div>
+    </div>
+    <div id="widthBox">
+      <div class="label">Grosor del trazo</div>
+      <div class="seg" id="widthSeg">
+        <div class="segb" data-v="auto">Auto</div><div class="segb" data-v="fuente" title="Sigue el grosor de la letra">Fuente</div><div class="segb" data-v="fino">Fino</div><div class="segb" data-v="medio">Medio</div><div class="segb" data-v="grueso">Grueso</div>
+      </div>
+    </div>
+
+    <sp-slider id="slLocura" min="0" max="100" value="55" show-value="true"><sp-label slot="label">Locura (variación de letras y palabras)</sp-label></sp-slider>
+    <sp-slider id="slPulso" min="0" max="100" value="45" show-value="true"><sp-label slot="label">Pulso (temblor del trazo)</sp-label></sp-slider>
+    <sp-slider id="slPrisa" min="0" max="100" value="20" show-value="true"><sp-label slot="label">Prisa (inclinación)</sp-label></sp-slider>
+    <sp-slider id="slTight" min="-50" max="50" value="0" show-value="true"><sp-label slot="label">Letras apretadas ↔ sueltas</sp-label></sp-slider>
+    <sp-slider id="slTinta" min="0" max="100" value="55" show-value="true"><sp-label slot="label">Tinta (textura y sequedad)</sp-label></sp-slider>
+
+    <div class="label">Resultado</div>
+    <div class="seg" id="kindSeg">
+      <div class="segb" data-v="imagen">Imagen (trazos reales)</div><div class="segb" data-v="editable">Editable (solo variación)</div>
+    </div>
+    <div class="hint">Cada letra se pinta encima de donde está: se respetan las líneas, el tamaño, las columnas y el orden.</div>
+
+    <div class="actions">
+      <sp-button variant="cta" id="btnHand">Aplicar a lo seleccionado</sp-button>
+      <div class="row">
+        <sp-button variant="secondary" id="btnHandNew" class="grow">Otra variación</sp-button>
+        <sp-button variant="secondary" id="btnHandUndo" class="grow">Volver al original</sp-button>
+      </div>
+    </div>
+    <div class="status" id="status"></div>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>

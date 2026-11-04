@@ -1,0 +1,29 @@
+A MANO 1.0 · plugin para Photoshop (2024 o posterior)
+=====================================================
+
+INSTALAR
+- Doble clic en A_mano_v1.0.0.ccx -> Creative Cloud avisa de que no viene del
+  Marketplace -> "Instalar". Es independiente de Cartelator: se pueden tener los dos.
+- En Photoshop: Plugins > A mano.
+
+USO
+1. Selecciona en Capas capas de texto (cualquier fuente; también texto de párrafo,
+   varias columnas o texto girado) o un grupo que las contenga (por ejemplo, un
+   bloque editable de Cartelator).
+2. Herramienta: Trazo (boli, rotulador, pincel, lápiz) o Relleno (brocha seca, sello).
+   Grosor del trazo: Auto / Fuente / Fino / Medio / Grueso.
+3. Locura (variación de letras y palabras), Pulso (temblor), Prisa (inclinación),
+   Letras apretadas/sueltas, Tinta (textura y sequedad).
+4. Resultado: Imagen (trazos reales) o Editable (sigue siendo texto: varían tamaño,
+   altura y espaciado de cada letra).
+5. "Aplicar a lo seleccionado": cada letra se pinta ENCIMA de donde está. Se respetan
+   las líneas, las columnas, el tamaño, el color y el orden. Los espacios entre
+   palabras siguen claros. El original queda oculto debajo.
+   "Otra variación" cambia la mano; "Volver al original" lo deshace.
+
+NOTAS
+- Las letras las da el propio Photoshop (como "Crear trazado de trabajo"), así que
+  funciona con cualquier tipografía. Si tenías un trazado de trabajo, se respeta.
+- La copia a mano copia la opacidad, el modo de fusión y el estilo de capa del original.
+- Documentos muy grandes se dibujan por franjas para no cargar la memoria.
+- El resultado en imagen necesita un documento RGB o en escala de grises (8, 16 o 32 bits).
