@@ -13,6 +13,8 @@ const INK = require('./ink.js');
 const SH = require('./shapes.js');
 const LY = require('./layout.js');
 const WR = require('./writer.js');
+const NG = require('./negativo.js');
+const GEO = require('./geom.js');
 const FN = require('./fonts.js');
 const { app, action, constants } = require('photoshop');
 
@@ -92,7 +94,7 @@ function genParams() {
     width: Math.pow(2, st.grosor / 50), repasado: st.repasado / 50, tinta: st.tinta / 100,
     contrast: st.contraste / 50, leading: st.inter / 100, align: st.align, stretch: 1 + st.llenar / 100,
     xFill: st.llenar / 150, margin: st.margen / 100, track: st.tight / 50 * 0.07,
-    inkPad: Math.max(INK.preset(st.tool, st.preset).w * FN.styleOf(st.persona + '_' + st.version).weight, FN.styleOf(st.persona + '_' + st.version).absW || 0) * Math.pow(2, st.grosor / 50)
+    inkPad: st.tool === 'negativo' ? (st.preset === 'pincel' ? 0.15 : 0.13) * Math.pow(2, st.grosor / 50) : Math.max(INK.preset(st.tool, st.preset).w * FN.styleOf(st.persona + '_' + st.version).weight, FN.styleOf(st.persona + '_' + st.version).absW || 0) * Math.pow(2, st.grosor / 50)
   };
 }
 function handParams() {
@@ -297,7 +299,8 @@ async function doWrite(fresh) {
       const key = docKey(doc) + '|' + target.shape.id;
       const seed = seedFor('g|' + key, fresh);
       gp.colorSeed = seed;
-      const strokes = WR.plan(lay, gp, seed);
+      // negativos: se pinta alrededor de las letras (las letras quedan libres)
+      const strokes = st.tool === 'negativo' ? NG.fromLayout(WR, lay, gp, seed).strokes : WR.plan(lay, gp, seed);
       const bb = WR.bounds(strokes);
       if (!bb) throw new P.UserError('No hay nada que escribir.');
       // lo escrito antes con esta forma se sustituye
@@ -347,6 +350,16 @@ function progressFor(ctx, label) {
 async function handImage(doc, ctx, insts, hp, seed, name, say) {
   if (!insts.length) throw new P.UserError('No hay letras que pasar a mano.');
   say('Pasando a mano…');
+  if (hp.tool === 'negativo') {
+    // negativo: la caja de cada línea pintada alrededor de las letras de la fuente
+    const neg = NG.fromInstances(HD, GEO, insts, hp, seed);
+    const bb = WR.bounds(neg.strokes);
+    if (!bb) throw new P.UserError('No ha salido nada visible.');
+    const gp = { color: insts[0].color, tinta: hp.ink, colorVar: hp.colorVar, colorSeed: seed };
+    const layerN = await P.putBands(doc, name, bb, c => WR.paint(c, neg.strokes, gp), progressFor(ctx, 'A mano'));
+    if (!layerN) throw new P.UserError('No ha salido nada visible.');
+    return layerN;
+  }
   const pv = HD.planVariation(insts, hp, seed);
   const boxes = insts.map(it => { const b = IN.docBounds([it]); return padBox(b, 0.45 * Math.max(b.right - b.left, b.bottom - b.top) + 3); });
   let all = boxes[0];

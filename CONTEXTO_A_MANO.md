@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.3)
+## 2. Cómo se usa (2.4)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -161,6 +161,39 @@ en azul, pincel en azul y burdeos, autoencajar en arco con líneas montadas)
 - **Cursiva más rápida**: `scriptW` (más estrecha), `scriptSmooth` (redondea los rizos pequeños), más inclinación;
   la raya de la t ya no se toma como salida al ligar; tolerancia de ligado mayor; en cursiva la línea no separa letras.
 
+### Tras probar la 2.3 (nuevas referencias: cartel Good Room a lápiz, cartel WRONG a pincel rojo)
+- «Dale más realismo, en general.» «La cursiva más natural, mejor hecha, curratelo mucho más.»
+- «La técnica BOLI no parece boli para nada.» «La técnica ÓLEO cámbiale el nombre a CERA.» «Al rotulador le sigue
+  faltando textura.»
+- «A una letra de cada 20 haz que uno solo de sus trazos esté remarcado (el palito de la P), como si al escribirlo
+  hubieses fallado y escrito encima.» «Busca pequeñas imperfecciones (muy pocas, muy sutiles, no te pases).»
+- **NEGATIVOS**: «pintar la caja de fuera y dejar el espacio de dentro libre; calcular los trazos para hacer la letra
+  alrededor; en dos modos, pincel y lápiz».
+
+### Qué se hizo en la 2.4
+- **Boli** (`pen: true` en el modelo procedural): línea fina y constante (0,0068 em), canto nítido, dos carriles algo
+  más cargados (el surco de la bola), más oscuro donde aprieta, saltos de la bola, grumo al empezar a veces.
+- **Rotulador**: fibras a tres escalas (franjas de la punta, fibras finas, fibra seca más clara), moteado del papel
+  más fuerte, se va descargando a lo largo; no se afila nunca: en las esquinas cerradas se para y la tinta se carga
+  en el punto (dos trazos que se montan, como un rotulador de verdad).
+- **Cera** (antes «Óleo en barra»): packs Gruesa, Blanda, Fina.
+- **Imperfecciones** (`writer.js`): 1 de cada ~20 letras con un trazo repasado encima (el palo casi siempre);
+  1 de cada ~35 con un trazo largo hecho en dos golpes (levanta y sigue un poco montado); grumo al empezar en
+  1 de cada ~25 trazos de boli o rotulador.
+- **Cursiva propia** (`SK.CURS` en `skeleton.js`, estilos con `script: 'own'`: adulta A/B y nerviosa A/B): minúsculas
+  dibujadas trazo a trazo, entran por la base a la izquierda y salen a la derecha (se ligan sin saltos), bucles
+  de ascendentes y descendentes, palos que suben y bajan casi por el mismo sitio, r de dos picos. Las mayúsculas en
+  cursiva son las de molde. Infantil sigue con Hershey Script (de colegio) y elegante con EMS Allure.
+- **NEGATIVOS** (`js/negativo.js`, herramienta `negativo` con modos lápiz y pincel, en GENERAR y CALCAR):
+  máscara de las letras (GENERAR: trazos gordos de la letra, ~0,085 em, menos en letras estrechas; CALCAR: el
+  contorno de la fuente con la variación de la mano, engordado un poco) → campo de distancia hacia fuera →
+  contornos desplazados por marching squares (el trazo que dibuja cada letra por fuera, con su canto tocando la
+  letra; los huecos de O/A/B se rellenan) → máscara del relleno. Una caja por línea (en GENERAR sigue la forma:
+  en un arco se curva; en CALCAR, rectángulo orientado de la línea). Lápiz: garabato denso en diagonal (dos capas),
+  caja perfilada, contornos a lápiz blando en trozos con alguna segunda pasada. Pincel: pinceladas anchas a lo
+  largo que se salen un poco de la caja + capa cruzada; el canto de la letra lo hace la misma pintura (sin raya).
+  `ink.paintStroke` acepta `opts.mask` (rejilla 0..1) para no pintar dentro de las letras.
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -219,7 +252,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.3.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.4.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)
@@ -237,7 +270,8 @@ python3 tests/node/sheet.py DIR hoja.png 2 800   # hoja de contactos
 - 2.2 añade: óleo en barra, rotulador gastado con la elegante B, una letra de cada color (y que el deslizador solo
   aparezca al marcarla).
 - 2.3 añade: negrita y subrayado en autoencajar (marcas en el panel).
-- Último resultado: **49/49 bien, sin errores de modal**.
+- 2.4 añade: negativos a lápiz y a pincel en GENERAR y en CALCAR.
+- Último resultado: **55/55 bien, sin errores de modal**.
 
 ---
 

@@ -21,12 +21,12 @@ const NVAR = 3;
 // track/minGap: espacio entre letras; weight: grosor relativo del trazo; bounce/sizeVar: baile al escribir;
 // double: trazos dobles sueltos; ovr: letras propias
 const STYLES = {
-  adulta_a: { label: 'Adulta A', hint: 'segura y compacta', wide: 0.9, slant: 0.04, slantVar: 0.025, hVar: 0.05, wVar: 0.06, wob: 0.012, wobF: 0, angular: 0, geo: 0, os: 0.02, osVar: 0.03, stem: 0.02, cb: 0.04, cbShift: 0, open: 0.25, xh: 0.72, track: 0.07, minGap: 0.035, weight: 1, bounce: 0.6, sizeVar: 0.6, double: 0, ovr: null, script: 'script', xhS: 0.42, slantS: 0.3, trackS: -0.02, scriptW: 0.72, scriptSmooth: 0.03, flick: 0.4 },
-  adulta_b: { label: 'Adulta B', hint: 'suelta y saltarina', wide: 0.86, slant: 0, slantVar: 0.09, hVar: 0.13, wVar: 0.1, wob: 0.02, wobF: 0, angular: 0, geo: 0, os: 0.03, osVar: 0.05, stem: 0.04, cb: 0.08, cbShift: 0.02, open: 0.3, xh: 0.74, track: 0.08, minGap: 0.04, weight: 1.1, bounce: 1.5, sizeVar: 1.3, double: 0, ovr: null, script: 'script', xhS: 0.46, slantS: 0.22, trackS: -0.02, scriptW: 0.76, scriptSmooth: 0.035, flick: 0.4 },
+  adulta_a: { label: 'Adulta A', hint: 'segura y compacta', wide: 0.9, slant: 0.04, slantVar: 0.025, hVar: 0.05, wVar: 0.06, wob: 0.012, wobF: 0, angular: 0, geo: 0, os: 0.02, osVar: 0.03, stem: 0.02, cb: 0.04, cbShift: 0, open: 0.25, xh: 0.72, track: 0.07, minGap: 0.035, weight: 1, bounce: 0.6, sizeVar: 0.6, double: 0, ovr: null, script: 'own', xhS: 0.42, slantS: 0.22, trackS: 0, scriptW: 1.05, scriptSmooth: 0.03, flick: 0.4 },
+  adulta_b: { label: 'Adulta B', hint: 'suelta y saltarina', wide: 0.86, slant: 0, slantVar: 0.09, hVar: 0.13, wVar: 0.1, wob: 0.02, wobF: 0, angular: 0, geo: 0, os: 0.03, osVar: 0.05, stem: 0.04, cb: 0.08, cbShift: 0.02, open: 0.3, xh: 0.74, track: 0.08, minGap: 0.04, weight: 1.1, bounce: 1.5, sizeVar: 1.3, double: 0, ovr: null, script: 'own', xhS: 0.46, slantS: 0.16, trackS: 0.01, scriptW: 1.12, scriptSmooth: 0.035, flick: 0.4 },
   infantil_a: { label: 'Infantil A', hint: 'de niño', wide: 0.95, slant: 0, slantVar: 0.14, hVar: 0.27, wVar: 0.18, wob: 0.045, wobF: 0, angular: 0, geo: 0, os: 0.02, osVar: 0.06, stem: 0.05, cb: 0.14, cbShift: 0, open: 0.45, xh: 0.78, track: 0.13, minGap: 0.06, weight: 1, bounce: 1.8, sizeVar: 1.4, double: 0, ovr: 'kid', script: 'script', xhS: 0.66, slantS: 0.02, trackS: 0.02 },
   infantil_b: { label: 'Infantil B', hint: 'de piezas', wide: 1.0, slant: 0, slantVar: 0.03, hVar: 0.07, wVar: 0.06, wob: 0.008, wobF: 0, angular: 0, geo: 1, os: 0, osVar: 0.01, stem: 0, cb: 0.03, cbShift: 0, open: 0, xh: 0.8, track: 0.09, minGap: 0.04, weight: 1, absW: 0.06, bounce: 0.8, sizeVar: 0.7, double: 0, ovr: 'geo', script: 'script', xhS: 0.66, slantS: 0, trackS: 0.02 },
-  nerviosa_a: { label: 'Nerviosa A', hint: 'rabiosa: alta, estrecha, a picos', wide: 0.38, slant: 0.03, slantVar: 0.07, hVar: 0.15, wVar: 0.12, wob: 0.01, wobF: 0, angular: 0, geo: 0, os: 0.07, osVar: 0.05, stem: 0.08, cb: 0.12, cbShift: -0.05, open: 0.3, xh: 0.84, track: 0.035, minGap: 0.025, weight: 0.72, bounce: 1.0, sizeVar: 1.0, double: 0.06, flick: 1, ovr: 'rab', script: 'script', xhS: 0.5, slantS: 0.3, trackS: -0.01, scriptW: 0.7, scriptSmooth: 0.035 },
-  nerviosa_b: { label: 'Nerviosa B', hint: 'rabiosa a lo loco: se pasa, repite trazos', wide: 0.46, slant: 0.02, slantVar: 0.13, hVar: 0.28, wVar: 0.16, wob: 0.014, wobF: 0, angular: 0, geo: 0, os: 0.15, osVar: 0.09, stem: 0.16, cb: 0.16, cbShift: -0.03, open: 0.35, xh: 0.86, track: 0.05, minGap: 0.02, weight: 0.75, bounce: 1.6, sizeVar: 1.35, double: 0.32, flick: 1, ovr: 'wild', script: 'script', xhS: 0.5, slantS: 0.34, trackS: -0.01, scriptW: 0.68, scriptSmooth: 0.04 },
+  nerviosa_a: { label: 'Nerviosa A', hint: 'rabiosa: alta, estrecha, a picos', wide: 0.38, slant: 0.03, slantVar: 0.07, hVar: 0.15, wVar: 0.12, wob: 0.01, wobF: 0, angular: 0, geo: 0, os: 0.07, osVar: 0.05, stem: 0.08, cb: 0.12, cbShift: -0.05, open: 0.3, xh: 0.84, track: 0.035, minGap: 0.025, weight: 0.72, bounce: 1.0, sizeVar: 1.0, double: 0.06, flick: 1, ovr: 'rab', script: 'own', xhS: 0.5, slantS: 0.26, trackS: 0.01, scriptW: 0.88, scriptSmooth: 0.035 },
+  nerviosa_b: { label: 'Nerviosa B', hint: 'rabiosa a lo loco: se pasa, repite trazos', wide: 0.46, slant: 0.02, slantVar: 0.13, hVar: 0.28, wVar: 0.16, wob: 0.014, wobF: 0, angular: 0, geo: 0, os: 0.15, osVar: 0.09, stem: 0.16, cb: 0.16, cbShift: -0.03, open: 0.35, xh: 0.86, track: 0.05, minGap: 0.02, weight: 0.75, bounce: 1.6, sizeVar: 1.35, double: 0.32, flick: 1, ovr: 'wild', script: 'own', xhS: 0.5, slantS: 0.3, trackS: 0.01, scriptW: 0.95, scriptSmooth: 0.04 },
   elegante_a: { label: 'Elegante A', hint: 'la de siempre: fina y tranquila', print: 'elfin', wide: 1, slant: 0.08, slantVar: 0.015, hVar: 0.02, wVar: 0.02, wob: 0.004, wobF: 0, angular: 0, geo: 0, os: 0, osVar: 0, stem: 0, cb: 0, cbShift: 0, open: 0, xh: 0.62, track: 0.03, minGap: 0.05, weight: 0.85, bounce: 0.5, sizeVar: 0.5, double: 0, ovr: null, script: 'allure', xhS: 0.48, slantS: 0.12, trackS: 0 },
   elegante_b: { label: 'Elegante B', hint: 'alta y espaciada, de cartel fino', print: 'elfin', wide: 0.86, slant: 0.12, slantVar: 0.012, hVar: 0.015, wVar: 0.02, wob: 0.003, wobF: 0, angular: 0, geo: 0, os: 0, osVar: 0, stem: 0, cb: 0, cbShift: 0, open: 0, xh: 0.52, track: 0.09, minGap: 0.07, weight: 0.72, bounce: 0.35, sizeVar: 0.35, double: 0, ovr: null, script: 'allure', xhS: 0.46, slantS: 0.16, trackS: 0.01 }
 };
@@ -177,7 +177,8 @@ function cutEnd(p, frac) {
 }
 
 // ------------------------------------------------------------------ definición de cada carácter
-function defFor(st, base) {
+function defFor(st, base, cursive) {
+  if (cursive) { const c = SK.CURS[base]; return c ? { w: c[0], d: c[1], lower: true, cursive: true } : null; }
   const ov = st.ovr && OVR[st.ovr] ? OVR[st.ovr][base] : null;
   if (ov) {
     if (typeof ov === 'string' && ov.indexOf('lower:') === 0) { const l = SK.LOWER[ov.slice(6)]; return l ? { w: l[0], d: l[1], lower: true, asCap: true } : null; }
@@ -189,15 +190,15 @@ function defFor(st, base) {
 }
 
 // glifo de molde (mayúsculas/minúsculas), variante v. Devuelve null si el carácter no está.
-function printGlyph(styleKey, ch, v, altIdx) {
+function printGlyph(styleKey, ch, v, altIdx, cursive) {
   const st = styleOf(styleKey);
   const nfd = ch.normalize ? ch.normalize('NFD') : ch;
   let base = nfd[0];
   const marks = Array.from(nfd.slice(1));
   if (ch === 'ñ' || ch === 'Ñ') { base = ch === 'ñ' ? 'n' : 'N'; if (!marks.length) marks.push('̃'); }
-  let def = altIdx != null && SK.ALT[base] && SK.ALT[base][altIdx] ? { w: SK.ALT[base][altIdx][0], d: SK.ALT[base][altIdx][1], lower: true } : defFor(st, base);
+  let def = altIdx != null && SK.ALT[base] && SK.ALT[base][altIdx] ? { w: SK.ALT[base][altIdx][0], d: SK.ALT[base][altIdx][1], lower: true } : defFor(st, base, cursive);
   if (!def) return null;
-  const rnd = R.mulberry32((hashStr(styleKey + '|' + ch) + v * 7919 + 13) >>> 0);
+  const rnd = R.mulberry32((hashStr(styleKey + (cursive ? '|c|' : '|') + ch) + v * 7919 + 13) >>> 0);
   const g = () => R.gauss(rnd);
   let strokes = parsePath(def.d);
   // sin punto si lleva tilde (í, ï)
@@ -248,9 +249,10 @@ function printGlyph(styleKey, ch, v, altIdx) {
   }
   strokes = strokes.concat(markStrokes);
   // ---- a em
-  const unit = def.lower && !def.asCap ? CAP * st.xh : CAP;
-  const hS = Math.exp(g() * st.hVar), wS = Math.exp(g() * st.wVar) * st.wide;
-  const slant = st.slant + g() * st.slantVar;
+  // (cursiva: altura de x, anchura e inclinación de la cursiva del estilo; menos desigualdad)
+  const unit = cursive ? CAP * st.xhS : def.lower && !def.asCap ? CAP * st.xh : CAP;
+  const hS = Math.exp(g() * st.hVar * (cursive ? 0.45 : 1)), wS = Math.exp(g() * st.wVar * (cursive ? 0.5 : 1)) * (cursive ? (st.scriptW || 0.8) : st.wide);
+  const slant = (cursive ? st.slantS : st.slant) + g() * st.slantVar * (cursive ? 0.5 : 1);
   const step = 0.012 / unit;
   const out = [];
   for (const s of strokes) {
@@ -262,14 +264,14 @@ function printGlyph(styleKey, ch, v, altIdx) {
     const o = { pts, closed: s.closed, fill: !!s.fill, mark: !!s.mark };
     out.push(o);
     // trazo doble suelto (nerviosa)
-    if (st.double && !s.fill && !s.mark && rnd() < st.double && pts.length > 3) {
+    if (st.double && !cursive && !s.fill && !s.mark && rnd() < st.double && pts.length > 3) {
       // la segunda pasada sale del mismo sitio y se abre un poco (se pasa de largo o se queda corta)
       const p0 = pts[0], rot = (rnd() - 0.5) * 0.12, off = 0.008 + 0.012 * rnd(), ang = rnd() * 6.28, ext = 1 + (rnd() - 0.3) * 0.12;
       const cr = Math.cos(rot), sr = Math.sin(rot);
       out.push({ pts: pts.map(([x, y]) => { const dx = (x - p0[0]) * ext, dy = (y - p0[1]) * ext; return [p0[0] + cr * dx - sr * dy + Math.cos(ang) * off, p0[1] + sr * dx + cr * dy + Math.sin(ang) * off]; }), closed: s.closed, fill: false, mark: false, extra: true });
     }
   }
-  return finishGlyph(out, def.w * unit * wS, ch, false, def.lower && !def.asCap);
+  return finishGlyph(out, def.w * unit * wS, ch, !!cursive, def.lower && !def.asCap);
 }
 
 function finishGlyph(strokes, adv, ch, script, lower) {
@@ -349,6 +351,7 @@ function glyph(styleKey, mode, ch, v) {
   if (cache.has(key)) return cache.get(key);
   let r = null;
   if (ch === ' ') r = null;
+  else if (mode === 'cursiva' && styleOf(styleKey).script === 'own') r = printGlyph(styleKey, ch, v, null, true) || printGlyph(styleKey, ch, v);
   else if (mode === 'cursiva') r = scriptGlyph(styleKey, ch, v) || printGlyph(styleKey, ch, v);
   else r = (styleOf(styleKey).print ? scriptGlyph(styleKey, ch, v, true) : null) || printGlyph(styleKey, ch, v) || scriptFallback(ch);
   if (cache.size > 6000) cache.clear();
@@ -366,6 +369,10 @@ function scriptFallback(ch) {
 // métricas (em, y hacia arriba en los valores)
 function metrics(styleKey, mode) {
   const st = styleOf(styleKey);
+  if (mode === 'cursiva' && st.script === 'own') {
+    const xh = st.xhS * CAP;
+    return { cap: CAP, xh, asc: Math.max(CAP * 1.05, xh * 2.05), desc: xh * 1.0, space: 0.26 * (0.8 + 0.2 * (st.scriptW || 0.8)) };
+  }
   if (mode === 'cursiva' || st.print) {
     const pf = mode !== 'cursiva';
     const F = fontOf(pf ? st.print : st.script), s0 = CAP / F.m.cap;

@@ -30,7 +30,9 @@ const { open } = require('./setup.js');
     ['rect', 'rotulador', 'gordo', 'adulta', 'mayus', 'b'],
     ['rect', 'boli', 'fino', 'elegante', 'minus', 'a'],
     ['arco', 'cera', 'oleo', 'elegante', 'mayus', 'a'],
-    ['rect', 'rotulador', 'gastado', 'elegante', 'mayus', 'b']
+    ['rect', 'rotulador', 'gastado', 'elegante', 'mayus', 'b'],
+    ['rect', 'negativo', 'lapiz', 'adulta', 'mayus', 'a'],
+    ['arco', 'negativo', 'pincel', 'nerviosa', 'mayus', 'b']
   ];
   let ci = 0;
   for (const [type, tool, preset, persona, mode, ver] of combos) {
@@ -161,7 +163,7 @@ const { open } = require('./setup.js');
   };
   let ids = await setup();
   await snap('c_00_original');
-  for (const [tool, pk, fill] of [['boli', 'bic', ''], ['rotulador', 'gordo', ''], ['pincel', 'gordo', ''], ['lapiz', 'hb', ''], ['carbon', 'fuerte', ''], ['pincel', 'seco', 'brocha'], ['pincel', 'fino', 'sello']]) {
+  for (const [tool, pk, fill] of [['boli', 'bic', ''], ['rotulador', 'gordo', ''], ['pincel', 'gordo', ''], ['lapiz', 'hb', ''], ['carbon', 'fuerte', ''], ['pincel', 'seco', 'brocha'], ['pincel', 'fino', 'sello'], ['negativo', 'lapiz', ''], ['negativo', 'pincel', '']]) {
     await run(([ids, tool, pk, fill]) => { SIM.select(...ids); T.seg('toolSeg', tool); T.seg('presetSeg', pk); T.seg('fillSeg', fill); T.seg('kindSeg', 'imagen'); }, [ids, tool, pk, fill]);
     await refresh();
     const t0 = Date.now();

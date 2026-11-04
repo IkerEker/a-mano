@@ -127,3 +127,4 @@ sp-checkbox { margin-top: 6px; }
 #viewAdv sp-slider { margin-top: 8px; }
 #versionSeg { width: 70px; flex: 0 0 auto; }
 #versionHint { font-size: 10px; }
+#toolSeg .segb { padding: 4px 2px; font-size: 10.5px; }

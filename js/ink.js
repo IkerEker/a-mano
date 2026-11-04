@@ -39,23 +39,25 @@ const TOOLS = {
     }
   },
   cera: {
-    label: 'Óleo en barra', presets: {
-      oleo: { label: 'Óleo en barra', fams: ['cera'], w: 0.06, dens: 1.25, tIn: 0.92, tOut: 0.85, inL: 0.6, outL: 1, press: 0.06, grain: 0.2, tremor: 0.85, tone: 0.18, load: 0.35, blend: 'over', fuse: true },
-      cera: { label: 'Cera', fams: ['cera'], w: 0.045, dens: 1.15, tIn: 0.9, tOut: 0.8, inL: 0.6, outL: 1, press: 0.06, grain: 0.42, tremor: 0.9, tone: 0.22, load: 0.2, fuse: true },
+    label: 'Cera', presets: {
+      oleo: { label: 'Gruesa', fams: ['cera'], w: 0.06, dens: 1.25, tIn: 0.92, tOut: 0.85, inL: 0.6, outL: 1, press: 0.06, grain: 0.2, tremor: 0.85, tone: 0.18, load: 0.35, blend: 'over', fuse: true },
+      cera: { label: 'Blanda', fams: ['cera'], w: 0.045, dens: 1.15, tIn: 0.9, tOut: 0.8, inL: 0.6, outL: 1, press: 0.06, grain: 0.42, tremor: 0.9, tone: 0.22, load: 0.2, fuse: true },
       fina: { label: 'Fina', fams: ['cera'], w: 0.032, dens: 1.2, tIn: 0.88, tOut: 0.78, inL: 0.8, outL: 1.2, press: 0.07, grain: 0.32, tremor: 0.9, tone: 0.22, load: 0.25, blend: 'over', fuse: true }
     }
   },
   boli: {
     label: 'Bolígrafo', presets: {
-      bic: { label: 'BIC', proc: 'marker', w: 0.0125, dens: 0.95, tIn: 0.8, tOut: 0.6, inL: 2, outL: 3.5, press: 0.1, grain: 0.12, pool: 0.3, wet: 0.1, streak: 0.4, skip: 0.45, tremor: 0.8, lift: 0.2, tone: 0.55 },
-      fino: { label: 'Fino', proc: 'marker', w: 0.0085, dens: 0.92, tIn: 0.75, tOut: 0.55, inL: 2, outL: 3.5, press: 0.08, grain: 0.14, pool: 0.3, wet: 0.08, streak: 0.3, skip: 0.5, tremor: 0.8, lift: 0.2, tone: 0.5 },
+      // boli: línea fina y constante (no se afila), borde limpio con dos carriles algo más cargados (el surco de
+      // la bola), más oscura donde aprieta, algún salto de la bola y algún grumo al empezar
+      bic: { label: 'BIC', proc: 'marker', pen: true, w: 0.0068, dens: 0.9, tIn: 0.95, tOut: 0.9, inL: 1, outL: 1.5, press: 0.04, grain: 0.1, pool: 0.25, wet: 0.5, streak: 0.15, skip: 0.35, tremor: 0.6, lift: 0.2, tone: 0.5, minR: 0.6 },
+      fino: { label: 'Fino', proc: 'marker', pen: true, w: 0.0048, dens: 0.88, tIn: 0.95, tOut: 0.9, inL: 1, outL: 1.5, press: 0.03, grain: 0.1, pool: 0.25, wet: 0.45, streak: 0.12, skip: 0.4, tremor: 0.6, lift: 0.2, tone: 0.45, minR: 0.55 },
       gel: { label: 'Gel', proc: 'marker', w: 0.016, dens: 1.0, tIn: 0.9, tOut: 0.85, inL: 1.2, outL: 2, press: 0.06, wet: 0.25, pool: 0.35, tremor: 0.95, lift: 0.15, tone: 0.3, grain: 0.04, fuse: true }
     }
   },
   rotulador: {
     label: 'Rotulador', presets: {
-      fino: { label: 'Fino', proc: 'marker', w: 0.022, dens: 0.88, tIn: 0.95, tOut: 0.92, inL: 1, outL: 1.2, press: 0.04, wet: 0.35, pool: 0.4, tremor: 0.75, lift: 0.1, tone: 0.12, grain: 0.06, fuse: true },
-      gordo: { label: 'Gordo', useFont: true, proc: 'marker', w: 0.055, dens: 0.8, tIn: 0.97, tOut: 0.95, inL: 0.8, outL: 1, press: 0.03, wet: 0.45, pool: 0.35, tremor: 0.7, lift: 0.08, tone: 0.1, grain: 0.07, fuse: true },
+      fino: { label: 'Fino', proc: 'marker', load: 0.15, w: 0.022, dens: 0.88, tIn: 0.95, tOut: 0.92, inL: 1, outL: 1.2, press: 0.04, wet: 0.35, pool: 0.4, tremor: 0.75, lift: 0.1, tone: 0.12, grain: 0.06, fuse: true },
+      gordo: { label: 'Gordo', useFont: true, proc: 'marker', load: 0.18, w: 0.055, dens: 0.8, tIn: 0.97, tOut: 0.95, inL: 0.8, outL: 1, press: 0.03, wet: 0.45, pool: 0.35, tremor: 0.7, lift: 0.08, tone: 0.1, grain: 0.07, fuse: true },
       gastado: { label: 'Gastado', proc: 'marker', w: 0.05, dens: 0.95, tIn: 0.95, tOut: 0.9, inL: 0.8, outL: 1, press: 0.05, wet: 0.15, pool: 0.15, dry: 0.75, tremor: 0.75, lift: 0.1, tone: 0.15, load: 0.3, grain: 0.12, fuse: true }
     }
   },
@@ -68,7 +70,14 @@ const TOOLS = {
     }
   }
 };
-const TOOL_ORDER = ['lapiz', 'carbon', 'cera', 'boli', 'rotulador', 'pincel'];
+// negativos: se pinta alrededor de las letras (js/negativo.js); aquí solo su modo de capa
+TOOLS.negativo = {
+  label: 'Negativo', neg: true, presets: {
+    lapiz: { label: 'Lápiz', neg: true, fams: ['lapiz'], blend: 'multiply' },
+    pincel: { label: 'Pincel', neg: true, fams: ['pincel'], blend: 'over' }
+  }
+};
+const TOOL_ORDER = ['lapiz', 'carbon', 'cera', 'boli', 'rotulador', 'pincel', 'negativo'];
 
 function preset(tool, pk) {
   const T = TOOLS[tool] || TOOLS.rotulador;
@@ -227,20 +236,26 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
     else if (s > Ls) { ve = Math.hypot(v, (s - Ls) / hEnd1); cap = 1; }
     // carga en los extremos: donde el rotulador se para, la tinta se extiende y oscurece
     const de = Math.min(s, Ls - s), hh = s < Ls / 2 ? hEnd0 : hEnd1;
-    const bleed = P.pool ? (1 - smooth01(0, hh * 1.6, Math.max(0, de))) * P.pool * Math.min(1, Ls / (hh * 8)) : 0;
+    let bleed = P.pool ? (1 - smooth01(0, hh * 1.6, Math.max(0, de))) * P.pool * Math.min(1, Ls / (hh * 8)) : 0;
+    // grumo: la punta se ha quedado un momento quieta al empezar y suelta un punto de tinta
+    if (opts.blob && s < Ls / 2) bleed += (1 - smooth01(0, hh * 1.3, Math.max(0, s))) * 0.9;
     // borde: casi limpio (el fieltro y la bola no tiemblan); solo el diente del papel lo muerde un poco
     const rough = 0.016 * R.noise1(s / (r * 2.5 + 1), mSeed + (v > 0 ? 1 : 2)) + 0.03 * (R.hash2(px, py, mSeed) - 0.5);
     const edge = 1 + rough + 0.14 * bleed;
-    const aa = Math.max(0.04, 0.7 / Math.max(1, r));
+    const aa = Math.max(0.04, (P.pen ? 0.55 : 0.7) / Math.max(1, r));
     const inside = smooth01(edge + aa, edge - aa, ve);
     if (inside <= 0) return 0;
     // vetas: la punta de fieltro deja franjas algo más claras a lo largo, que derivan despacio
     const vs = v + 0.25 * R.noise1(s / (r * 7 + 1), mSeed + 5);
-    const streak = 0.13 * R.noise1(vs * 3.1, mSeed + 7) + 0.07 * R.noise1(vs * 8.5 + s / (r * 30 + 1), mSeed + 9);
+    // (tres escalas: franjas anchas de la punta, fibras finas y alguna fibra seca más clara)
+    const fib = R.noise1(vs * 16 + s / (r * 60 + 1), mSeed + 31);
+    const streak = 0.12 * R.noise1(vs * 3.1, mSeed + 7) + 0.09 * R.noise1(vs * 8.5 + s / (r * 30 + 1), mSeed + 9)
+      + 0.07 * fib - 0.12 * smooth01(0.55, 0.85, fib);
     // absorción del papel: moteado fino
-    const mott = 0.06 * (paper[(((py * 0.7) & 255) << 8) | ((px * 0.7) & 255)] - 0.5);
+    const mott = 0.1 * (paper[(((py * 0.7) & 255) << 8) | ((px * 0.7) & 255)] - 0.5);
     // borde: una línea fina un poco más cargada donde la tinta se seca antes
-    const rim = (P.wet || 0) * 0.55 * smooth01(0.8, 0.97, ve / edge) * (1 - smooth01(0.97, 1.02, ve / edge) * 0.5);
+    const rim = P.pen ? (P.wet || 0) * (smooth01(0.25, 0.75, ve / edge) - 0.35) * 0.5   // carriles del surco
+      : (P.wet || 0) * 0.55 * smooth01(0.8, 0.97, ve / edge) * (1 - smooth01(0.97, 1.02, ve / edge) * 0.5);
     let a = inside * (0.86 + (P.streak == null ? 1 : P.streak) * streak + mott + rim) * (1 + 0.3 * bleed);
     // boli: la bola salta a ratos (claros finos a lo ancho), más en los trazos rápidos
     if (P.skip) {
@@ -392,7 +407,24 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
   }
   // borde húmedo: la tinta se acumula en el borde de la mancha
   if (P.wet > 0) wetEdge(buf, bw, bh, Math.max(1, Math.round(r * 0.45)), P.wet);
+  // máscara (negativos): donde vale 0 no se pinta (las letras quedan libres)
+  if (opts.mask) applyMask(buf, bx0, by0, bw, bh, opts.mask);
   RD.compositePigment(canvas, buf, bx0, by0, bw, bh, rgb, opts.blend || P.blend, opts.alphaMul == null ? 1 : opts.alphaMul);
+}
+// mask: { x0, y0, w, h, s (px de máscara por px de documento), d: Float32Array (0..1) }
+function maskAt(M, X, Y) {
+  const x = (X - M.x0) * M.s - 0.5, y = (Y - M.y0) * M.s - 0.5;
+  if (x < 0 || y < 0 || x > M.w - 1 || y > M.h - 1) return M.out == null ? 1 : M.out;
+  const x0 = x | 0, y0 = y | 0, fx = x - x0, fy = y - y0, x1 = Math.min(M.w - 1, x0 + 1), y1 = Math.min(M.h - 1, y0 + 1);
+  const a = M.d[y0 * M.w + x0], b = M.d[y0 * M.w + x1], c = M.d[y1 * M.w + x0], d = M.d[y1 * M.w + x1];
+  return (a + (b - a) * fx) * (1 - fy) + (c + (d - c) * fx) * fy;
+}
+function applyMask(buf, bx0, by0, bw, bh, M) {
+  for (let y = 0; y < bh; y++) for (let x = 0; x < bw; x++) {
+    const k = y * bw + x;
+    if (buf[k] <= 0) continue;
+    buf[k] *= maskAt(M, bx0 + x + 0.5, by0 + y + 0.5);
+  }
 }
 
 // relleno pintado: la figura se llena a pinceladas (con su textura y sus solapes) y se repasa el borde
@@ -461,4 +493,4 @@ function wetEdge(buf, w, h, rad, amt) {
   }
 }
 
-module.exports = { TOOLS, TOOL_ORDER, preset, paintStroke, paintFill, famAvailable, _load: load };
+module.exports = { TOOLS, TOOL_ORDER, preset, paintStroke, paintFill, famAvailable, maskAt, _load: load };
