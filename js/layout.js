@@ -161,7 +161,7 @@ function layoutInShape(text, levels, shape, o) {
   const met = FN.metrics(o.persona, o.mode);
   const space = met.space * (o.spaceMul || 1) + 2 * (o.inkPad || 0);
   const leading = o.leading || 1;
-  if (o.auto) return autoFit(words, shape, space, o, met);
+  if (o.auto) return require('./autofit.js').autoFit(words, shape, space, o);
   if (shape.kind === 'env') return inEnvelope(words, shape, space, leading, o);
   return inSilhouette(words, shape, space, leading, o, met);
 }

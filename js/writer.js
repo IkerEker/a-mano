@@ -75,7 +75,8 @@ function plan(lay, p, seed) {
   for (const L of letters) {
     if (wordT.has(L.word)) continue;
     const r = R.mulberry32(seed + L.word * 7919 + 3);
-    wordT.set(L.word, { rot: g(r) * (0.006 + 0.05 * c), sc: Math.exp(g(r) * (0.015 + 0.06 * c)), dy: g(r) * (0.01 + 0.06 * c) * persona.bounce, dx: g(r) * 0.03 * c, slant: (p.prisa || 0) * 0.3 + g(r) * 0.05 * c });
+    const k = auto ? 0 : 1;   // en autoencajar las palabras no se mueven ni crecen (se montarían)
+    wordT.set(L.word, { rot: g(r) * (0.006 + 0.05 * c) * k, sc: Math.exp(g(r) * (0.015 + 0.06 * c) * k), dy: g(r) * (0.01 + 0.06 * c) * persona.bounce * k, dx: g(r) * 0.03 * c * k, slant: (p.prisa || 0) * 0.3 + g(r) * 0.05 * c * (auto ? 0.3 : 1) });
   }
   // centro de cada palabra (en el espacio de maquetación)
   const wordC = new Map();
@@ -87,6 +88,8 @@ function plan(lay, p, seed) {
     wordC.set(L.word, w);
   }
   const lineSeed = li => seed + 977 * (li + 1);
+  // autoencajar: tamaños y posiciones ya están medidos al milímetro; lo que mueve o agranda letras casi no actúa
+  const cp = auto ? c * 0.25 : c;
   // ---- letras -> trazos (en el espacio de maquetación)
   const cursiveLetters = [];
   letters.forEach((L, li) => {
@@ -94,11 +97,11 @@ function plan(lay, p, seed) {
     const W = wordT.get(L.word), WC = wordC.get(L.word);
     const em = L.size;
     const rot = g(r) * (0.012 + 0.11 * c) * (0.6 + 0.4 * persona.bounce);
-    const sc = Math.exp(g(r) * (0.02 + 0.09 * c) * persona.sizeVar);
+    const sc = Math.exp(g(r) * (0.02 + 0.09 * cp) * persona.sizeVar * (auto ? 0.4 : 1));
     const ax = Math.exp(g(r) * (0.02 + 0.07 * c));
     const shear = g(r) * (0.025 + 0.1 * c);
-    const ldy = g(r) * (0.008 + 0.05 * c) * persona.bounce;
-    const ldx = g(r) * (0.005 + 0.035 * c);
+    const ldy = g(r) * (0.008 + 0.05 * cp) * persona.bounce * (auto ? 0.4 : 1);
+    const ldx = g(r) * (0.005 + 0.035 * cp);
     const warpA = 0.006 + 0.045 * c, warpL = 0.33;
     const wseed = seed + li * 31 + 7;
     const box = L.g.box, cx = (box.left + box.right) / 2, cy = (box.top + box.bottom) / 2;
@@ -118,7 +121,7 @@ function plan(lay, p, seed) {
       const cw = Math.cos(W.rot), sw = Math.sin(W.rot);
       X = wcx + cw * U - sw * V + W.dx * em; Y = L.base + sw * U + cw * V + W.dy * em;
       // línea base que ondula
-      Y += em * (0.012 + 0.05 * c) * persona.bounce * R.noise1(X / 3.2, lineSeed(L.line));
+      if (!auto) Y += em * (0.012 + 0.05 * c) * persona.bounce * R.noise1(X / 3.2, lineSeed(L.line));
       return [X, Y];
     };
     const strokes = L.g.strokes.map((s, si) => {
@@ -214,7 +217,10 @@ function plan(lay, p, seed) {
     const hw = wEm * (lv.w || 1) * Math.sqrt(L.size); // medio ancho en unidades de maqueta
     l.strokes.forEach((s, si) => {
       if (!s.pts || s.pts.length < 2) return;
-      const np = s.fill ? 1 : passes;
+      // fundido: las pasadas de más no se dibujan aparte (dejaban halos y «biberones»): el trazo carga más pigmento
+      // y engorda un pelo, como cuando se repasa encima con la misma herramienta
+      const extra = s.fill ? 0 : passes - 1;
+      const np = s.fill || fuse ? 1 : passes;
       for (let pass = 0; pass < np; pass++) {
         const rs = R.mulberry32(seed + li * 3301 + si * 211 + pass * 7919 + 11);
         let pts = s.pts;
@@ -256,10 +262,11 @@ function plan(lay, p, seed) {
         let r = Math.max(0.5, wEm * emPx * (lv.w || 1) / Math.max(0.5, Math.sqrt(L.size)));
         if (pass > 0) r *= fuse ? 1.04 + 0.08 * rs() : 0.85 + 0.1 * rs();
         if (s.extra) r *= 0.8;
+        if (fuse && extra > 0) r *= 1 + 0.05 * Math.min(3, extra);
         let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
         for (const q of fin) { if (q.x < x0) x0 = q.x; if (q.x > x1) x1 = q.x; if (q.y < y0) y0 = q.y; if (q.y > y1) y1 = q.y; }
         const m = r * 2.5 + 3;
-        out.push({ pts: fin, r, fill: !!s.fill, seed: (seed + li * 7 + si * 131 + pass * 1777) >>> 0, P, box: { left: x0 - m, top: y0 - m, right: x1 + m, bottom: y1 + m }, alpha: pass > 0 ? (fuse ? 0.75 : 0.85) : 1 });
+        out.push({ pts: fin, r, fill: !!s.fill, seed: (seed + li * 7 + si * 131 + pass * 1777) >>> 0, P, box: { left: x0 - m, top: y0 - m, right: x1 + m, bottom: y1 + m }, alpha: pass > 0 ? 0.85 : 1, ink: fuse && extra > 0 ? 1 + 0.32 * Math.min(3, extra) : 1, letter: li, word: L.word == null ? 0 : L.word });
       }
     });
   });
@@ -268,13 +275,14 @@ function plan(lay, p, seed) {
 
 // pinta el plan en un lienzo (solo los trazos que caen en él)
 function paint(canvas, strokes, p) {
-  const rgb = RD.hexToRgb(p.color || '#1b1b1b');
+  const rgb0 = RD.hexToRgb(p.color || '#1b1b1b');
   const ink = p.tinta == null ? 0.55 : p.tinta;
   let n = 0;
   for (const s of strokes) {
     const b = s.box;
     if (b.right < canvas.x0 || b.left > canvas.x0 + canvas.w || b.bottom < canvas.y0 || b.top > canvas.y0 + canvas.h) continue;
-    const o = { inkMul: 0.88 + 0.24 * ink, dryMul: 0.45 + 1.1 * ink, alphaMul: s.alpha };
+    const rgb = p.colorVar ? RD.letterColor(rgb0, s.letter || 0, p.colorVar, p.colorSeed || 0) : rgb0;
+    const o = { inkMul: (0.88 + 0.24 * ink) * (s.ink || 1), dryMul: 0.45 + 1.1 * ink, alphaMul: s.alpha };
     if (s.fill) INK.paintFill(canvas, s.pts.map(q => [q.x, q.y]), s.P, s.r, rgb, s.seed, o);
     else INK.paintStroke(canvas, s.pts, s.P, s.r, rgb, s.seed, o);
     n++;

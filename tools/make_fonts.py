@@ -24,6 +24,7 @@ FONTS = {
     'readability': ('EMSReadability', False),
     'script': ('HersheyScript1', True),
     'allure': ('EMSAllure', True),
+    'elfin': ('EMSElfin', False),          # la elegante de la 2.0 (la que gustaba)
 }
 CHARS = ''.join(chr(c) for c in range(33, 127)) + '¡¿ÁÉÍÓÚÜÑáéíóúüñ«»ºª€çÇàèìòùÀÈÌÒÙ·–—“”'
 

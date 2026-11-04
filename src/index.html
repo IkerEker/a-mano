@@ -54,13 +54,19 @@
     <!-- ---------------- compartido: estilo ---------------- -->
     <div class="sec"><span class="num" id="numStyle">3</span>ESTILO <span class="sub">con qué se escribe</span></div>
     <div class="seg" id="toolSeg">
-      <div class="segb" data-v="lapiz">Lápiz</div><div class="segb" data-v="carbon">Carbón</div><div class="segb" data-v="boli">Boli</div><div class="segb" data-v="rotulador">Rotu</div><div class="segb" data-v="pincel">Pincel</div>
+      <div class="segb" data-v="lapiz">Lápiz</div><div class="segb" data-v="carbon">Carbón</div><div class="segb" data-v="cera">Óleo</div><div class="segb" data-v="boli">Boli</div><div class="segb" data-v="rotulador">Rotu</div><div class="segb" data-v="pincel">Pincel</div>
     </div>
     <div class="seg mt4" id="presetSeg"></div>
     <div class="row" id="colorRow">
       <div class="lbl">Color</div>
       <div class="swatch" id="swColor" title="Pulsa para usar el color frontal de Photoshop"></div>
       <div class="hint inline">pulsa para tomar el color frontal</div>
+    </div>
+    <div class="row" id="multiRow">
+      <div class="seg grow" id="colorModeSeg"><div class="segb" data-v="uno">Un color</div><div class="segb" data-v="letras" title="Cada letra con un tono distinto, a partir del color base">Una letra de cada color</div></div>
+    </div>
+    <div id="multiBox" class="hidden">
+      <sp-slider id="slColorVar" min="0" max="100" value="45" show-value="true"><sp-label slot="label">Variación de cada letra (tono, saturación, luz)</sp-label></sp-slider>
     </div>
     <div class="row hidden" id="fillRow">
       <div class="lbl">Relleno</div>

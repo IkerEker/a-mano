@@ -511,6 +511,8 @@ function renderHand(canvas, insts, p, seed, only, pvIn) {
   insts.forEach((it, i) => {
     if (only && !only(i)) return;
     const f = letterTransform(pv, insts, i);
+    // una letra de cada color (a partir del color de la capa de texto)
+    if (p.colorVar) { const c = RD.letterColor(RD.hexToRgb(it.color), i, p.colorVar, seed); it = Object.assign({}, it, { color: '#' + c.map(v => v.toString(16).padStart(2, '0')).join('') }); }
     if (tool.kind === 'fill') drawFill(canvas, it, f, tool, q, seed + i * 31 + 7);
     else drawStrokes(canvas, it, f, tool, q, seed + i * 31 + 7);
     n++;

@@ -22,46 +22,53 @@ const TD = require('./texdata.js');
 // load: cuánta carga pierde a lo largo del trazo (el pincel empieza cargado y acaba seco)
 // blend: 'multiply' tinta transparente (se monta y oscurece) u 'over' pintura que tapa (guache, óleo)
 // fuse: el repasado se funde (más pigmento) en vez de verse como líneas sueltas
-const BASE = { capSkip: 0.35, fams: ['rotu'], w: 0.03, dens: 0.92, tIn: 0.6, tOut: 0.5, inL: 1.5, outL: 2.5, press: 0.12, down: 0, grain: 0, wet: 0, pool: 0, dry: 0, tremor: 1, up: 0, lift: 0.2, minR: 0.55, light: 0, tone: 0.2, load: 0, blend: 'multiply', fuse: false };
+const BASE = { capSkip: 0.15, fams: ['rotu'], w: 0.03, dens: 0.92, tIn: 0.6, tOut: 0.5, inL: 1.5, outL: 2.5, press: 0.12, down: 0, grain: 0, wet: 0, pool: 0, dry: 0, tremor: 1, up: 0, lift: 0.2, minR: 0.55, light: 0, tone: 0.2, load: 0, blend: 'multiply', fuse: false };
 const TOOLS = {
   lapiz: {
     label: 'Lápiz', presets: {
-      hb: { label: 'HB', fams: ['lapiz'], w: 0.019, dens: 1.15, tIn: 0.45, tOut: 0.3, inL: 2.5, outL: 5, press: 0.3, down: 0.08, grain: 0.5, tremor: 1.2, lift: 0.3, tone: 0.4 },
-      blando: { label: 'Blando 6B', fams: ['lapiz'], w: 0.03, dens: 1.3, tIn: 0.5, tOut: 0.35, inL: 2, outL: 4, press: 0.28, down: 0.12, grain: 0.4, tremor: 1.1, lift: 0.25, tone: 0.4 },
-      nervioso: { label: 'Nervioso', fams: ['lapiz'], w: 0.021, dens: 1.1, tIn: 0.35, tOut: 0.25, inL: 2, outL: 4, press: 0.35, down: 0.1, grain: 0.45, tremor: 1.6, lift: 0.45, tone: 0.45, extraPass: 1 }
+      hb: { label: 'HB', fams: ['lapiz'], w: 0.019, dens: 1.15, tIn: 0.65, tOut: 0.5, inL: 2.5, outL: 4, press: 0.2, down: 0.06, grain: 0.5, tremor: 1.1, lift: 0.3, tone: 0.4 },
+      blando: { label: 'Blando 6B', fams: ['lapiz'], w: 0.03, dens: 1.3, tIn: 0.7, tOut: 0.55, inL: 2, outL: 3.5, press: 0.18, down: 0.08, grain: 0.4, tremor: 1.05, lift: 0.25, tone: 0.4 },
+      nervioso: { label: 'Nervioso', fams: ['lapiz'], w: 0.021, dens: 1.1, tIn: 0.6, tOut: 0.45, inL: 2, outL: 3.5, press: 0.22, down: 0.06, grain: 0.45, tremor: 1.3, lift: 0.45, tone: 0.45, extraPass: 1 }
     }
   },
   carbon: {
     label: 'Carboncillo', presets: {
-      suave: { label: 'Suave', fams: ['carbon'], w: 0.045, dens: 1.0, tIn: 0.55, tOut: 0.4, inL: 1.2, outL: 2.5, press: 0.25, down: 0.1, grain: 0.5, tremor: 1.1, tone: 0.35, load: 0.2 },
-      fuerte: { label: 'Fuerte', fams: ['carbon'], w: 0.052, dens: 1.35, tIn: 0.65, tOut: 0.45, inL: 1, outL: 2, press: 0.2, down: 0.12, grain: 0.32, tremor: 1.1, tone: 0.3, load: 0.15 },
-      cera: { label: 'Cera', fams: ['cera'], w: 0.05, dens: 1.2, tIn: 0.75, tOut: 0.6, inL: 0.8, outL: 1.5, press: 0.12, grain: 0.38, tremor: 0.9, tone: 0.25, load: 0.1 }
+      suave: { label: 'Suave', fams: ['carbon'], w: 0.045, dens: 1.0, tIn: 0.8, tOut: 0.7, inL: 1, outL: 2, press: 0.12, down: 0.05, grain: 0.5, tremor: 1.0, tone: 0.35, load: 0.2 },
+      fuerte: { label: 'Fuerte', fams: ['carbon'], w: 0.052, dens: 1.35, tIn: 0.85, tOut: 0.75, inL: 1, outL: 1.6, press: 0.1, down: 0.05, grain: 0.32, tremor: 1.0, tone: 0.3, load: 0.15 },
+      fino: { label: 'Fino', fams: ['carbon'], w: 0.03, dens: 1.15, tIn: 0.75, tOut: 0.6, inL: 1.2, outL: 2, press: 0.12, down: 0.05, grain: 0.45, tremor: 1.0, tone: 0.35, load: 0.15 }
+    }
+  },
+  cera: {
+    label: 'Óleo en barra', presets: {
+      oleo: { label: 'Óleo en barra', fams: ['cera'], w: 0.06, dens: 1.25, tIn: 0.92, tOut: 0.85, inL: 0.6, outL: 1, press: 0.06, grain: 0.2, tremor: 0.85, tone: 0.18, load: 0.35, blend: 'over', fuse: true },
+      cera: { label: 'Cera', fams: ['cera'], w: 0.045, dens: 1.15, tIn: 0.9, tOut: 0.8, inL: 0.6, outL: 1, press: 0.06, grain: 0.42, tremor: 0.9, tone: 0.22, load: 0.2, fuse: true },
+      fina: { label: 'Fina', fams: ['cera'], w: 0.032, dens: 1.2, tIn: 0.88, tOut: 0.78, inL: 0.8, outL: 1.2, press: 0.07, grain: 0.32, tremor: 0.9, tone: 0.22, load: 0.25, blend: 'over', fuse: true }
     }
   },
   boli: {
     label: 'Bolígrafo', presets: {
       bic: { label: 'BIC', fams: ['boli'], w: 0.0135, dens: 1.05, tIn: 0.75, tOut: 0.55, inL: 2, outL: 4, press: 0.14, grain: 0.06, pool: 0.25, capSkip: 0.6, tremor: 1, lift: 0.2, tone: 0.55 },
       fino: { label: 'Fino', fams: ['boli'], w: 0.0095, dens: 1.0, tIn: 0.7, tOut: 0.5, inL: 2, outL: 4, press: 0.12, grain: 0.05, pool: 0.3, tremor: 1.05, lift: 0.2, tone: 0.5 },
-      gel: { label: 'Gel', fams: ['boli', 'rotu'], w: 0.017, dens: 1.15, tIn: 0.85, tOut: 0.75, inL: 1.2, outL: 2, press: 0.08, wet: 0.18, pool: 0.4, tremor: 0.95, lift: 0.15, tone: 0.35, fuse: true }
+      gel: { label: 'Gel', proc: 'marker', w: 0.016, dens: 1.0, tIn: 0.9, tOut: 0.85, inL: 1.2, outL: 2, press: 0.06, wet: 0.25, pool: 0.35, tremor: 0.95, lift: 0.15, tone: 0.3, grain: 0.04, fuse: true }
     }
   },
   rotulador: {
     label: 'Rotulador', presets: {
-      fino: { label: 'Fino', fams: ['rotu'], w: 0.026, dens: 0.9, tIn: 0.9, tOut: 0.85, inL: 1, outL: 1.2, press: 0.05, wet: 0.35, pool: 0.08, capSkip: 0.7, tremor: 0.75, lift: 0.12, tone: 0.18, fuse: true },
-      gordo: { label: 'Gordo', useFont: true, fams: ['rotu'], w: 0.062, dens: 0.85, tIn: 0.95, tOut: 0.9, inL: 0.8, outL: 1, press: 0.04, wet: 0.4, pool: 0.1, capSkip: 0.75, tremor: 0.7, lift: 0.1, tone: 0.15, fuse: true },
-      gastado: { label: 'Gastado', fams: ['gastado'], w: 0.058, dens: 1.0, tIn: 0.92, tOut: 0.85, inL: 0.8, outL: 1, press: 0.06, wet: 0.08, dry: 0.25, tremor: 0.75, lift: 0.1, tone: 0.2, load: 0.3, fuse: true }
+      fino: { label: 'Fino', proc: 'marker', w: 0.022, dens: 0.88, tIn: 0.95, tOut: 0.92, inL: 1, outL: 1.2, press: 0.04, wet: 0.35, pool: 0.4, tremor: 0.75, lift: 0.1, tone: 0.12, grain: 0.06, fuse: true },
+      gordo: { label: 'Gordo', useFont: true, proc: 'marker', w: 0.055, dens: 0.8, tIn: 0.97, tOut: 0.95, inL: 0.8, outL: 1, press: 0.03, wet: 0.45, pool: 0.35, tremor: 0.7, lift: 0.08, tone: 0.1, grain: 0.07, fuse: true },
+      gastado: { label: 'Gastado', proc: 'marker', w: 0.05, dens: 0.95, tIn: 0.95, tOut: 0.9, inL: 0.8, outL: 1, press: 0.05, wet: 0.15, pool: 0.15, dry: 0.75, tremor: 0.75, lift: 0.1, tone: 0.15, load: 0.3, grain: 0.12, fuse: true }
     }
   },
   pincel: {
     label: 'Pincel', presets: {
-      fino: { label: 'Fino', fams: ['pincelfino', 'guache'], w: 0.038, dens: 1.1, tIn: 0.22, tOut: 0.12, inL: 2.5, outL: 4.5, press: 0.18, down: 0.55, tremor: 0.85, up: 0.55, lift: 0.15, tone: 0.3, load: 0.45, blend: 'over', fuse: true },
-      gordo: { label: 'Gordo', useFont: true, fams: ['pincel', 'oleo'], w: 0.085, dens: 1.15, tIn: 0.45, tOut: 0.3, inL: 1.2, outL: 2.2, press: 0.14, down: 0.3, tremor: 0.8, up: 0.6, lift: 0.1, tone: 0.25, load: 0.5, blend: 'over', fuse: true },
-      seco: { label: 'Seco', useFont: true, fams: ['pincel', 'guache', 'brocha'], w: 0.07, dens: 1.15, tIn: 0.55, tOut: 0.35, inL: 1, outL: 2, press: 0.16, down: 0.25, dry: 0.75, grain: 0.15, tremor: 0.85, up: 0.6, lift: 0.1, tone: 0.25, load: 0.55, blend: 'over', fuse: true },
-      humedo: { label: 'Húmedo', useFont: true, fams: ['aguada'], w: 0.075, dens: 1.15, tIn: 0.45, tOut: 0.35, inL: 1.2, outL: 2, press: 0.16, down: 0.25, wet: 0.12, tremor: 0.8, up: 0.6, lift: 0.1, tone: 0.2, load: 0.4, fuse: true }
+      fino: { label: 'Fino', fams: ['pincelfino', 'guache'], w: 0.036, dens: 1.1, tIn: 0.6, tOut: 0.5, inL: 2, outL: 3.5, press: 0.12, down: 0.3, tremor: 0.85, up: 0.5, lift: 0.15, tone: 0.3, load: 0.45, blend: 'over', fuse: true },
+      gordo: { label: 'Gordo', useFont: true, fams: ['pincel'], w: 0.08, dens: 1.15, tIn: 0.8, tOut: 0.65, inL: 1, outL: 1.8, press: 0.07, down: 0.1, tremor: 0.8, up: 0.5, lift: 0.1, tone: 0.25, load: 0.5, blend: 'over', fuse: true },
+      seco: { label: 'Seco', useFont: true, fams: ['pincel', 'guache', 'brocha'], w: 0.07, dens: 1.15, tIn: 0.85, tOut: 0.7, inL: 1, outL: 1.6, press: 0.08, down: 0.08, dry: 0.75, grain: 0.15, tremor: 0.85, up: 0.5, lift: 0.1, tone: 0.25, load: 0.55, blend: 'over', fuse: true },
+      humedo: { label: 'Húmedo', useFont: true, fams: ['aguada'], w: 0.07, dens: 1.15, tIn: 0.8, tOut: 0.7, inL: 1, outL: 1.6, press: 0.08, down: 0.08, wet: 0.12, tremor: 0.8, up: 0.5, lift: 0.1, tone: 0.2, load: 0.4, fuse: true }
     }
   }
 };
-const TOOL_ORDER = ['lapiz', 'carbon', 'boli', 'rotulador', 'pincel'];
+const TOOL_ORDER = ['lapiz', 'carbon', 'cera', 'boli', 'rotulador', 'pincel'];
 
 function preset(tool, pk) {
   const T = TOOLS[tool] || TOOLS.rotulador;
@@ -181,10 +188,18 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
   }
   // pigmento a lo largo del trazo: presión (aprieta al bajar, en las curvas y al frenar; afloja en las subidas
   // rápidas) y carga (el pincel empieza cargado y se va quedando seco)
+  // curvatura medida en una ventana de ~1.5 anchos y suavizada (si no, cada vértice deja una banda)
+  const kw = Math.max(2, Math.round(r * 1.5 / step));
+  const slowA = new Float32Array(n);
   for (let i = 0; i < n; i++) {
-    const q = Q[i], a = Q[Math.max(0, i - 2)], b = Q[Math.min(n - 1, i + 2)];
+    const a = Q[Math.max(0, i - kw)], b = Q[Math.min(n - 1, i + kw)];
     const turn = Math.acos(Math.max(-1, Math.min(1, a.tx * b.tx + a.ty * b.ty))) / Math.max(1e-6, b.s - a.s);
-    const slow = smooth01(0.02, 0.3, turn * r);
+    slowA[i] = smooth01(0.02, 0.3, turn * r);
+  }
+  for (let i = 0; i < n; i++) {
+    const q = Q[i];
+    let sl = 0, sn = 0; for (let k = Math.max(0, i - kw); k <= Math.min(n - 1, i + kw); k++) { sl += slowA[k]; sn++; }
+    const slow = sl / sn;
     const down = q.ty > 0 ? q.ty : 0, up = q.ty < 0 ? -q.ty : 0;
     let tone = 1 + P.tone * (0.5 * down - 0.45 * up + 0.8 * slow + 0.45 * R.noise1(q.s / (r * 4 + 1), pSeed + 9));
     if (P.pool) tone *= 1 + P.pool * (1 - smooth01(0, r * 2.2, q.s)) * 1.2;
@@ -193,7 +208,8 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
     q.pig = tone * Math.max(0.3, load);
   }
   // textura: cinta escogida, mapa a lo largo (inicio real, final real, medio sin costuras)
-  const S = pickStrip(P.fams, rnd);
+  const proc = P.proc || null;                       // 'marker': rotulador procedural (sin cinta)
+  const S = proc ? { w: 23, h: 64, mh: 10, ar: 1 } : pickStrip(P.fams, rnd);
   const W = S.w, Hs = S.h, mh = S.mh;
   const E = (W - 1) / 2 / mh;                       // la cinta abarca ±E medios anchos
   const cpp = mh / r;                                // columnas por píxel (a lo ancho)
@@ -201,7 +217,45 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
   const Lr = Hs - 1;
   const need = Ls * rpp;
   const blurRad = cpp > 2.2 ? Math.min(6, Math.round(cpp / 2.2)) : 0;
-  const tex = stripBlur(S, blurRad);
+  const tex = proc ? null : stripBlur(S, blurRad);
+  const hEnd0 = Q[0].h, hEnd1 = Q[n - 1].h;
+  const mSeed = (seed * 7 + 3) | 0;
+  // rotulador: vetas a lo largo (la fibra de la punta), deriva lenta; el borde se come un poco el papel
+  const marker = (s, v, px, py) => {
+    let cap = 0, ve = Math.abs(v);
+    if (s < 0) { ve = Math.hypot(v, -s / hEnd0); cap = 1; }
+    else if (s > Ls) { ve = Math.hypot(v, (s - Ls) / hEnd1); cap = 1; }
+    // carga en los extremos: donde el rotulador se para, la tinta se extiende y oscurece
+    const de = Math.min(s, Ls - s), hh = s < Ls / 2 ? hEnd0 : hEnd1;
+    const bleed = P.pool ? (1 - smooth01(0, hh * 1.6, Math.max(0, de))) * P.pool * Math.min(1, Ls / (hh * 8)) : 0;
+    const rough = 0.05 * R.noise1(s / (r * 0.6 + 1), mSeed + (v > 0 ? 1 : 2)) + 0.035 * (R.hash2(px, py, mSeed) - 0.5);
+    const edge = 1 + rough + 0.14 * bleed;
+    const aa = Math.max(0.04, 0.7 / Math.max(1, r));
+    const inside = smooth01(edge + aa, edge - aa, ve);
+    if (inside <= 0) return 0;
+    // vetas: la punta de fieltro deja franjas algo más claras a lo largo, que derivan despacio
+    const vs = v + 0.25 * R.noise1(s / (r * 7 + 1), mSeed + 5);
+    const streak = 0.13 * R.noise1(vs * 3.1, mSeed + 7) + 0.07 * R.noise1(vs * 8.5 + s / (r * 30 + 1), mSeed + 9);
+    // absorción del papel: moteado fino
+    const mott = 0.06 * (paper[(((py * 0.7) & 255) << 8) | ((px * 0.7) & 255)] - 0.5);
+    // borde: una línea fina un poco más cargada donde la tinta se seca antes
+    const rim = (P.wet || 0) * 0.55 * smooth01(0.8, 0.97, ve / edge) * (1 - smooth01(0.97, 1.02, ve / edge) * 0.5);
+    let a = inside * (0.86 + streak + mott + rim) * (1 + 0.3 * bleed);
+    // gastado: la punta seca deja vetas sin tinta, más hacia el final
+    if (P.dry > 0) {
+      // rotulador gastado: la tinta no llega a todo el fieltro; se abren claros a trozos (no rayas limpias),
+      // más hacia el final y en un lado; el grano del papel se queda sin tinta
+      const t = Math.max(0, Math.min(1, s / Ls));
+      const side = 0.5 + 0.5 * R.noise1(s / (r * 5 + 1), mSeed + 17);
+      const z = 0.5 + 0.38 * R.noise2(vs * 2.6, s / (r * 2.2 + 1), mSeed + 13) + 0.18 * R.noise2(vs * 7, s / (r * 0.9 + 1), mSeed + 19)
+        - 0.25 * Math.max(0, v * (side - 0.5) * 2);
+      const g = paper[(((py * 0.9) & 255) << 8) | ((px * 0.9) & 255)];
+      const thr = P.dry * (0.1 + 0.55 * t) + (1 - g) * 0.25 * P.dry;
+      a *= 0.25 + 0.75 * smooth01(thr, thr + 0.22, z);
+      a *= smooth01(thr * 0.6, thr * 0.6 + 0.25, z + 0.15);
+    }
+    return a * (cap ? 1 : 1);
+  };
   // no siempre se usa el inicio exacto: a veces el trazo «entra» ya cargado
   const skipIn = rnd() < P.capSkip ? rnd() * Math.max(0, Math.min(Lr - need, Lr * 0.15)) : 0;
   const skipOut = rnd() < P.capSkip ? rnd() * Math.max(0, Math.min(Lr - need - skipIn, Lr * 0.15)) : 0;
@@ -263,15 +317,24 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
         const l3 = 1 - l1 - l2;
         if (l3 < -1e-6) continue;
         const s = l1 * as + l2 * bs + l3 * cs, v = l1 * av + l2 * bv + l3 * cv;
-        const c = (W - 1) / 2 + v * mh;
-        const um = uMap(s);
-        let t0 = sampleT(um[0], c);
-        if (um[2] > 0) t0 += (sampleT(um[1], c) - t0) * um[2];
+        let t0;
+        if (proc) t0 = marker(s, v, px, py);
+        else {
+          // en los remates (fuera del trazo) se usa la última fila real girada: el final redondo tiene el mismo
+          // borde que el trazo (sin cuellos ni «biberones»)
+          let vv = v, ss = s;
+          if (s < 0) { vv = Math.sign(v || 1) * Math.hypot(v, -s / hEnd0); ss = 0; }
+          else if (s > Ls) { vv = Math.sign(v || 1) * Math.hypot(v, (s - Ls) / hEnd1); ss = Ls; }
+          const c = (W - 1) / 2 + vv * mh;
+          const um = uMap(ss);
+          t0 = sampleT(um[0], c);
+          if (um[2] > 0) t0 += (sampleT(um[1], c) - t0) * um[2];
+        }
         if (t0 <= 0.002) continue;
-        const qi = Q[Math.max(0, Math.min(n - 1, Math.round(s / step)))];
+        const qi = Q[Math.max(0, Math.min(n - 1, Math.round(Math.max(0, Math.min(Ls, s)) / step)))];
         let a = t0 * dens * (qi ? qi.pig : 1);
-        if (pool) a *= 1 + pool * 0.5 * (1 - smooth01(0, r * 1.6, Ls - s));
-        if (dry > 0) {
+        if (pool && !proc) a *= 1 + pool * 0.5 * (1 - smooth01(0, r * 1.6, Ls - s));
+        if (dry > 0 && !proc) {
           const t = s / Ls, thr = dry * (0.12 + 0.75 * t * t);
           a = a * smooth01(thr, thr + 0.22, t0);
         }
@@ -291,7 +354,10 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
   }
   // remates redondeados en los extremos (sin ellos el trazo acaba en corte recto)
   // (abanico de medio círculo: del borde izquierdo, por delante, al borde derecho)
+  // (con textura y trazo ancho, el inicio y el final reales de la cinta ya son el remate: solo se añade
+  //  el medio círculo si la cinta se ha cortado a mitad o el trazo es fino)
   for (const [q, sgn] of [[Q[0], -1], [Q[n - 1], 1]]) {
+    if (!proc && r >= 4 && (sgn < 0 ? skipIn : skipOut) === 0) continue;
     const e = q.h * E, segs = 10;
     let prev = null;
     for (let k = 0; k <= segs; k++) {

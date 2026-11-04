@@ -25,10 +25,10 @@ const STYLES = {
   adulta_b: { label: 'Adulta B', hint: 'suelta y saltarina', wide: 0.86, slant: 0, slantVar: 0.09, hVar: 0.13, wVar: 0.1, wob: 0.02, wobF: 0.009, angular: 0.25, geo: 0, os: 0.03, osVar: 0.05, stem: 0.04, cb: 0.08, cbShift: 0.02, open: 0.3, xh: 0.74, track: 0.08, minGap: 0.04, weight: 1.1, bounce: 1.5, sizeVar: 1.3, double: 0, ovr: null, script: 'script', xhS: 0.6, slantS: 0.12, trackS: 0 },
   infantil_a: { label: 'Infantil A', hint: 'de niño', wide: 0.95, slant: 0, slantVar: 0.14, hVar: 0.27, wVar: 0.18, wob: 0.045, wobF: 0.014, angular: 0.15, geo: 0, os: 0.02, osVar: 0.06, stem: 0.05, cb: 0.14, cbShift: 0, open: 0.45, xh: 0.78, track: 0.13, minGap: 0.06, weight: 1, bounce: 1.8, sizeVar: 1.4, double: 0, ovr: 'kid', script: 'script', xhS: 0.66, slantS: 0.02, trackS: 0.02 },
   infantil_b: { label: 'Infantil B', hint: 'de piezas', wide: 1.0, slant: 0, slantVar: 0.03, hVar: 0.07, wVar: 0.06, wob: 0.008, wobF: 0.002, angular: 0, geo: 1, os: 0, osVar: 0.01, stem: 0, cb: 0.03, cbShift: 0, open: 0, xh: 0.8, track: 0.09, minGap: 0.04, weight: 1, absW: 0.06, bounce: 0.8, sizeVar: 0.7, double: 0, ovr: 'geo', script: 'script', xhS: 0.66, slantS: 0, trackS: 0.02 },
-  nerviosa_a: { label: 'Nerviosa A', hint: 'alta, estrecha, desbordada', wide: 0.6, slant: 0.02, slantVar: 0.07, hVar: 0.2, wVar: 0.16, wob: 0.02, wobF: 0.006, angular: 1, geo: 0, os: 0.13, osVar: 0.1, stem: 0.1, cb: 0.12, cbShift: -0.04, open: 0.3, xh: 0.84, track: 0.03, minGap: 0.012, weight: 0.9, bounce: 1.2, sizeVar: 1.3, double: 0.12, ovr: 'tonya', script: 'script', xhS: 0.6, slantS: 0.3, trackS: -0.01 },
-  nerviosa_b: { label: 'Nerviosa B', hint: 'temblona y desigual', wide: 0.8, slant: 0.03, slantVar: 0.1, hVar: 0.16, wVar: 0.13, wob: 0.03, wobF: 0.02, angular: 0.6, geo: 0, os: 0.04, osVar: 0.06, stem: 0.06, cb: 0.1, cbShift: 0, open: 0.35, xh: 0.8, track: 0.08, minGap: 0.045, weight: 1, bounce: 1.6, sizeVar: 1.3, double: 0.05, ovr: null, script: 'script', xhS: 0.6, slantS: 0.24, trackS: 0 },
-  elegante_a: { label: 'Elegante A', hint: 'alta y tranquila', wide: 0.55, slant: 0.03, slantVar: 0.015, hVar: 0.03, wVar: 0.03, wob: 0.005, wobF: 0.003, angular: 0.05, geo: 0, os: 0.05, osVar: 0.02, stem: 0.03, cb: 0.03, cbShift: -0.08, open: 0.12, xh: 0.66, track: 0.1, minGap: 0.06, weight: 0.85, bounce: 0.4, sizeVar: 0.35, double: 0, ovr: null, script: 'allure', xhS: 0.5, slantS: 0.12, trackS: 0 },
-  elegante_b: { label: 'Elegante B', hint: 'fina, de ilustrador', wide: 0.72, slant: 0.07, slantVar: 0.02, hVar: 0.03, wVar: 0.03, wob: 0.006, wobF: 0.003, angular: 0, geo: 0, os: 0.03, osVar: 0.02, stem: 0.02, cb: 0.03, cbShift: 0.1, open: 0.15, xh: 0.6, track: 0.09, minGap: 0.05, weight: 0.7, bounce: 0.5, sizeVar: 0.45, double: 0, ovr: 'fine', script: 'allure', xhS: 0.48, slantS: 0.14, trackS: 0 }
+  nerviosa_a: { label: 'Nerviosa A', hint: 'alta, estrecha, desbordada', wide: 0.6, slant: 0.02, slantVar: 0.07, hVar: 0.2, wVar: 0.16, wob: 0.01, wobF: 0.0025, angular: 0.6, geo: 0, os: 0.1, osVar: 0.06, stem: 0.07, cb: 0.1, cbShift: -0.04, open: 0.25, xh: 0.84, track: 0.03, minGap: 0.012, weight: 0.9, bounce: 1.0, sizeVar: 1.1, double: 0, ovr: 'tonya', script: 'script', xhS: 0.6, slantS: 0.3, trackS: -0.01 },
+  nerviosa_b: { label: 'Nerviosa B', hint: 'temblona y desigual', wide: 0.8, slant: 0.03, slantVar: 0.1, hVar: 0.16, wVar: 0.13, wob: 0.016, wobF: 0.006, angular: 0.35, geo: 0, os: 0.04, osVar: 0.05, stem: 0.05, cb: 0.09, cbShift: 0, open: 0.3, xh: 0.8, track: 0.08, minGap: 0.045, weight: 1, bounce: 1.3, sizeVar: 1.15, double: 0, ovr: null, script: 'script', xhS: 0.6, slantS: 0.24, trackS: 0 },
+  elegante_a: { label: 'Elegante A', hint: 'la de siempre: fina y tranquila', print: 'elfin', wide: 1, slant: 0.08, slantVar: 0.015, hVar: 0.02, wVar: 0.02, wob: 0.004, wobF: 0, angular: 0, geo: 0, os: 0, osVar: 0, stem: 0, cb: 0, cbShift: 0, open: 0, xh: 0.62, track: 0.03, minGap: 0.05, weight: 0.85, bounce: 0.5, sizeVar: 0.5, double: 0, ovr: null, script: 'allure', xhS: 0.48, slantS: 0.12, trackS: 0 },
+  elegante_b: { label: 'Elegante B', hint: 'alta y espaciada, de cartel fino', print: 'elfin', wide: 0.86, slant: 0.12, slantVar: 0.012, hVar: 0.015, wVar: 0.02, wob: 0.003, wobF: 0, angular: 0, geo: 0, os: 0, osVar: 0, stem: 0, cb: 0, cbShift: 0, open: 0, xh: 0.52, track: 0.09, minGap: 0.07, weight: 0.72, bounce: 0.35, sizeVar: 0.35, double: 0, ovr: null, script: 'allure', xhS: 0.46, slantS: 0.16, trackS: 0.01 }
 };
 // compatibilidad con ajustes guardados de la 2.0
 const ALIAS = { infantil: 'infantil_a', adulta: 'adulta_a', rabiosa: 'nerviosa_a', nerviosa: 'nerviosa_a', elegante: 'elegante_a' };
@@ -255,13 +255,15 @@ function finishGlyph(strokes, adv, ch, script, lower) {
 
 // ------------------------------------------------------------------ cursiva (fuentes ligadas)
 function fontOf(key) { return FD[key] || FD.script; }
-function scriptGlyph(styleKey, ch, v) {
+// (también sirve para estilos de molde hechos con una fuente de trazo: la elegante, con EMS Elfin)
+function scriptGlyph(styleKey, ch, v, printFont) {
   const st = styleOf(styleKey);
-  let F = fontOf(st.script), g = F.g[ch];
+  let F = fontOf(printFont ? st.print : st.script), g = F.g[ch];
+  if (!g && printFont) return null;
   if (!g) { F = FD.script; g = F.g[ch]; }
   if (!g) { const nfd = ch.normalize ? ch.normalize('NFD') : ch; if (nfd.length > 1 && nfd[0] !== ch) return scriptGlyph(styleKey, nfd[0], v); return null; }
   const m = F.m, s0 = CAP / m.cap;
-  const xhWant = st.xhS * CAP, xh = m.xh * s0, asc = Math.max(m.asc, m.cap) * s0;
+  const xhWant = (printFont ? st.xh : st.xhS) * CAP, xh = m.xh * s0, asc = Math.max(m.asc, m.cap) * s0;
   const kx = xhWant / xh;
   const isLower = ch !== ch.toUpperCase() || /[a-zñ]/.test(ch);
   const capE = m.cap * s0;
@@ -272,9 +274,9 @@ function scriptGlyph(styleKey, ch, v) {
     const top = Math.max(asc, xh + 0.05);
     return xhWant + (y - xh) * Math.max(0.45, (top - xhWant) / Math.max(1e-6, top - xh));
   };
-  const rnd = R.mulberry32((hashStr(styleKey + '|s|' + ch) + v * 7919) >>> 0);
+  const rnd = R.mulberry32((hashStr(styleKey + (printFont ? '|p|' : '|s|') + ch) + v * 7919) >>> 0);
   const seedW = (rnd() * 1e6) | 0;
-  const slant = st.slantS + R.gauss(rnd) * st.slantVar * 0.6;
+  const slant = (printFont ? st.slant : st.slantS) + R.gauss(rnd) * st.slantVar * 0.6;
   const hS = Math.exp(R.gauss(rnd) * st.hVar * 0.5);
   const strokes = [];
   for (const [closed, flat] of g[1]) {
@@ -288,7 +290,7 @@ function scriptGlyph(styleKey, ch, v) {
   }
   const bodyTop = -(isLower ? xhWant * 0.93 : CAP * 1.02);
   for (const s of strokes) { let lowest = -Infinity; for (const q of s.pts) if (q[1] > lowest) lowest = q[1]; s.mark = lowest < bodyTop && strokes.length > 1; }
-  return finishGlyph(strokes, g[0] * s0 * (0.9 + 0.1 * st.wide), ch, true, isLower);
+  return finishGlyph(strokes, g[0] * s0 * (0.9 + 0.1 * st.wide), ch, !printFont, isLower);
 }
 
 // ------------------------------------------------------------------ API
@@ -302,7 +304,7 @@ function glyph(styleKey, mode, ch, v) {
   let r = null;
   if (ch === ' ') r = null;
   else if (mode === 'cursiva') r = scriptGlyph(styleKey, ch, v) || printGlyph(styleKey, ch, v);
-  else r = printGlyph(styleKey, ch, v) || scriptFallback(ch);
+  else r = (styleOf(styleKey).print ? scriptGlyph(styleKey, ch, v, true) : null) || printGlyph(styleKey, ch, v) || scriptFallback(ch);
   if (cache.size > 6000) cache.clear();
   cache.set(key, r);
   return r;
@@ -318,10 +320,11 @@ function scriptFallback(ch) {
 // métricas (em, y hacia arriba en los valores)
 function metrics(styleKey, mode) {
   const st = styleOf(styleKey);
-  if (mode === 'cursiva') {
-    const F = fontOf(st.script), s0 = CAP / F.m.cap;
-    const xh = st.xhS * CAP;
-    return { cap: CAP, xh, asc: Math.max(CAP, xh + (Math.max(F.m.asc, F.m.cap) * s0 - F.m.xh * s0) * 0.9), desc: Math.min(0.42, -F.m.desc * s0), space: 0.27 * (0.8 + 0.2 * st.wide) };
+  if (mode === 'cursiva' || st.print) {
+    const pf = mode !== 'cursiva';
+    const F = fontOf(pf ? st.print : st.script), s0 = CAP / F.m.cap;
+    const xh = (pf ? st.xh : st.xhS) * CAP;
+    return { cap: CAP, xh, asc: Math.max(CAP * 1.04, xh + (Math.max(F.m.asc, F.m.cap) * s0 - F.m.xh * s0) * 0.9), desc: Math.min(0.42, -F.m.desc * s0), space: (pf ? (mode === 'mayus' ? 0.4 : 0.3) : 0.27) * (0.8 + 0.2 * st.wide) };
   }
   const xh = st.xh * CAP;
   const hv = 1 + st.hVar * 1.2;

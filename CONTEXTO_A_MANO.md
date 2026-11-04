@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.1)
+## 2. Cómo se usa (2.2)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -100,6 +100,38 @@ Avanzado).
 de tamaño entre importancias, interlineado, llenar la forma, margen y alineación; en CALCAR, resultado y grosor
 (de la herramienta o de la letra).
 
+### Tras probar la 2.1 en Photoshop (capturas: nerviosa con carboncillo, elegante con lápiz, rotulador gordo y fino
+en azul, pincel en azul y burdeos, autoencajar en arco con líneas montadas)
+- «Evita los lobulados o giros extremos en la nerviosa.» «Cuidado con los lobulados en general.»
+- «La elegante es muy poco elegante, me gustaba más la de antes» (la de la 2.0, hecha con EMS Elfin).
+- «Al rotulador gordo le falta textura y realismo.» «A rotulador, todos, le falta realismo en general.»
+- «Pincel hace alguna cosa rara, pero está mejor.» «Los biberones de pincel al final de los trazos… mejor no.»
+- «Ultrarrealista: te pasé imágenes de trazos de ceras (óleo en barra)» (carpeta `TRAZOS/CERAS`).
+- **Una letra de cada color**: «que tome el tono base, y un slider que me pregunte cuánta variación de todo
+  (saturación, etc.) para cada diferencia de letra; estas opciones solo se abren si marcas "Una letra de cada color"».
+- «La opción de AUTOENCAJAR podría funcionar mil veces mejor. AUTOENCAJAR es letra a letra, de forma inteligente.»
+- «En general haz que TODO SEA MEJOR Y MÁS REALISTA, pero VAS MUY BIEN.»
+
+### Qué se hizo en la 2.2
+- **Biberones y lóbulos**: venían de (1) colas finas de los escaneos al principio y al final de las cintas
+  (ahora `extract_textures.py` recorta las filas de menos de media anchura y deja solo el redondeo real),
+  (2) el medio círculo de remate que repetía la última fila (ahora solo se añade si la cinta se corta a mitad o el
+  trazo es fino, y usa el perfil real girado), (3) las pasadas «fundidas» del repasado, que eran trazos más anchos
+  y a veces parciales encima (ahora el repasado fundido es el mismo trazo con más pigmento y un pelo más ancho) y
+  (4) entradas y salidas muy afiladas y el engorde al bajar (presets con `tIn/tOut` altos y `down` bajo).
+  Además, la curvatura del tono se mide en una ventana de ~1,5 anchos (antes cada vértice dejaba una banda).
+- **Rotulador procedural** (`P.proc = 'marker'` en `ink.js`): borde nítido con sangrado de fibra, vetas a lo
+  largo que derivan, moteado de absorción del papel, línea de borde algo más cargada, punto de carga donde se
+  para, y el gastado abre claros a trozos (más hacia el final y en un lado) en vez de rayas limpias. También el boli de gel.
+- **Óleo en barra** (herramienta nueva `cera`: Óleo en barra, Cera, Fina) con las cintas de `TRAZOS/CERAS` a más
+  resolución (MH 20) y normalizadas por la mediana alta (las barras claras cubren igual).
+- Pincel y aguada con cintas a más resolución (bordes sin escalones).
+- **Elegante**: vuelve la de la 2.0 (EMS Elfin) como A; la B es la misma letra más alta, estrecha y espaciada.
+- **Nerviosa**: menos deformación y temblor fino, angulosidad moderada y sin trazos dobles sueltos.
+- **Una letra de cada color** (`RD.letterColor`): tono ±80°, saturación y luz según el deslizador, con la
+  sucesión áurea para que dos letras seguidas nunca salgan iguales; en GENERAR y en CALCAR.
+- **Autoencajar letra a letra** (`js/autofit.js`, ver arquitectura).
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -109,7 +141,8 @@ de tamaño entre importancias, interlineado, llenar la forma, margen y alineaci�
 | `main.js` | Panel: pestañas, vista avanzada, ajustes (`amano.settings2`), casilla de texto con niveles, crear forma, escribir, calcar. |
 | `ps.js` | Puente con Photoshop. Nuevo en 2.0: `vectorMaskOf` (lee y calibra unidades), `resolveShape` (forma/grupo desde la selección), `makeShapeLayer` (prueba px y pt y comprueba límites y máscara), `selectionToWorkPath`, `deselect`. |
 | `shapes.js` | Genera las formas (anclas en orden conocido: empieza arriba a la izquierda, sentido horario) y las lee: **envolventes** (4 esquinas → parche de Coons; si está volteada no escribe en espejo: elige cambiar izq/der o arriba/abajo según hacia dónde quede «arriba») y **siluetas** (círculo con su «arriba», selección, formas libres). |
-| `layout.js` | (2.1: **autoencajar** —`autoFit`/`stackAuto`/`autoSilhouette`: cada línea llena el ancho, cada letra sube al hueco de la de arriba y baja hasta la siguiente, el grosor del trazo cuenta; en siluetas cada línea toma el ancho de su franja—; cualquier salto de línea cuenta) Texto → palabras con nivel (tamaño, pasadas, grosor) → cortes de línea por programación dinámica buscando la proporción de la forma → bloque dentro de la envolvente (estira hasta ×1,3) o líneas que caben en la silueta (búsqueda binaria del tamaño, prueba varias alturas de arranque). Reserva el grosor de la herramienta (`inkPad`). |
+| `autofit.js` | (2.2) **Autoencajar letra a letra**: perfil de la forma por columnas (envolvente o silueta); se prueban 1…12 líneas (cortes exactos por programación dinámica, respetando los saltos del usuario); cada letra se relaja hacia el hueco vertical que le dejan la línea de arriba, la de abajo y el borde (puede meterse un tercio en la franja vecina, nunca ocupar dos); la línea llena su ancho ensanchando o estrechando las letras (×0,8–1,32) y si sobra se centra; al final nada se monta (si no cabe, la letra encoge entera). Gana el número de líneas que más área llena sin letras diminutas ni aplastadas. Los signos cuentan como letras de altura de mayúscula. |
+| `layout.js` | (cualquier salto de línea cuenta; `o.auto` → `autofit.js`) Texto → palabras con nivel (tamaño, pasadas, grosor) → cortes de línea por programación dinámica buscando la proporción de la forma → bloque dentro de la envolvente (estira hasta ×1,3) o líneas que caben en la silueta (búsqueda binaria del tamaño, prueba varias alturas de arranque). Reserva el grosor de la herramienta (`inkPad`). |
 | `skeleton.js` | **Letras dibujadas a mano trazo a trazo** en un mini lenguaje (`M/L/S/F/Z`): mayúsculas, minúsculas, números, signos, alternativas (a y g de dos pisos) y marcas (tildes, diéresis, virgulilla, cedilla). |
 | `fonts.js` | 8 estilos (`STYLES`: `adulta_a` … `elegante_b`) que transforman el esqueleto: anchura, inclinación, alturas desiguales, deformación, temblor, curvas angulosas o geométricas, travesaños que se pasan, palos que sobresalen, óvalos que no cierran, trazos dobles, letras propias (`OVR`: kid, geo, tonya, fine). 3 variantes por letra. Cursiva con `fontdata.js` (Hershey Script y EMS Allure). `templates(ch)` da la letra neutra para el calco. |
 | `calco.js` | **Calco guiado** (CALCAR): plantilla del carácter → encaje afín al esqueleto real de la letra (puntos cercanos en los dos sentidos, con rigidez) → ajuste fino por punto → grosor de la propia letra. Si no cubre bien la letra (calidad < 0,9), se usa el esqueleto antiguo. |
@@ -123,8 +156,9 @@ de tamaño entre importancias, interlineado, llenar la forma, margen y alineaci�
 ### Texturas (`tools/extract_textures.py` → `js/texdata.js`, ~1,2 MB)
 - Densidad de tinta independiente del color y del papel (papel estimado a baja resolución con ventana grande).
 - Cada trazo recto se endereza siguiendo su centro y se guarda como cinta (filas = a lo largo, desde el inicio).
-- Familias: `aguada` (12), `cera` (8), `guache` (12), `oleo` (8), `lapiz` (10), `carbon` (10), `pincel` (14),
-  `pincelfino` (5), `brocha` (2), `gastado` (8), `rotu` (8), `boli` (8). Tabla `SOURCES` = qué archivo es qué.
+- Familias (2.2): `aguada` (12), `cera` (12, MH 20), `guache` (12), `lapiz` (10), `carbon` (10), `pincel` (14),
+  `pincelfino` (5), `brocha` (2), `rotu` (3, solo respaldo), `boli` (8). `gastado` y `oleo` ya no se extraen
+  (el rotulador es procedural). Las colas finas de los extremos se recortan. Tabla `SOURCES` = qué archivo es qué.
 - Papel: grano sintético con espectro de papel de dibujo (el de las imágenes de Gemini era ruido de generación).
 - Para añadir material: subirlo a `TRAZOS/`, añadirlo a `SOURCES` y `python3 tools/extract_textures.py --preview DIR`
   (tarda unos 2 minutos; mirar las hojas `fam_*.png`).
@@ -156,7 +190,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.0.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.2.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)
@@ -171,14 +205,15 @@ python3 tests/node/sheet.py DIR hoja.png 2 800   # hoja de contactos
   forma y sin texto, los 16 packs, CALCAR con 5 herramientas + brocha + sello (sin copias duplicadas), otra
   variación, volver al original, editable, grupo con texto girado, aviso sin selección y 16 bits.
 - 2.1 añade: 8 combinaciones de estilo y versión, capa en Multiplicar, autoencajar en rectángulo y círculo.
-- Último resultado: **43/43 bien, sin errores de modal**; 0,1–0,5 s por escritura (1–1,4 s el primer calco).
+- 2.2 añade: óleo en barra, rotulador gastado con la elegante B, una letra de cada color (y que el deslizador solo
+  aparezca al marcarla).
+- Último resultado: **48/48 bien, sin errores de modal**.
 
 ---
 
 ## 5. Pendiente e ideas
 
-1. **Probar en Photoshop real** (sigue sin probarse): crear la capa de forma y leerla tras Deformar, `make path`
-   desde la selección, `createLayerGroup`, `blendMode = MULTIPLY`, la casilla de texto en UXP.
+1. La 2.1 ya se probó en Photoshop real (capturas del usuario). Falta ver la 2.2 allí.
 2. Letra hueca de bloque (referencia Good Room) como estilo o versión aparte: no está.
 3. Cursivas: siguen saliendo de fuentes de plóter (Hershey/Allure) con el comportamiento del estilo; si no
    gustan, dibujarlas también en `skeleton.js` con entradas y salidas para ligar.

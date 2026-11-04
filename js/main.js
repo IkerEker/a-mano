@@ -28,11 +28,12 @@ const store = {
 const DEF = {
   tab: 'gen', tool: 'rotulador', preset: 'fino', fill: '', color: '#1d1d1f', persona: 'adulta', version: 'a', mode: 'mayus', textMode: 'importancia', repaso: 'auto', legib: 70,
   grosor: 0, tinta: 55, pulso: 40, repasado: 50, follow: 'auto', locura: 50, prisa: 15, tight: 0,
-  contraste: 50, inter: 100, llenar: 30, margen: 5, align: 'center', kind: 'imagen',
+  contraste: 50, inter: 100, llenar: 30, margen: 5, align: 'center', kind: 'imagen', colorMode: 'uno', colorVar: 45,
   text: 'Nadie había cerrado\nla puerta del sótano', levels: [0, 2, 1, 0, 0, -1, 0]
 };
 const st = Object.assign({}, DEF, store.get('settings2', {}));
 if (st.persona === 'rabiosa') st.persona = 'nerviosa';
+if (st.tool === 'carbon' && st.preset === 'cera') { st.tool = 'cera'; st.preset = 'cera'; }
 if (!/^[ab]$/.test(st.version)) st.version = 'a';
 let saveTimer = null;
 function save() { clearTimeout(saveTimer); saveTimer = setTimeout(() => store.set('settings2', st), 250); }
@@ -85,6 +86,7 @@ function chaos() { return Math.max(0, 1 - st.legib / 100); }
 function genParams() {
   return {
     persona: st.persona + '_' + st.version, mode: st.mode, tool: st.tool, preset: st.preset, color: st.color,
+    colorVar: st.colorMode === 'letras' ? Math.max(0.02, st.colorVar / 100) : 0,
     auto: st.textMode === 'auto', repaso: st.repaso,
     legib: st.legib / 100, locura: st.locura / 50, pulso: st.pulso / 100, prisa: st.prisa / 100,
     width: Math.pow(2, st.grosor / 50), repasado: st.repasado / 50, tinta: st.tinta / 100,
@@ -96,7 +98,7 @@ function genParams() {
 function handParams() {
   // la legibilidad manda; «locura» la escala (50 = normal)
   const loc = Math.min(1.4, chaos() * 1.8 * (st.locura / 50));
-  return { tool: st.tool, preset: st.preset, fill: st.fill || '', follow: st.follow, repaso: st.repaso, width: Math.pow(2, st.grosor / 50), locura: loc, pulso: st.pulso / 100, prisa: st.prisa / 100, tight: st.tight / 150, ink: st.tinta / 100 };
+  return { colorVar: st.colorMode === 'letras' ? Math.max(0.02, st.colorVar / 100) : 0, tool: st.tool, preset: st.preset, fill: st.fill || '', follow: st.follow, repaso: st.repaso, width: Math.pow(2, st.grosor / 50), locura: loc, pulso: st.pulso / 100, prisa: st.prisa / 100, tight: st.tight / 150, ink: st.tinta / 100 };
 }
 
 // ------------------------------------------------------------------ segmentados
@@ -211,7 +213,7 @@ async function refreshCtx() {
     else { ctxC.textContent = 'Selecciona en Capas las capas de texto que quieras pasar a mano (o un grupo que las contenga).'; ctxC.className = 'ctx'; }
   }
 }
-const SAVED_KEYS = ['text', 'levels', 'persona', 'version', 'mode', 'textMode', 'tool', 'preset', 'color', 'legib'];
+const SAVED_KEYS = ['text', 'levels', 'persona', 'version', 'mode', 'textMode', 'tool', 'preset', 'color', 'colorMode', 'colorVar', 'legib'];
 function loadSaved(saved) {
   for (const k of SAVED_KEYS) if (saved[k] != null) st[k] = Array.isArray(saved[k]) ? saved[k].slice() : saved[k];
   save(); syncControls();
@@ -271,6 +273,7 @@ async function doWrite(fresh) {
       if (!lay || !lay.letters.length) throw new P.UserError('El texto no cabe en la forma. Prueba con una forma más grande o menos texto.');
       const key = docKey(doc) + '|' + target.shape.id;
       const seed = seedFor('g|' + key, fresh);
+      gp.colorSeed = seed;
       const strokes = WR.plan(lay, gp, seed);
       const bb = WR.bounds(strokes);
       if (!bb) throw new P.UserError('No hay nada que escribir.');
@@ -413,10 +416,10 @@ function setColor(hex) {
   st.color = hex; save();
   const sw = $('swColor'); if (sw) sw.style.backgroundColor = hex;
 }
-const SLIDERS = { slLegib: 'legib', slGrosor: 'grosor', slTinta: 'tinta', slPulso: 'pulso', slRepasado: 'repasado', slLocura: 'locura', slPrisa: 'prisa', slTight: 'tight', slContraste: 'contraste', slInter: 'inter', slLlenar: 'llenar', slMargen: 'margen' };
+const SLIDERS = { slColorVar: 'colorVar', slLegib: 'legib', slGrosor: 'grosor', slTinta: 'tinta', slPulso: 'pulso', slRepasado: 'repasado', slLocura: 'locura', slPrisa: 'prisa', slTight: 'tight', slContraste: 'contraste', slInter: 'inter', slLlenar: 'llenar', slMargen: 'margen' };
 function syncControls() {
   segSet('toolSeg', st.tool); renderPresets(); segSet('fillSeg', st.fill || ''); segSet('fontSeg', st.persona); segSet('caseSeg', st.mode);
-  segSet('versionSeg', st.version); segSet('textModeSeg', st.textMode); segSet('repasoSeg', st.repaso); syncText();
+  segSet('versionSeg', st.version); segSet('colorModeSeg', st.colorMode); show($('multiBox'), st.colorMode === 'letras'); segSet('textModeSeg', st.textMode); segSet('repasoSeg', st.repaso); syncText();
   segSet('alignSeg', st.align); segSet('kindSeg', st.kind); segSet('followSeg', st.follow);
   for (const [id, k] of Object.entries(SLIDERS)) { const el = $(id); if (el) el.value = st[k]; }
   const t = $('txt'); if (t && t.value !== st.text) t.value = st.text;
@@ -441,6 +444,7 @@ function bind() {
   segBind('toolSeg', v => { st.tool = v; st.preset = Object.keys(INK.TOOLS[v].presets)[0]; save(); segSet('toolSeg', v); renderPresets(); });
   segBind('presetSeg', v => { st.preset = v; save(); segSet('presetSeg', v); });
   segBind('fillSeg', v => { st.fill = v; save(); segSet('fillSeg', v); });
+  segBind('colorModeSeg', v => { st.colorMode = v; save(); segSet('colorModeSeg', v); show($('multiBox'), v === 'letras'); });
   segBind('fontSeg', v => { st.persona = v; save(); segSet('fontSeg', v); syncText(); });
   segBind('versionSeg', v => { st.version = v; save(); segSet('versionSeg', v); syncText(); });
   segBind('textModeSeg', v => { st.textMode = v; save(); segSet('textModeSeg', v); syncText(); });

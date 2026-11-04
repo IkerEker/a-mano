@@ -11,6 +11,34 @@ function hexToRgb(hex) {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
+// una letra de cada color: parte del color base y cambia tono, saturación y luz según «v» (0..1).
+// La sucesión áurea hace que dos letras seguidas nunca salgan casi iguales.
+function rgbToHsl(c) {
+  const r = c[0] / 255, g = c[1] / 255, b = c[2] / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2;
+  if (mx === mn) return [0, 0, l];
+  const d = mx - mn, s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+  const h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return [h / 6, s, l];
+}
+function hslToRgb(h, s, l) {
+  h = ((h % 1) + 1) % 1;
+  const f = (t) => { t = ((t % 1) + 1) % 1; const q = l < 0.5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q; return t < 1 / 6 ? p + (q - p) * 6 * t : t < 0.5 ? q : t < 2 / 3 ? p + (q - p) * (2 / 3 - t) * 6 : p; };
+  return s === 0 ? [l * 255, l * 255, l * 255].map(Math.round) : [f(h + 1 / 3), f(h), f(h - 1 / 3)].map(x => Math.round(Math.max(0, Math.min(1, x)) * 255));
+}
+function letterColor(rgb, i, v, seed) {
+  if (!v) return rgb;
+  const [h, s, l] = rgbToHsl(rgb);
+  const fr = x => x - Math.floor(x);
+  const a = fr(i * 0.6180339 + (seed % 997) * 0.01371) * 2 - 1;
+  const b = fr(i * 0.4142136 + (seed % 991) * 0.02713) * 2 - 1;
+  const c = fr(i * 0.7320508 + (seed % 983) * 0.01913) * 2 - 1;
+  const nh = h + a * v * 0.22;                                   // hasta ±80°
+  const ns = Math.max(0, Math.min(1, s + b * v * 0.45 * (s < 0.08 ? 0 : 1)));
+  // la luz se mueve sobre todo hacia arriba en colores oscuros y hacia abajo en los claros
+  const nl = Math.max(0.04, Math.min(0.92, l + c * v * 0.22 + (l < 0.25 ? Math.abs(c) * v * 0.12 : 0)));
+  return hslToRgb(nh, ns, nl);
+}
+
 // Lienzo de pigmento: cada píxel guarda cómo se ve sobre papel blanco (W, por canal, 1 = blanco) y cuánto
 // está cubierto (A). Las tintas transparentes se acumulan como veladuras (multiplican: donde se montan,
 // más oscuro y más saturado; donde hay poco pigmento, más claro y lavado). Al terminar, finalize() lo pasa
@@ -248,4 +276,4 @@ function toDepth(data, bits) {
   return data;
 }
 
-module.exports = { hexToRgb, makeCanvas, composite, compositePigment, finalize, rasterLocal, fillPolys, lineGlyphs, lineMapper, mapContours, localScale, renderPlain, trimCanvas, toDepth, polysBBox };
+module.exports = { hexToRgb, letterColor, makeCanvas, composite, compositePigment, finalize, rasterLocal, fillPolys, lineGlyphs, lineMapper, mapContours, localScale, renderPlain, trimCanvas, toDepth, polysBBox };

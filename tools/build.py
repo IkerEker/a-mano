@@ -5,7 +5,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 JS = os.path.join(ROOT, 'js')
 SRC = os.path.join(ROOT, 'src')
 OUT = os.path.join(ROOT, 'dist')
-MODS = ['rng', 'raster', 'geom', 'glyphs', 'render', 'strokes', 'texdata', 'ink', 'skeleton', 'fontdata', 'fonts', 'calco', 'hand', 'handmade', 'instances', 'shapes', 'layout', 'writer', 'ps', 'main']
+MODS = ['rng', 'raster', 'geom', 'glyphs', 'render', 'strokes', 'texdata', 'ink', 'skeleton', 'fontdata', 'fonts', 'calco', 'hand', 'handmade', 'instances', 'shapes', 'autofit', 'layout', 'writer', 'ps', 'main']
 
 def bundle():
     parts = ["'use strict';", '(function () {', '  const __mods = {}, __cache = {};',

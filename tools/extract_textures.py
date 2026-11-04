@@ -64,11 +64,11 @@ SOURCES = [
     ('Cuatro líneas rojas dibujadas a mano*.png', 'boli', 'left', 2.2),
 ]
 # resolución de la cinta: el medio ancho medio del trazo ocupa MH columnas
-MH = {'boli': 3.0, 'rotu': 7.0, 'lapiz': 10.0, 'carbon': 11.0}
+MH = {'boli': 3.0, 'rotu': 7.0, 'lapiz': 10.0, 'carbon': 11.0, 'cera': 20.0, 'oleo': 16.0, 'aguada': 15.0, 'pincel': 14.0, 'guache': 14.0, 'pincelfino': 12.0}
 MH_DEF = 10.0
 MAXROWS = 520
 # como mucho estas cintas por familia (las más distintas entre sí)
-CAP = {'boli': 8, 'rotu': 8, 'gastado': 8, 'lapiz': 10, 'carbon': 10, 'cera': 8, 'aguada': 12, 'guache': 12, 'oleo': 8, 'pincel': 14, 'pincelfino': 5, 'brocha': 2}
+CAP = {'boli': 8, 'rotu': 3, 'gastado': 0, 'oleo': 0, 'lapiz': 10, 'carbon': 10, 'cera': 12, 'aguada': 12, 'guache': 12, 'pincel': 14, 'pincelfino': 5, 'brocha': 2}
 
 
 def load(path):
@@ -199,10 +199,21 @@ def strip_of(d, lab, comp, E, fam):
     # normaliza: tinta plena = 1 (percentil alto del núcleo)
     core = A[:, ncol // 2 - int(mhc * 0.6): ncol // 2 + int(mhc * 0.6) + 1]
     # se normaliza por arriba del todo: así se conserva la veta (las zonas con más pigmento siguen siendo más oscuras)
-    p = np.percentile(core, 99.3)
+    # (ceras y óleo: por la mediana alta, que las barras claras cubran igual que las oscuras)
+    p = np.percentile(core, 80 if fam in ('cera', 'oleo') else 99.3)
     if p < 0.05:
         return None
     A = np.clip(A / p, 0, 1)
+    # quita colas finas en los extremos (restos del escaneo que hacían «biberones» al final del trazo):
+    # el trazo empieza donde la fila ya tiene al menos media anchura, y se deja el redondeo del remate
+    wid = (A > 0.3).sum(1).astype(np.float32)
+    medw = np.median(wid[wid > 0]) if (wid > 0).any() else 0
+    if medw > 0:
+        okr = np.nonzero(wid >= medw * 0.5)[0]
+        if len(okr) >= 8:
+            keep = int(round(mhc * 0.7))
+            a0 = max(0, okr[0] - keep); a1 = min(len(A), okr[-1] + 1 + keep)
+            A = A[a0:a1]
     # descarta lo que no es un trazo limpio: tinta fuerte en los bordes de la cinta (vecinos, sombras)
     edge = np.concatenate([A[:, :max(1, int(ncol * 0.12))], A[:, -max(1, int(ncol * 0.12)):]], 1).mean()
     if edge > 0.22 * A[:, ncol // 2 - 2: ncol // 2 + 3].mean():
@@ -233,6 +244,8 @@ def main():
         os.makedirs(preview, exist_ok=True)
     strips = []
     for pat, fam, start, E in SOURCES:
+        if CAP.get(fam, 8) == 0:
+            continue                      # familia que ya no se usa (p. ej. el rotulador es procedural)
         files = sorted(glob.glob(os.path.join(TR, pat)))
         if not files:
             print('falta', pat); continue

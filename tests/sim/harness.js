@@ -28,7 +28,9 @@ const { open } = require('./setup.js');
     ['circulo', 'carbon', 'suave', 'infantil', 'mayus', 'b'],
     ['rect', 'pincel', 'humedo', 'nerviosa', 'mayus', 'b'],
     ['rect', 'rotulador', 'gordo', 'adulta', 'mayus', 'b'],
-    ['rect', 'boli', 'fino', 'elegante', 'minus', 'a']
+    ['rect', 'boli', 'fino', 'elegante', 'minus', 'a'],
+    ['arco', 'cera', 'oleo', 'elegante', 'mayus', 'a'],
+    ['rect', 'rotulador', 'gastado', 'elegante', 'mayus', 'b']
   ];
   let ci = 0;
   for (const [type, tool, preset, persona, mode, ver] of combos) {
@@ -47,6 +49,18 @@ const { open } = require('./setup.js');
     await rec('G2 escribir ' + type + ' (' + tool + ' ' + preset + ', ' + persona + ' ' + ver.toUpperCase() + ' ' + mode + ')', s2);
     await snap('g_' + ci + '_' + type + '_' + tool + '_' + persona + ver);
   }
+
+  // 2b. una letra de cada color (la variación sale y el panel la enseña solo al marcarla)
+  await newDoc(3000, 1900); await refresh();
+  await shape('rect');
+  const hiddenBefore = await run(() => document.getElementById('multiBox').classList.contains('hidden'));
+  await run(() => { T.seg('colorModeSeg', 'letras'); T.seg('toolSeg', 'cera'); T.seg('presetSeg', 'oleo'); T.seg('fontSeg', 'adulta'); T.seg('versionSeg', 'a'); T.seg('caseSeg', 'mayus'); });
+  const hiddenAfter = await run(() => document.getElementById('multiBox').classList.contains('hidden'));
+  await click('btnGo');
+  const sc = await waitDone();
+  await rec('G2c una letra de cada color (' + (hiddenBefore && !hiddenAfter ? 'slider solo al marcar' : 'FALLO slider ' + hiddenBefore + '/' + hiddenAfter) + ')', hiddenBefore && !hiddenAfter ? sc : Object.assign({}, sc, { cls: 'err' }));
+  await snap('g_colores');
+  await run(() => { T.seg('colorModeSeg', 'uno'); });
 
   // 3. selección de lazo
   await newDoc(3000, 1900); await refresh();
