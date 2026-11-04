@@ -47,8 +47,8 @@ const TOOLS = {
   },
   boli: {
     label: 'Bolígrafo', presets: {
-      bic: { label: 'BIC', fams: ['boli'], w: 0.0135, dens: 1.05, tIn: 0.75, tOut: 0.55, inL: 2, outL: 4, press: 0.14, grain: 0.06, pool: 0.25, capSkip: 0.6, tremor: 1, lift: 0.2, tone: 0.55 },
-      fino: { label: 'Fino', fams: ['boli'], w: 0.0095, dens: 1.0, tIn: 0.7, tOut: 0.5, inL: 2, outL: 4, press: 0.12, grain: 0.05, pool: 0.3, tremor: 1.05, lift: 0.2, tone: 0.5 },
+      bic: { label: 'BIC', proc: 'marker', w: 0.0125, dens: 0.95, tIn: 0.8, tOut: 0.6, inL: 2, outL: 3.5, press: 0.1, grain: 0.12, pool: 0.3, wet: 0.1, streak: 0.4, skip: 0.45, tremor: 0.8, lift: 0.2, tone: 0.55 },
+      fino: { label: 'Fino', proc: 'marker', w: 0.0085, dens: 0.92, tIn: 0.75, tOut: 0.55, inL: 2, outL: 3.5, press: 0.08, grain: 0.14, pool: 0.3, wet: 0.08, streak: 0.3, skip: 0.5, tremor: 0.8, lift: 0.2, tone: 0.5 },
       gel: { label: 'Gel', proc: 'marker', w: 0.016, dens: 1.0, tIn: 0.9, tOut: 0.85, inL: 1.2, outL: 2, press: 0.06, wet: 0.25, pool: 0.35, tremor: 0.95, lift: 0.15, tone: 0.3, grain: 0.04, fuse: true }
     }
   },
@@ -228,7 +228,8 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
     // carga en los extremos: donde el rotulador se para, la tinta se extiende y oscurece
     const de = Math.min(s, Ls - s), hh = s < Ls / 2 ? hEnd0 : hEnd1;
     const bleed = P.pool ? (1 - smooth01(0, hh * 1.6, Math.max(0, de))) * P.pool * Math.min(1, Ls / (hh * 8)) : 0;
-    const rough = 0.05 * R.noise1(s / (r * 0.6 + 1), mSeed + (v > 0 ? 1 : 2)) + 0.035 * (R.hash2(px, py, mSeed) - 0.5);
+    // borde: casi limpio (el fieltro y la bola no tiemblan); solo el diente del papel lo muerde un poco
+    const rough = 0.016 * R.noise1(s / (r * 2.5 + 1), mSeed + (v > 0 ? 1 : 2)) + 0.03 * (R.hash2(px, py, mSeed) - 0.5);
     const edge = 1 + rough + 0.14 * bleed;
     const aa = Math.max(0.04, 0.7 / Math.max(1, r));
     const inside = smooth01(edge + aa, edge - aa, ve);
@@ -240,7 +241,12 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
     const mott = 0.06 * (paper[(((py * 0.7) & 255) << 8) | ((px * 0.7) & 255)] - 0.5);
     // borde: una línea fina un poco más cargada donde la tinta se seca antes
     const rim = (P.wet || 0) * 0.55 * smooth01(0.8, 0.97, ve / edge) * (1 - smooth01(0.97, 1.02, ve / edge) * 0.5);
-    let a = inside * (0.86 + streak + mott + rim) * (1 + 0.3 * bleed);
+    let a = inside * (0.86 + (P.streak == null ? 1 : P.streak) * streak + mott + rim) * (1 + 0.3 * bleed);
+    // boli: la bola salta a ratos (claros finos a lo ancho), más en los trazos rápidos
+    if (P.skip) {
+      const z = 0.5 + 0.5 * R.noise1(s / (r * 4 + 1), mSeed + 23), z2 = R.hash2(Math.floor(s / Math.max(1, r * 0.8)), 3, mSeed + 29);
+      a *= 1 - P.skip * smooth01(0.7, 0.88, z) * (0.55 + 0.45 * z2);
+    }
     // gastado: la punta seca deja vetas sin tinta, más hacia el final
     if (P.dry > 0) {
       // rotulador gastado: la tinta no llega a todo el fieltro; se abren claros a trozos (no rayas limpias),

@@ -42,15 +42,22 @@ function tokenize(text) {
 function measure(tokens, levels, o) {
   const met = FN.metrics(o.persona, o.mode);
   return tokens.map((t, i) => {
-    const lv = levelOf(levels[i] || 0, o.contrast);
+    let lv = levelOf(levels[i] || 0, o.contrast);
+    // marcas de la palabra: negrita (repasada con pasadas que se ven, algo más gruesa) y subrayado
+    const mk = (o.marks && o.marks[i]) || '';
+    const bold = mk.indexOf('b') >= 0, under = mk.indexOf('u') >= 0;
+    if (bold) lv = { size: lv.size, passes: lv.passes + 2, w: lv.w * 1.15 };
     // el grosor de la herramienta también ocupa: más aire entre letras y entre líneas con trazo gordo
-    const pad = o.inkPad || 0;
+    const mk0 = (o.marks && o.marks[i]) || '';
+    const pad = (o.inkPad || 0) * (mk0.indexOf('b') >= 0 ? 1.8 : 1);
     const sw = FN.setWord(o.persona, o.mode, FN.caseText(t.text, o.mode), o.track || 0, pad, i + 1);
     const caps = o.mode === 'mayus';
     // las letras de alturas desiguales (infantil, nerviosa) necesitan más aire entre líneas
     const hv = FN.styleOf(o.persona).hVar || 0;
     const asc = (caps ? FN.CAP * (1 + hv * 1.5) + 0.12 : met.asc) + pad * 1.1, desc = (caps ? 0.1 + hv * 0.12 : met.desc) + pad * 0.9;
-    return { text: t.text, brk: t.brk, level: levels[i] || 0, lv, size: lv.size, set: sw, w: sw.width * lv.size, asc: asc * lv.size, desc: desc * lv.size };
+    // el subrayado necesita sitio debajo
+    const descU = under ? Math.max(desc, 0.1) + 0.2 : desc;
+    return { text: t.text, brk: t.brk, level: levels[i] || 0, lv, size: lv.size, set: sw, w: sw.width * lv.size, asc: asc * lv.size, desc: descU * lv.size, bold, under };
   });
 }
 
@@ -170,7 +177,8 @@ function inEnvelope(words, shape, space, leading, o) {
   const m = o.margin == null ? 0.05 : o.margin;
   const Wp = shape.W * (1 - 2 * m), Hp = shape.H * (1 - 2 * m);
   const block = bestBlock(words, Wp / Hp, space, leading);
-  const letters = placeBlock(words, block, space, o.align || 'center', o.xFill == null ? 0.2 : o.xFill);
+  // (en cursiva las letras van ligadas: no se separan para llenar la línea)
+  const letters = placeBlock(words, block, space, o.align || 'center', o.mode === 'cursiva' ? 0 : o.xFill == null ? 0.2 : o.xFill);
   // el bloque llena el hueco; se permite estirar un poco (el trazo no se deforma: solo el camino)
   let sx = Wp / block.W, sy = Hp / block.H;
   const lim = o.stretch == null ? 1.3 : o.stretch;

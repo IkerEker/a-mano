@@ -38,8 +38,12 @@ textarea { width: 100%; height: 84px; font-size: 12px; padding: 4px; }
 .board .empty { color: #8a857b; font-size: 11px; }
 .chip { padding: 1px 3px; margin: 1px 1px; border-radius: 3px; border: 1px solid transparent; cursor: pointer; font-size: 13px; }
 .chip.c-bold { font-size: 16px; font-weight: bold; }
-.chip.c-hero { font-size: 20px; font-weight: bold; text-decoration: underline; }
+.chip.c-hero { font-size: 20px; font-weight: bold; }
 .chip.c-small { font-size: 10px; font-style: italic; }
+.chip.m-b { font-weight: 900; text-shadow: 0.6px 0 0 currentColor; }
+.chip.m-u { text-decoration: underline; border-bottom: 2px solid currentColor; }
+.s-neg { font-weight: 900; }
+.s-sub { text-decoration: underline; }
 .chip.sel { background-color: rgba(224, 83, 61, 0.18); border-color: #e0533d; }
 .brk { width: 100%; height: 0; }
 

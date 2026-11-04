@@ -57,6 +57,78 @@ function trimEnds(p, a, b) {
   return out.reverse();
 }
 
+// parte un trazo (en px) en los vértices muy cerrados; cada lado llega afilado al pico
+function splitAtPeaks(pts, r) {
+  const n = pts.length;
+  if (n < 5) return [pts];
+  // dirección media a cada lado, en una ventana de ~1,2 anchos
+  let L = 0; const S = [0];
+  for (let i = 1; i < n; i++) { L += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y); S.push(L); }
+  const win = Math.max(2, r * 2.4);
+  const turn = new Float32Array(n);
+  let j0 = 0, j1 = 0;
+  for (let i = 1; i < n - 1; i++) {
+    while (j0 < i && S[i] - S[j0] > win) j0++;
+    while (j1 < n - 1 && S[j1] - S[i] < win) j1++;
+    const ax = pts[i].x - pts[j0].x, ay = pts[i].y - pts[j0].y, bx = pts[j1].x - pts[i].x, by = pts[j1].y - pts[i].y;
+    const la = Math.hypot(ax, ay), lb = Math.hypot(bx, by);
+    if (la < win * 0.5 || lb < win * 0.5) continue;
+    turn[i] = Math.acos(Math.max(-1, Math.min(1, (ax * bx + ay * by) / (la * lb))));
+  }
+  const cuts = [];
+  const LIM = 1.95; // ~112°: vértices de A, M, N, V, W, Z (no las esquinas de la E o la L)
+  for (let i = 2; i < n - 2; i++) {
+    if (turn[i] < LIM) continue;
+    let best = i; while (best + 1 < n - 2 && turn[best + 1] >= turn[best]) best++;
+    if (turn[best] >= LIM && (!cuts.length || S[best] - S[cuts[cuts.length - 1]] > win)) cuts.push(best);
+    i = best + 1;
+  }
+  if (!cuts.length) return [pts];
+  const out = [];
+  let a = 0;
+  for (const c of cuts) {
+    const seg = pts.slice(a, c + 1).map(q => Object.assign({}, q));
+    sharpen(seg, r, false, true); out.push(seg); a = c;
+  }
+  const last = pts.slice(a).map(q => Object.assign({}, q));
+  sharpen(last, r, true, false); out.push(last);
+  for (let k = 1; k < out.length - 1; k++) sharpen(out[k], r, true, false);
+  return out;
+}
+// afila un extremo: el grosor baja hacia la punta (start: el inicio, end: el final)
+function sharpen(pc, r, start, end) {
+  const n = pc.length; if (n < 2) return;
+  const D = r * 2.2;
+  const go = (from, step) => {
+    let acc = 0;
+    for (let k = from; k >= 0 && k < n; k += step) {
+      if (k !== from) acc += Math.hypot(pc[k].x - pc[k - step].x, pc[k].y - pc[k - step].y);
+      if (acc > D) break;
+      const t = acc / D;
+      pc[k].w = Math.min(pc[k].w == null ? 1 : pc[k].w, 0.45 + 0.55 * t * t * (3 - 2 * t));
+    }
+  };
+  if (start) go(0, 1);
+  if (end) go(n - 1, -1);
+}
+function taperEnds(pc, r, flick, rs) {
+  const n = pc.length; if (n < 3) return;
+  // casi siempre el final; a veces también la entrada
+  let L = 0; for (let i = 1; i < n; i++) L += Math.hypot(pc[i].x - pc[i - 1].x, pc[i].y - pc[i - 1].y);
+  const D = Math.min(L * 0.3, r * (3 + 3 * rs()) * flick);
+  const go = (from, step, min) => {
+    let acc = 0;
+    for (let k = from; k >= 0 && k < n; k += step) {
+      if (k !== from) acc += Math.hypot(pc[k].x - pc[k - step].x, pc[k].y - pc[k - step].y);
+      if (acc > D) break;
+      const t = acc / D;
+      pc[k].w = Math.min(pc[k].w == null ? 1 : pc[k].w, min + (1 - min) * Math.sqrt(t));
+    }
+  };
+  if (rs() < 0.75) go(n - 1, -1, 0.3);
+  if (rs() < 0.3) go(0, 1, 0.5);
+}
+
 // ------------------------------------------------------------------ plan: trazos en px del documento
 // lay: layoutInShape(...). Devuelve [{ pts:[{x,y}], r, seed, P, box, alpha }]
 function plan(lay, p, seed) {
@@ -195,9 +267,56 @@ function plan(lay, p, seed) {
     for (const l of cursiveLetters) { if (!byWord.has(l.word)) byWord.set(l.word, []); byWord.get(l.word).push(l); }
     for (const [, ls] of byWord) FN.joinCursive(ls, 0.09 * (1 + c));
   }
+  // ---- subrayados: una raya a mano bajo la palabra (sigue las bases de sus letras, se pasa un poco)
+  const wordsInfo = lay.words || [];
+  const byWordL = new Map();
+  for (const l of cursiveLetters) { if (!byWordL.has(l.word)) byWordL.set(l.word, []); byWordL.get(l.word).push(l); }
+  for (const [wi, ls] of byWordL) {
+    const W = wordsInfo[wi];
+    if (!W || !W.under || !ls.length) continue;
+    const rs = R.mulberry32(seed + wi * 6151 + 99);
+    // puntos guía: bajo cada letra, a su base (más el descendente si lo tiene, para no cortarlo del todo)
+    const guide = [];
+    let x0 = Infinity, x1 = -Infinity;
+    for (const l of ls) {
+      let a = Infinity, b = -Infinity;
+      for (const s of l.strokes) if (!s.mark) for (const q of s.pts) { if (q[0] < a) a = q[0]; if (q[0] > b) b = q[0]; }
+      if (!isFinite(a)) continue;
+      x0 = Math.min(x0, a); x1 = Math.max(x1, b);
+      guide.push([a, l.L.base + 0.11 * l.size, l.size]); guide.push([b, l.L.base + 0.11 * l.size, l.size]);
+    }
+    if (guide.length < 1 || !isFinite(x0)) continue;
+    const sz = guide.reduce((t, q) => t + q[2], 0) / guide.length;
+    // recta que mejor sigue las bases (la mano no hace escalones), con una curva suave y caída al final
+    let mx = 0, my = 0; for (const q of guide) { mx += q[0]; my += q[1]; } mx /= guide.length; my /= guide.length;
+    let sxy = 0, sxx = 0; for (const q of guide) { sxy += (q[0] - mx) * (q[1] - my); sxx += (q[0] - mx) * (q[0] - mx); }
+    const slope = (sxx > 1e-9 ? sxy / sxx : 0) + g(rs) * 0.02;
+    // la raya pasa por debajo de todas las letras (no se mete en ninguna)
+    let below = 0; for (const q of guide) below = Math.max(below, q[1] - (my + (q[0] - mx) * slope));
+    my += below;
+    const xa = x0 - (0.03 + 0.05 * rs()) * sz, xb = x1 + (0.05 + 0.1 * rs()) * sz;
+    const bow = (g(rs) * 0.012 + 0.006) * (xb - xa), drop = (0.01 + 0.02 * rs()) * sz;
+    const pts = [];
+    for (let k = 0; k <= 16; k++) {
+      const t = k / 16, x = xa + (xb - xa) * t;
+      pts.push([x, my + (x - mx) * slope + bow * 4 * t * (1 - t) * -1 + drop * Math.pow(t, 3) + 0.012 * sz * R.noise1(t * 3, seed + wi)]);
+    }
+    const L0 = ls[0].L;
+    const fakeL = Object.assign({}, L0, { x: xa, base: my, size: sz, g: { box: { left: 0, right: (xb - xa) / sz, top: -0.04, bottom: 0.04 }, strokes: [] }, lv: { passes: W.bold ? 2 : 1, w: 0.9 } });
+    cursiveLetters.push({ strokes: [{ pts, closed: false, joinable: false, mark: false, under: true }], L: fakeL, size: sz, word: wi, under: true });
+    // a veces, con prisa, dos rayas
+    if (W.under === 2 || (p.prisa > 0.5 && rs() < 0.25)) {
+      const pts2 = pts.map(([x, y], k) => [x + 0.03 * sz, y + 0.1 * sz + 0.02 * sz * (k / 16)]);
+      cursiveLetters.push({ strokes: [{ pts: pts2.slice(1), closed: false, joinable: false, mark: false, under: true }], L: fakeL, size: sz, word: wi, under: true });
+    }
+  }
   // ---- a píxeles del documento, con temblor y repasado
   const widthMul = p.width == null ? 1 : p.width;
   const passMul = p.repasado == null ? 1 : p.repasado;
+  // repasado: «fundido» (más pigmento en el mismo trazo) o «visible» (pasadas sueltas encima, como cuando se
+  // repasa una palabra para ponerla en negrita). Por defecto: fundido solo con pintura que tapa (pincel, óleo)
+  const fuse = p.repaso === 'fundido' ? true : p.repaso === 'visible' ? false : P.blend === 'over';
+  const flick = persona.flick || 0;
   cursiveLetters.forEach((l, li) => {
     const L = l.L;
     const lv = L.lv || { passes: 1, w: 1 };
@@ -209,64 +328,69 @@ function plan(lay, p, seed) {
     const ux = Math.sqrt(Math.abs(J[0] * J[3] - J[1] * J[2])) || 1;
     const emPx = ux * L.size;
     let passes = 1 + Math.round((lv.passes - 1) * passMul);
-    if (P.extraPass) passes += P.extraPass;
-    // repasado: fundido (más pigmento, sin líneas sueltas) o visible (alguna pasada se separa un poco)
-    const fuse = p.repaso === 'fundido' ? true : p.repaso === 'visible' ? false : !!P.fuse;
+    if (P.extraPass && !l.under) passes += P.extraPass;
     // grosor: el de la herramienta (por el del estilo); las letras de piezas tienen grosor propio
     const wEm = Math.max(P.w * widthMul * persona.weight, (persona.absW || 0) * widthMul);
     const hw = wEm * (lv.w || 1) * Math.sqrt(L.size); // medio ancho en unidades de maqueta
     l.strokes.forEach((s, si) => {
       if (!s.pts || s.pts.length < 2) return;
-      // fundido: las pasadas de más no se dibujan aparte (dejaban halos y «biberones»): el trazo carga más pigmento
-      // y engorda un pelo, como cuando se repasa encima con la misma herramienta
       const extra = s.fill ? 0 : passes - 1;
       const np = s.fill || fuse ? 1 : passes;
+      // centro del trazo (para el pequeño giro de cada pasada)
+      let smx = 0, smy = 0; for (const q of s.pts) { smx += q[0]; smy += q[1]; } smx /= s.pts.length; smy /= s.pts.length;
       for (let pass = 0; pass < np; pass++) {
         const rs = R.mulberry32(seed + li * 3301 + si * 211 + pass * 7919 + 11);
         let pts = s.pts;
         if (pass > 0) {
-          // la otra pasada va casi encima: se desvía despacio y menos que el grosor (no es una copia movida)
-          const A = fuse ? 0.35 * hw : Math.max(0.9 * hw, 0.012 * L.size);
-          const lam = (0.18 + 0.2 * rs()) * L.size, ns = (seed + li * 31 + si * 7 + pass * 101) | 0;
+          // la otra pasada: el mismo gesto otra vez, algo desplazado y girado, que se pasa o se queda corto en
+          // los extremos (nunca un trozo suelto a mitad de la letra)
+          const ang = rs() * 6.283, d = (0.3 + 0.5 * rs()) * hw * 1.4;
+          const ox = Math.cos(ang) * d, oy = Math.sin(ang) * d, rot = g(rs) * 0.018, cr = Math.cos(rot), sr = Math.sin(rot);
+          const lam = (0.25 + 0.2 * rs()) * L.size, ns = (seed + li * 31 + si * 7 + pass * 101) | 0, A = 0.5 * hw;
           let acc = 0;
           pts = pts.map((q, k) => {
             if (k) acc += Math.hypot(q[0] - pts[k - 1][0], q[1] - pts[k - 1][1]);
             const a = pts[Math.max(0, k - 1)], b = pts[Math.min(pts.length - 1, k + 1)];
             const tx = b[0] - a[0], ty = b[1] - a[1], tl = Math.hypot(tx, ty) || 1;
             const o = A * R.noise1(acc / lam, ns);
-            return [q[0] - ty / tl * o, q[1] + tx / tl * o];
+            const x = q[0] - smx, y = q[1] - smy;
+            return [smx + cr * x - sr * y + ox - ty / tl * o, smy + sr * x + cr * y + oy + tx / tl * o];
           });
-          // a veces solo se repasa un tramo
-          if (!s.closed && pts.length > 8 && rs() < (fuse ? 0.25 : 0.4)) {
-            const t0 = Math.floor(pts.length * rs() * 0.3), t1 = Math.ceil(pts.length * (0.7 + rs() * 0.3));
-            pts = pts.slice(t0, Math.max(t0 + 3, t1));
-          }
-          if (pts.length > 3) pts = trimEnds(pts, g(rs) * 0.012 * L.size, g(rs) * 0.016 * L.size);
+          if (!s.closed && pts.length > 3) pts = trimEnds(pts, (rs() - 0.35) * 0.05 * L.size, (rs() - 0.3) * 0.06 * L.size);
         }
         // pincel: algunos trazos verticales empiezan por abajo
         if (P.up && !s.fill && pts.length > 2) {
           const a = pts[0], b = pts[pts.length - 1];
           if (Math.abs(b[1] - a[1]) > 1.6 * Math.abs(b[0] - a[0]) && b[1] > a[1] && rs() < P.up) pts = pts.slice().reverse();
         }
-        // al documento, con temblor perpendicular
-        const tremA = emPx * (0.0015 + 0.008 * (p.pulso == null ? 0.4 : p.pulso)) * P.tremor, tremL = emPx * 0.06;
+        // al documento, con un pulso lento (no un temblorcillo: la mano ondula, no vibra)
+        const tremA = emPx * (0.0008 + 0.004 * (p.pulso == null ? 0.4 : p.pulso)) * P.tremor, tremL = emPx * 0.32;
         const dpts = pts.map(q => map(q[0], q[1]));
         let acc = 0;
-        const fin = dpts.map((q, k) => {
+        let fin = dpts.map((q, k) => {
           if (k > 0) acc += Math.hypot(q[0] - dpts[k - 1][0], q[1] - dpts[k - 1][1]);
           const a = dpts[Math.max(0, k - 1)], b = dpts[Math.min(dpts.length - 1, k + 1)];
           const tx = b[0] - a[0], ty = b[1] - a[1], tl = Math.hypot(tx, ty) || 1;
           const nn = tremA * R.noise1(acc / tremL, seed + li * 3 + si * 17 + pass);
-          return { x: q[0] - ty / tl * nn, y: q[1] + tx / tl * nn };
+          return { x: q[0] - ty / tl * nn, y: q[1] + tx / tl * nn, w: 1 };
         });
         let r = Math.max(0.5, wEm * emPx * (lv.w || 1) / Math.max(0.5, Math.sqrt(L.size)));
-        if (pass > 0) r *= fuse ? 1.04 + 0.08 * rs() : 0.85 + 0.1 * rs();
+        if (pass > 0) r *= 0.88 + 0.12 * rs();
         if (s.extra) r *= 0.8;
+        if (s.under) r *= 0.9;
         if (fuse && extra > 0) r *= 1 + 0.05 * Math.min(3, extra);
+        // picos: en los vértices cerrados (A, M, N, V...) la mano da la vuelta en seco: el trazo se parte y
+        // los dos lados llegan afilados al pico (en vez de una curva o un codo redondeado)
+        const pieces = s.fill ? [fin] : splitAtPeaks(fin, r);
+        // la mano suelta el trazo al final (sobre todo en letra rabiosa): la punta se afila
+        if (flick && !s.fill) for (const pc of pieces) taperEnds(pc, r, flick, rs);
         let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
         for (const q of fin) { if (q.x < x0) x0 = q.x; if (q.x > x1) x1 = q.x; if (q.y < y0) y0 = q.y; if (q.y > y1) y1 = q.y; }
         const m = r * 2.5 + 3;
-        out.push({ pts: fin, r, fill: !!s.fill, seed: (seed + li * 7 + si * 131 + pass * 1777) >>> 0, P, box: { left: x0 - m, top: y0 - m, right: x1 + m, bottom: y1 + m }, alpha: pass > 0 ? 0.85 : 1, ink: fuse && extra > 0 ? 1 + 0.32 * Math.min(3, extra) : 1, letter: li, word: L.word == null ? 0 : L.word });
+        pieces.forEach((pc, pi) => {
+          if (pc.length < 2) return;
+          out.push({ pts: pc, r, fill: !!s.fill, seed: (seed + li * 7 + si * 131 + pass * 1777 + pi * 53) >>> 0, P, box: { left: x0 - m, top: y0 - m, right: x1 + m, bottom: y1 + m }, alpha: pass > 0 ? 0.9 : 1, ink: fuse && extra > 0 ? 1 + 0.32 * Math.min(3, extra) : 1, letter: li, word: L.word == null ? 0 : L.word });
+        });
       }
     });
   });

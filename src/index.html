@@ -35,13 +35,18 @@
       </div>
       <div class="hint hidden" id="autoHint">Autoencajar: las letras llenan la forma al máximo, cambian de tamaño y se meten en los huecos de la línea de arriba. Los espacios entre palabras se mantienen claros.</div>
       <div id="levelBox">
-      <div class="styles-bar">
+      <div class="styles-bar" id="importBar">
         <div class="sbtn s-small" id="stSmall" title="Más pequeña">pequeña</div>
         <div class="sbtn" id="stNormal">normal</div>
         <div class="sbtn s-bold" id="stBold" title="Más grande y repasada">importante</div>
         <div class="sbtn s-hero" id="stHero" title="La que más se lee: grande y muy repasada">¡LA MÁS!</div>
       </div>
-      <div class="board" id="board"><span class="empty">Toca palabras aquí (o selecciónalas arriba) y elige su importancia.</span></div>
+      <div class="styles-bar mt4" id="markBar">
+        <div class="sbtn s-neg" id="stNeg" title="Repasada a mano, con las pasadas a la vista">negrita</div>
+        <div class="sbtn s-sub" id="stSub" title="Una raya a mano debajo de la palabra">subrayada</div>
+        <div class="sbtn" id="stClean" title="Quita negrita y subrayado">sin marcas</div>
+      </div>
+      <div class="board" id="board"><span class="empty">Toca palabras aquí (o selecciónalas arriba) y elige su importancia, negrita o subrayado.</span></div>
       </div>
     </div>
 

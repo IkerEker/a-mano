@@ -29,7 +29,7 @@ const DEF = {
   tab: 'gen', tool: 'rotulador', preset: 'fino', fill: '', color: '#1d1d1f', persona: 'adulta', version: 'a', mode: 'mayus', textMode: 'importancia', repaso: 'auto', legib: 70,
   grosor: 0, tinta: 55, pulso: 40, repasado: 50, follow: 'auto', locura: 50, prisa: 15, tight: 0,
   contraste: 50, inter: 100, llenar: 30, margen: 5, align: 'center', kind: 'imagen', colorMode: 'uno', colorVar: 45,
-  text: 'Nadie había cerrado\nla puerta del sótano', levels: [0, 2, 1, 0, 0, -1, 0]
+  text: 'Nadie había cerrado\nla puerta del sótano', levels: [0, 2, 1, 0, 0, -1, 0], marks: []
 };
 const st = Object.assign({}, DEF, store.get('settings2', {}));
 if (st.persona === 'rabiosa') st.persona = 'nerviosa';
@@ -87,7 +87,7 @@ function genParams() {
   return {
     persona: st.persona + '_' + st.version, mode: st.mode, tool: st.tool, preset: st.preset, color: st.color,
     colorVar: st.colorMode === 'letras' ? Math.max(0.02, st.colorVar / 100) : 0,
-    auto: st.textMode === 'auto', repaso: st.repaso,
+    auto: st.textMode === 'auto', repaso: st.repaso, marks: st.marks || [],
     legib: st.legib / 100, locura: st.locura / 50, pulso: st.pulso / 100, prisa: st.prisa / 100,
     width: Math.pow(2, st.grosor / 50), repasado: st.repasado / 50, tinta: st.tinta / 100,
     contrast: st.contraste / 50, leading: st.inter / 100, align: st.align, stretch: 1 + st.llenar / 100,
@@ -139,7 +139,9 @@ function renderBoard() {
     if (t.brk) { const br = document.createElement('div'); br.className = 'brk'; b.appendChild(br); }
     const c = document.createElement('span');
     const lv = st.levels[i] || 0;
-    c.className = 'chip' + (lv === -1 ? ' c-small' : lv === 1 ? ' c-bold' : lv === 2 ? ' c-hero' : '') + (chipSel.has(i) ? ' sel' : '');
+    const mk = (st.marks && st.marks[i]) || '';
+    const auto = st.textMode === 'auto';
+    c.className = 'chip' + (auto ? '' : lv === -1 ? ' c-small' : lv === 1 ? ' c-bold' : lv === 2 ? ' c-hero' : '') + (mk.indexOf('b') >= 0 ? ' m-b' : '') + (mk.indexOf('u') >= 0 ? ' m-u' : '') + (chipSel.has(i) ? ' sel' : '');
     c.textContent = t.text;
     c.setAttribute('data-i', String(i));
     b.appendChild(c);
@@ -149,7 +151,9 @@ function onText() {
   const v = $('txt').value;
   const old = tokens();
   st.text = v;
-  st.levels = relevel(old, st.levels, tokens());
+  const nt = tokens();
+  st.marks = relevel(old, st.marks || [], nt).map(m => m || '');
+  st.levels = relevel(old, st.levels, nt);
   chipSel = new Set();
   save(); renderBoard();
 }
@@ -166,6 +170,25 @@ function wordsInSelection() {
   while ((m = re.exec(v))) { const s = m.index, e = s + m[0].length; if (e > a && s < b) out.push(k); k++; i = e; }
   void i;
   return out;
+}
+// negrita / subrayado (se suman a la importancia; también valen en autoencajar)
+function applyMark(kind) {
+  let idx = [...chipSel];
+  if (!idx.length) idx = wordsInSelection();
+  if (!idx.length) { status('Toca antes una o varias palabras (abajo) o selecciónalas en la casilla.', ''); return; }
+  st.marks = st.marks || [];
+  const has = idx.every(i => (st.marks[i] || '').indexOf(kind) >= 0);
+  for (const i of idx) {
+    let m = st.marks[i] || '';
+    if (kind === '') m = '';
+    else if (has) m = m.replace(kind, '');
+    else if (m.indexOf(kind) < 0) m += kind;
+    st.marks[i] = m;
+  }
+  for (let i = 0; i < st.marks.length; i++) if (st.marks[i] == null) st.marks[i] = '';
+  chipSel = new Set();
+  save(); renderBoard();
+  status('', '');
 }
 function applyLevel(lv) {
   let idx = [...chipSel];
@@ -213,7 +236,7 @@ async function refreshCtx() {
     else { ctxC.textContent = 'Selecciona en Capas las capas de texto que quieras pasar a mano (o un grupo que las contenga).'; ctxC.className = 'ctx'; }
   }
 }
-const SAVED_KEYS = ['text', 'levels', 'persona', 'version', 'mode', 'textMode', 'tool', 'preset', 'color', 'colorMode', 'colorVar', 'legib'];
+const SAVED_KEYS = ['text', 'levels', 'marks', 'persona', 'version', 'mode', 'textMode', 'tool', 'preset', 'color', 'colorMode', 'colorVar', 'legib'];
 function loadSaved(saved) {
   for (const k of SAVED_KEYS) if (saved[k] != null) st[k] = Array.isArray(saved[k]) ? saved[k].slice() : saved[k];
   save(); syncControls();
@@ -428,7 +451,8 @@ function syncControls() {
 }
 function syncText() {
   const auto = st.textMode === 'auto';
-  show($('levelBox'), !auto); show($('autoHint'), auto);
+  show($('importBar'), !auto); show($('autoHint'), auto);
+  renderBoard();
   const vh = $('versionHint'); if (vh) vh.textContent = (FN.styleOf(st.persona + '_' + st.version).hint) || '';
 }
 function showAdv(on) { show($('viewMain'), !on); show($('viewAdv'), on); }
@@ -478,6 +502,9 @@ function bind() {
   $('stNormal').addEventListener('click', () => applyLevel(0));
   $('stBold').addEventListener('click', () => applyLevel(1));
   $('stHero').addEventListener('click', () => applyLevel(2));
+  $('stNeg').addEventListener('click', () => applyMark('b'));
+  $('stSub').addEventListener('click', () => applyMark('u'));
+  $('stClean').addEventListener('click', () => applyMark(''));
   // color
   $('swColor').addEventListener('click', () => {
     try { const fg = app.foregroundColor; const hx = fg && fg.rgb && fg.rgb.hexValue; if (hx) { setColor('#' + String(hx).replace('#', '').toLowerCase()); status('Color tomado del color frontal.', 'ok'); } }

@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.2)
+## 2. Cómo se usa (2.3)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -132,6 +132,35 @@ en azul, pincel en azul y burdeos, autoencajar en arco con líneas montadas)
   sucesión áurea para que dos letras seguidas nunca salgan iguales; en GENERAR y en CALCAR.
 - **Autoencajar letra a letra** (`js/autofit.js`, ver arquitectura).
 
+### Tras probar la 2.2 en Photoshop (capturas: rotulador azul con bordes que ondulan, letras con vértices de polígono)
+- «El temblorcillo del boli queda fatal.» «Los picos en las letras están mal» (O y S hechas de tramos rectos).
+- Mandó cuatro muestras suyas: dos de **letra rabiosa** (ESTA / NO LA / ADIVINAS / MURCIÉLAGO: mayúsculas altas y
+  estrechas a lápiz de color, vértices en pico, puntas que se sueltan; y ESTA NO LA ADIVINAS: más loca, trazos que
+  se pasan y se repiten), una palabra **repasada en negrita** (PRUEBA: dos o tres pasadas translúcidas un poco
+  desplazadas, que se oscurecen al montarse) y **cursiva normal** (escritura rápida, estrecha, inclinada).
+- «Añade el subrayado.» «Que dentro del autoencajar se puedan también hacer negritas y subrayados.»
+- «MEJORA TODO, más REALISTA.»
+
+### Qué se hizo en la 2.3
+- Sin temblorcillo: `wobF` (temblor fino de la letra) a 0 en todos los estilos; el pulso de la mano en `writer.js`
+  ahora ondula despacio (longitud de onda 0,32 em) y mucho menos; el borde del rotulador ya no ondula.
+- Sin polígonos: `angular` a 0 en todos los estilos (las curvas siguen siendo curvas; la S de «tonya» es curva).
+- **Picos** (`splitAtPeaks` en `writer.js`): en los vértices de más de ~112° (A, M, N, V, W, Z) el trazo se parte y
+  cada lado llega afilado al pico. **Puntas sueltas** (`flick` del estilo, `taperEnds`): el final del trazo se afila.
+- **Nerviosa A** = rabiosa alta y estrecha (OVR `rab`, `wide` 0,38); **Nerviosa B** = rabiosa a lo loco (OVR `wild`:
+  se pasa de largo, travesaños que cruzan, E de dos golpes; `double` 0,32 con la segunda pasada que sale del mismo
+  sitio y se abre).
+- **Repasado visible** por defecto (fundido solo con pintura que tapa: pincel y óleo): cada pasada repite el gesto
+  entero, algo desplazada (0,2–0,6 del grosor) y girada, y se pasa o se queda corta en los extremos.
+- **Negrita y subrayado** (`st.marks`, una cadena por palabra: 'b', 'u'): negrita = +2 pasadas visibles y ×1,15 de
+  grosor (y más aire entre letras); subrayado = raya a mano bajo la palabra (sigue la inclinación de las bases, pasa
+  por debajo de todas las letras, se pasa al final; con mucha prisa a veces dos rayas). En la maqueta normal reserva
+  sitio debajo (desc + 0,2); en autoencajar cada letra de la palabra lleva ese hueco en su celda. El panel tiene una
+  segunda fila (negrita / subrayada / sin marcas) que también se ve en autoencajar.
+- **Boli procedural** (`proc: 'marker'` con `streak` bajo y `skip`: la bola salta a ratos).
+- **Cursiva más rápida**: `scriptW` (más estrecha), `scriptSmooth` (redondea los rizos pequeños), más inclinación;
+  la raya de la t ya no se toma como salida al ligar; tolerancia de ligado mayor; en cursiva la línea no separa letras.
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -190,7 +219,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.2.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.3.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)
@@ -207,7 +236,8 @@ python3 tests/node/sheet.py DIR hoja.png 2 800   # hoja de contactos
 - 2.1 añade: 8 combinaciones de estilo y versión, capa en Multiplicar, autoencajar en rectángulo y círculo.
 - 2.2 añade: óleo en barra, rotulador gastado con la elegante B, una letra de cada color (y que el deslizador solo
   aparezca al marcarla).
-- Último resultado: **48/48 bien, sin errores de modal**.
+- 2.3 añade: negrita y subrayado en autoencajar (marcas en el panel).
+- Último resultado: **49/49 bien, sin errores de modal**.
 
 ---
 
@@ -215,8 +245,8 @@ python3 tests/node/sheet.py DIR hoja.png 2 800   # hoja de contactos
 
 1. La 2.1 ya se probó en Photoshop real (capturas del usuario). Falta ver la 2.2 allí.
 2. Letra hueca de bloque (referencia Good Room) como estilo o versión aparte: no está.
-3. Cursivas: siguen saliendo de fuentes de plóter (Hershey/Allure) con el comportamiento del estilo; si no
-   gustan, dibujarlas también en `skeleton.js` con entradas y salidas para ligar.
+3. Cursivas: siguen saliendo de fuentes de plóter (Hershey/Allure), ahora más rápidas y estrechas. Lo mejor sería
+   que el usuario escriba su alfabeto en cursiva y pasarlo al mini lenguaje de `skeleton.js` (con entradas y salidas).
 4. CALCAR: el calco guiado acepta ~92 % de las letras de prueba; las decorativas (cursiva de Chorus) caen al
    esqueleto. La variación de CALCAR (planVariation) puede subir o bajar letras sueltas de más con legibilidad baja.
 5. Goteo de la brocha (The New Pop), papel rasgado (AVONAT) y las manchas de TRAZOS: aún no.

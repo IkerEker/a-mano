@@ -16,13 +16,16 @@ const NC = 240;           // columnas del perfil
 
 function lettersOf(words, ink) {
   // cada letra: ancho de tinta + grosor, alto total de tinta (con tilde y descendente)
+  // (palabra subrayada: la raya va en un hueco reservado debajo de cada letra; negrita: más grosor)
   return words.map((w, wi) => w.set.glyphs.map((q, j) => {
     const b = q.g.box, bd = q.g.body;
-    const bw = Math.max(0.06, bd.right - bd.left) + ink;
+    const ik = ink * (w.bold ? 1.6 : 1);
+    const bw = Math.max(0.06, bd.right - bd.left) + ik;
     const top = -b.top, desc = Math.max(0, b.bottom);
+    const ul = w.under ? 0.2 : 0;
     // todas las letras cuentan al menos con la altura de mayúscula (signos y minúsculas cortas no se agigantan)
-    const ht = Math.max(0.7 * 0.97, top + desc) + ink;
-    return { q, g: q.g, word: wi, first: j === 0, bw, ht, a: bw / ht, desc, ink };
+    const ht = Math.max(0.7 * 0.97, top + desc) + ik + ul;
+    return { q, g: q.g, word: wi, first: j === 0, bw, ht, a: bw / ht, desc: desc + ul, ink: ik, bold: !!w.bold };
   }));
 }
 
@@ -230,7 +233,7 @@ function autoFit(words, shape, space, o) {
       const sx = Math.max(0.7, Math.min(1.45, it.w / (l.bw * size)));  // ancho propio
       const inkPx = l.ink * size;
       // origen: el cuerpo empieza en x; la base deja el descendente por debajo
-      letters.push({ g, x: it.x + inkPx / 2 * sx - bd.left * size * sx, base: it.top + it.H - inkPx / 2 - l.desc * size, size, sx, sy: 1, word: l.word, line: li, level: 0, lv: { passes: 1, w: 1 } });
+      letters.push({ g, x: it.x + inkPx / 2 * sx - bd.left * size * sx, base: it.top + it.H - inkPx / 2 - l.desc * size, size, sx, sy: 1, word: l.word, line: li, level: 0, lv: l.bold ? { passes: 3, w: 1.15 } : { passes: 1, w: 1 } });
     }
   });
   // a unidades de letra (como el resto de maquetas): K px por unidad

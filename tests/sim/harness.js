@@ -62,6 +62,20 @@ const { open } = require('./setup.js');
   await snap('g_colores');
   await run(() => { T.seg('colorModeSeg', 'uno'); });
 
+  // 2c. negrita y subrayado (también en autoencajar)
+  await newDoc(3000, 1900); await refresh();
+  await shape('rect');
+  await run(() => { T.seg('textModeSeg', 'auto'); T.seg('toolSeg', 'rotulador'); T.seg('presetSeg', 'fino'); T.seg('fontSeg', 'nerviosa'); T.seg('versionSeg', 'a'); T.seg('caseSeg', 'mayus'); });
+  await run(() => { T.style('había', 'neg'); T.style('sótano', 'sub'); });
+  const chipsM = (await run(() => T.chips())).join(' ');
+  console.log('chips marcas:', chipsM);
+  const marksOk = /m-b[^:]*:había/.test(chipsM) && /m-u[^:]*:sótano/.test(chipsM) && await run(() => document.getElementById('importBar').classList.contains('hidden'));
+  await click('btnGo');
+  const sm = await waitDone();
+  await rec('G2d negrita y subrayado en autoencajar' + (marksOk ? '' : ' (FALLO marcas)'), marksOk ? sm : Object.assign({}, sm, { cls: 'err' }));
+  await snap('g_marcas');
+  await run(() => { T.style('había', 'clean'); T.style('sótano', 'clean'); T.seg('textModeSeg', 'importancia'); });
+
   // 3. selección de lazo
   await newDoc(3000, 1900); await refresh();
   await run(() => { const P = []; for (let k = 0; k < 48; k++) { const a = k / 48 * 6.283, r = 520 + 140 * Math.sin(3 * a) + 60 * Math.cos(5 * a); P.push([1500 + r * 1.45 * Math.cos(a), 950 + r * Math.sin(a)]); } SIM.setSelection(P); });

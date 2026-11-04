@@ -21,12 +21,12 @@ const NVAR = 3;
 // track/minGap: espacio entre letras; weight: grosor relativo del trazo; bounce/sizeVar: baile al escribir;
 // double: trazos dobles sueltos; ovr: letras propias
 const STYLES = {
-  adulta_a: { label: 'Adulta A', hint: 'segura y compacta', wide: 0.9, slant: 0.04, slantVar: 0.025, hVar: 0.05, wVar: 0.06, wob: 0.012, wobF: 0.005, angular: 0.1, geo: 0, os: 0.02, osVar: 0.03, stem: 0.02, cb: 0.04, cbShift: 0, open: 0.25, xh: 0.72, track: 0.07, minGap: 0.035, weight: 1, bounce: 0.6, sizeVar: 0.6, double: 0, ovr: null, script: 'script', xhS: 0.55, slantS: 0.2, trackS: 0 },
-  adulta_b: { label: 'Adulta B', hint: 'suelta y saltarina', wide: 0.86, slant: 0, slantVar: 0.09, hVar: 0.13, wVar: 0.1, wob: 0.02, wobF: 0.009, angular: 0.25, geo: 0, os: 0.03, osVar: 0.05, stem: 0.04, cb: 0.08, cbShift: 0.02, open: 0.3, xh: 0.74, track: 0.08, minGap: 0.04, weight: 1.1, bounce: 1.5, sizeVar: 1.3, double: 0, ovr: null, script: 'script', xhS: 0.6, slantS: 0.12, trackS: 0 },
-  infantil_a: { label: 'Infantil A', hint: 'de niño', wide: 0.95, slant: 0, slantVar: 0.14, hVar: 0.27, wVar: 0.18, wob: 0.045, wobF: 0.014, angular: 0.15, geo: 0, os: 0.02, osVar: 0.06, stem: 0.05, cb: 0.14, cbShift: 0, open: 0.45, xh: 0.78, track: 0.13, minGap: 0.06, weight: 1, bounce: 1.8, sizeVar: 1.4, double: 0, ovr: 'kid', script: 'script', xhS: 0.66, slantS: 0.02, trackS: 0.02 },
-  infantil_b: { label: 'Infantil B', hint: 'de piezas', wide: 1.0, slant: 0, slantVar: 0.03, hVar: 0.07, wVar: 0.06, wob: 0.008, wobF: 0.002, angular: 0, geo: 1, os: 0, osVar: 0.01, stem: 0, cb: 0.03, cbShift: 0, open: 0, xh: 0.8, track: 0.09, minGap: 0.04, weight: 1, absW: 0.06, bounce: 0.8, sizeVar: 0.7, double: 0, ovr: 'geo', script: 'script', xhS: 0.66, slantS: 0, trackS: 0.02 },
-  nerviosa_a: { label: 'Nerviosa A', hint: 'alta, estrecha, desbordada', wide: 0.6, slant: 0.02, slantVar: 0.07, hVar: 0.2, wVar: 0.16, wob: 0.01, wobF: 0.0025, angular: 0.6, geo: 0, os: 0.1, osVar: 0.06, stem: 0.07, cb: 0.1, cbShift: -0.04, open: 0.25, xh: 0.84, track: 0.03, minGap: 0.012, weight: 0.9, bounce: 1.0, sizeVar: 1.1, double: 0, ovr: 'tonya', script: 'script', xhS: 0.6, slantS: 0.3, trackS: -0.01 },
-  nerviosa_b: { label: 'Nerviosa B', hint: 'temblona y desigual', wide: 0.8, slant: 0.03, slantVar: 0.1, hVar: 0.16, wVar: 0.13, wob: 0.016, wobF: 0.006, angular: 0.35, geo: 0, os: 0.04, osVar: 0.05, stem: 0.05, cb: 0.09, cbShift: 0, open: 0.3, xh: 0.8, track: 0.08, minGap: 0.045, weight: 1, bounce: 1.3, sizeVar: 1.15, double: 0, ovr: null, script: 'script', xhS: 0.6, slantS: 0.24, trackS: 0 },
+  adulta_a: { label: 'Adulta A', hint: 'segura y compacta', wide: 0.9, slant: 0.04, slantVar: 0.025, hVar: 0.05, wVar: 0.06, wob: 0.012, wobF: 0, angular: 0, geo: 0, os: 0.02, osVar: 0.03, stem: 0.02, cb: 0.04, cbShift: 0, open: 0.25, xh: 0.72, track: 0.07, minGap: 0.035, weight: 1, bounce: 0.6, sizeVar: 0.6, double: 0, ovr: null, script: 'script', xhS: 0.42, slantS: 0.3, trackS: -0.02, scriptW: 0.72, scriptSmooth: 0.03, flick: 0.4 },
+  adulta_b: { label: 'Adulta B', hint: 'suelta y saltarina', wide: 0.86, slant: 0, slantVar: 0.09, hVar: 0.13, wVar: 0.1, wob: 0.02, wobF: 0, angular: 0, geo: 0, os: 0.03, osVar: 0.05, stem: 0.04, cb: 0.08, cbShift: 0.02, open: 0.3, xh: 0.74, track: 0.08, minGap: 0.04, weight: 1.1, bounce: 1.5, sizeVar: 1.3, double: 0, ovr: null, script: 'script', xhS: 0.46, slantS: 0.22, trackS: -0.02, scriptW: 0.76, scriptSmooth: 0.035, flick: 0.4 },
+  infantil_a: { label: 'Infantil A', hint: 'de niño', wide: 0.95, slant: 0, slantVar: 0.14, hVar: 0.27, wVar: 0.18, wob: 0.045, wobF: 0, angular: 0, geo: 0, os: 0.02, osVar: 0.06, stem: 0.05, cb: 0.14, cbShift: 0, open: 0.45, xh: 0.78, track: 0.13, minGap: 0.06, weight: 1, bounce: 1.8, sizeVar: 1.4, double: 0, ovr: 'kid', script: 'script', xhS: 0.66, slantS: 0.02, trackS: 0.02 },
+  infantil_b: { label: 'Infantil B', hint: 'de piezas', wide: 1.0, slant: 0, slantVar: 0.03, hVar: 0.07, wVar: 0.06, wob: 0.008, wobF: 0, angular: 0, geo: 1, os: 0, osVar: 0.01, stem: 0, cb: 0.03, cbShift: 0, open: 0, xh: 0.8, track: 0.09, minGap: 0.04, weight: 1, absW: 0.06, bounce: 0.8, sizeVar: 0.7, double: 0, ovr: 'geo', script: 'script', xhS: 0.66, slantS: 0, trackS: 0.02 },
+  nerviosa_a: { label: 'Nerviosa A', hint: 'rabiosa: alta, estrecha, a picos', wide: 0.38, slant: 0.03, slantVar: 0.07, hVar: 0.15, wVar: 0.12, wob: 0.01, wobF: 0, angular: 0, geo: 0, os: 0.07, osVar: 0.05, stem: 0.08, cb: 0.12, cbShift: -0.05, open: 0.3, xh: 0.84, track: 0.035, minGap: 0.025, weight: 0.72, bounce: 1.0, sizeVar: 1.0, double: 0.06, flick: 1, ovr: 'rab', script: 'script', xhS: 0.5, slantS: 0.3, trackS: -0.01, scriptW: 0.7, scriptSmooth: 0.035 },
+  nerviosa_b: { label: 'Nerviosa B', hint: 'rabiosa a lo loco: se pasa, repite trazos', wide: 0.46, slant: 0.02, slantVar: 0.13, hVar: 0.28, wVar: 0.16, wob: 0.014, wobF: 0, angular: 0, geo: 0, os: 0.15, osVar: 0.09, stem: 0.16, cb: 0.16, cbShift: -0.03, open: 0.35, xh: 0.86, track: 0.05, minGap: 0.02, weight: 0.75, bounce: 1.6, sizeVar: 1.35, double: 0.32, flick: 1, ovr: 'wild', script: 'script', xhS: 0.5, slantS: 0.34, trackS: -0.01, scriptW: 0.68, scriptSmooth: 0.04 },
   elegante_a: { label: 'Elegante A', hint: 'la de siempre: fina y tranquila', print: 'elfin', wide: 1, slant: 0.08, slantVar: 0.015, hVar: 0.02, wVar: 0.02, wob: 0.004, wobF: 0, angular: 0, geo: 0, os: 0, osVar: 0, stem: 0, cb: 0, cbShift: 0, open: 0, xh: 0.62, track: 0.03, minGap: 0.05, weight: 0.85, bounce: 0.5, sizeVar: 0.5, double: 0, ovr: null, script: 'allure', xhS: 0.48, slantS: 0.12, trackS: 0 },
   elegante_b: { label: 'Elegante B', hint: 'alta y espaciada, de cartel fino', print: 'elfin', wide: 0.86, slant: 0.12, slantVar: 0.012, hVar: 0.015, wVar: 0.02, wob: 0.003, wobF: 0, angular: 0, geo: 0, os: 0, osVar: 0, stem: 0, cb: 0, cbShift: 0, open: 0, xh: 0.52, track: 0.09, minGap: 0.07, weight: 0.72, bounce: 0.35, sizeVar: 0.35, double: 0, ovr: null, script: 'allure', xhS: 0.46, slantS: 0.16, trackS: 0.01 }
 };
@@ -65,11 +65,40 @@ const OVR = {
     M: [0.78, 'M 0 0 L 0.06 1 L 0.38 0.28 L 0.72 1 L 0.78 0'],
     N: [0.6, 'M 0 0 L 0.02 1 L 0.58 0 L 0.6 1'],
     O: [0.62, 'M 0.32 1 S 0.06 0.86 S 0 0.5 S 0.08 0.1 S 0.3 0 S 0.54 0.1 S 0.62 0.5 S 0.56 0.88 S 0.32 1 Z'],
-    S: [0.56, 'M 0.54 0.9 L 0.3 1 L 0.04 0.86 L 0.06 0.62 L 0.5 0.42 L 0.56 0.14 L 0.3 0 L 0 0.1'],
+    S: [0.56, 'M 0.54 0.88 S 0.32 1 S 0.08 0.92 S 0.05 0.7 S 0.26 0.54 S 0.5 0.42 S 0.56 0.18 S 0.38 0.01 S 0.12 0.02 S 0 0.14'],
     G: [0.64, 'M 0.6 0.9 S 0.4 1 S 0.12 0.9 S 0 0.5 S 0.1 0.08 S 0.34 0 S 0.6 0.12 L 0.62 0.46 L 0.36 0.46'],
     D: [0.6, 'M 0.02 1 L 0 0 M 0.02 1 L 0.26 0.98 S 0.52 0.82 S 0.6 0.46 S 0.5 0.12 S 0.24 0 L 0 0.02'],
     E: [0.5, 'M 0.5 1 L 0.02 1 L 0 0 L 0.5 0.02 M 0.02 0.5 L 0.46 0.52'],
     R: [0.56, 'M 0 0 L 0 1 L 0.26 1 S 0.5 0.9 S 0.54 0.72 S 0.44 0.55 S 0.24 0.5 L 0 0.5 M 0.2 0.5 L 0.56 0']
+  },
+  // rabiosa (A): alta y estrecha, vértices en pico, curvas que siguen siendo curvas
+  rab: {
+    A: [0.62, 'M 0 0 L 0.31 1 L 0.62 0 M 0.1 0.3 L 0.54 0.33'],
+    M: [0.78, 'M 0 0 L 0.03 1 L 0.39 0.14 L 0.74 1 L 0.78 0'],
+    N: [0.62, 'M 0 0 L 0.02 1 L 0.6 0 L 0.62 1'],
+    V: [0.64, 'M 0 1 L 0.32 0 L 0.64 1'],
+    W: [0.92, 'M 0 1 L 0.2 0 L 0.46 0.82 L 0.72 0 L 0.92 1'],
+    E: [0.5, 'M 0.5 1 L 0.02 1 L 0 0 L 0.5 0.02 M 0.01 0.54 L 0.42 0.56'],
+    S: [0.54, 'M 0.52 0.88 S 0.32 1 S 0.08 0.92 S 0.05 0.7 S 0.26 0.54 S 0.48 0.42 S 0.54 0.18 S 0.36 0.01 S 0.12 0.02 S 0 0.14'],
+    O: [0.62, 'M 0.32 1 S 0.06 0.86 S 0 0.5 S 0.08 0.1 S 0.32 0 S 0.56 0.1 S 0.62 0.5 S 0.54 0.88 S 0.32 1 Z'],
+    C: [0.58, 'M 0.56 0.86 S 0.36 1 S 0.1 0.9 S 0 0.5 S 0.1 0.1 S 0.34 0 S 0.58 0.12'],
+    G: [0.62, 'M 0.6 0.86 S 0.4 1 S 0.1 0.9 S 0 0.5 S 0.1 0.1 S 0.34 0 S 0.58 0.1 L 0.6 0.44 L 0.32 0.44'],
+    D: [0.6, 'M 0.02 1 L 0 0 M 0.02 1 S 0.44 0.94 S 0.6 0.5 S 0.44 0.06 S 0 0'],
+    R: [0.56, 'M 0 0 L 0 1 L 0.24 1 S 0.5 0.9 S 0.52 0.7 S 0.36 0.56 L 0 0.54 M 0.2 0.55 L 0.56 0']
+  },
+  // rabiosa a lo loco (B): se pasa de largo, travesaños que cruzan, E de dos golpes
+  wild: {
+    A: [0.62, 'M 0 -0.02 L 0.32 1.08 L 0.62 -0.04 M 0.02 0.36 L 0.66 0.42'],
+    E: [0.52, 'M 0.52 1 L 0.02 1 L 0.02 0.5 L 0.42 0.52 M 0.02 0.5 L 0 0 L 0.54 0.02'],
+    N: [0.6, 'M 0 -0.02 L 0.02 1.06 L 0.58 0 L 0.6 1.1'],
+    M: [0.8, 'M 0 0 L 0.03 1.06 L 0.4 0.08 L 0.76 1.08 L 0.8 -0.02'],
+    V: [0.64, 'M -0.02 1.08 L 0.32 0 L 0.66 1.1'],
+    S: [0.54, 'M 0.54 0.9 S 0.32 1.02 S 0.06 0.92 S 0.04 0.7 S 0.26 0.54 S 0.48 0.42 S 0.54 0.18 S 0.36 0 S 0.1 0.02 S -0.02 0.16'],
+    O: [0.62, 'M 0.4 0.98 S 0.06 0.9 S 0 0.5 S 0.08 0.08 S 0.32 0 S 0.56 0.1 S 0.62 0.5 S 0.54 0.9 S 0.26 1.02 S 0.12 0.94'],
+    T: [0.66, 'M -0.04 1 L 0.7 1.04 M 0.32 1.06 L 0.3 -0.04'],
+    H: [0.62, 'M 0 1.06 L 0 0 M 0.62 1.08 L 0.6 -0.02 M -0.04 0.5 L 0.68 0.54'],
+    I: [0.1, 'M 0.05 1.08 L 0.05 -0.04'],
+    L: [0.5, 'M 0 1.08 L 0 0 L 0.54 0.02']
   },
   fine: {
     B: [0.58, 'M 0 1 L 0 0 M 0 1 L 0.26 1 S 0.44 0.95 S 0.48 0.82 S 0.4 0.7 L 0.24 0.66 L 0 0.66 M 0.24 0.66 S 0.52 0.58 S 0.58 0.3 S 0.48 0.06 L 0.28 0 L 0 0'],
@@ -234,8 +263,10 @@ function printGlyph(styleKey, ch, v, altIdx) {
     out.push(o);
     // trazo doble suelto (nerviosa)
     if (st.double && !s.fill && !s.mark && rnd() < st.double && pts.length > 3) {
-      const off = 0.018 + 0.02 * rnd(), ang = rnd() * 6.28;
-      out.push({ pts: pts.map(([x, y]) => [x + Math.cos(ang) * off, y + Math.sin(ang) * off]), closed: s.closed, fill: false, mark: false, extra: true });
+      // la segunda pasada sale del mismo sitio y se abre un poco (se pasa de largo o se queda corta)
+      const p0 = pts[0], rot = (rnd() - 0.5) * 0.12, off = 0.008 + 0.012 * rnd(), ang = rnd() * 6.28, ext = 1 + (rnd() - 0.3) * 0.12;
+      const cr = Math.cos(rot), sr = Math.sin(rot);
+      out.push({ pts: pts.map(([x, y]) => { const dx = (x - p0[0]) * ext, dy = (y - p0[1]) * ext; return [p0[0] + cr * dx - sr * dy + Math.cos(ang) * off, p0[1] + sr * dx + cr * dy + Math.sin(ang) * off]; }), closed: s.closed, fill: false, mark: false, extra: true });
     }
   }
   return finishGlyph(out, def.w * unit * wS, ch, false, def.lower && !def.asCap);
@@ -283,14 +314,29 @@ function scriptGlyph(styleKey, ch, v, printFont) {
     let pts = [];
     for (let i = 0; i < flat.length; i += 2) pts.push([flat[i] * s0, flat[i + 1] * s0, false]);
     if (pts.length) { pts[0][2] = true; pts[pts.length - 1][2] = true; }
-    for (let k = 1; k < pts.length - 1; k++) if (st.angular && rnd() < st.angular * 0.5) pts[k][2] = true;
+    
     pts = densify(pts.map(p => [p[0] + st.wob * 0.5 * R.noise2(p[0] * 3, p[1] * 3, seedW), p[1] + st.wob * 0.5 * R.noise2(p[0] * 3 + 5, p[1] * 3, seedW + 1), p[2]]), 0.012);
-    pts = pts.map(([x, y]) => { const Y = mapY(y) * hS; return [x * (0.9 + 0.1 * st.wide) + Y * slant, -Y]; });
+    // cursiva rápida: la mano redondea los rizos pequeños y no remata las esquinas (suavizado a lo largo)
+    if (!printFont && st.scriptSmooth) pts = smoothPts(pts, st.scriptSmooth);
+    pts = pts.map(([x, y]) => { const Y = mapY(y) * hS; return [x * (printFont ? 0.9 + 0.1 * st.wide : (st.scriptW || 0.9)) + Y * slant, -Y]; });
     if (pts.length >= 2) strokes.push({ pts, closed: !!closed, fill: false, mark: false });
   }
   const bodyTop = -(isLower ? xhWant * 0.93 : CAP * 1.02);
   for (const s of strokes) { let lowest = -Infinity; for (const q of s.pts) if (q[1] > lowest) lowest = q[1]; s.mark = lowest < bodyTop && strokes.length > 1; }
-  return finishGlyph(strokes, g[0] * s0 * (0.9 + 0.1 * st.wide), ch, !printFont, isLower);
+  return finishGlyph(strokes, g[0] * s0 * (printFont ? 0.9 + 0.1 * st.wide : (st.scriptW || 0.9)), ch, !printFont, isLower);
+}
+
+function smoothPts(p, sigma) {
+  if (p.length < 4) return p;
+  const n = p.length, S = [0];
+  for (let i = 1; i < n; i++) S.push(S[i - 1] + Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]));
+  return p.map((q, i) => {
+    if (i === 0 || i === n - 1) return q;
+    let sx = 0, sy = 0, sw = 0;
+    for (let j = i; j >= 0 && S[i] - S[j] < sigma * 2.5; j--) { const w = Math.exp(-((S[i] - S[j]) ** 2) / (2 * sigma * sigma)); sx += p[j][0] * w; sy += p[j][1] * w; sw += w; }
+    for (let j = i + 1; j < n && S[j] - S[i] < sigma * 2.5; j++) { const w = Math.exp(-((S[j] - S[i]) ** 2) / (2 * sigma * sigma)); sx += p[j][0] * w; sy += p[j][1] * w; sw += w; }
+    return [sx / sw, sy / sw];
+  });
 }
 
 // ------------------------------------------------------------------ API
@@ -371,14 +417,16 @@ function joinCursive(letters, emTol) {
     const L = letters[i], A = letters[i - 1];
     if (!A.joinable || !L.joinable) continue;
     let ai = -1, best = -Infinity;
-    A.strokes.forEach((s, k) => { if (s.closed || s.fill || s.mark) return; const e = s.pts[s.pts.length - 1]; const sc = e[0] + e[1] * 0.2; if (sc > best) { best = sc; ai = k; } });
+    // (la raya de la t no cuenta como salida: es corta y casi horizontal)
+    const isBar = s => { const a = s.pts[0], e = s.pts[s.pts.length - 1]; return s.pts.length < 40 && Math.abs(e[1] - a[1]) < 0.03 && plen(s.pts) < 0.3; };
+    A.strokes.forEach((s, k) => { if (s.closed || s.fill || s.mark || isBar(s)) return; const e = s.pts[s.pts.length - 1]; const sc = e[0] + e[1] * 0.2; if (sc > best) { best = sc; ai = k; } });
     let bi = -1, bestb = Infinity;
     L.strokes.forEach((s, k) => { if (s.closed || s.fill || s.mark) return; const e = s.pts[0]; const sc = e[0] - e[1] * 0.2; if (sc < bestb) { bestb = sc; bi = k; } });
     if (ai < 0 || bi < 0) continue;
     const sa = A.strokes[ai], sb = L.strokes[bi];
     const e = sa.pts[sa.pts.length - 1], b0 = sb.pts[0];
     const d = Math.hypot(b0[0] - e[0], b0[1] - e[1]);
-    if (d > tol * (L.size || 1) * 2.2) continue;
+    if (d > tol * (L.size || 1) * 3) continue;
     const ta = tangent(sa.pts, true), tb = tangent(sb.pts, false);
     const bridge = [];
     const n = Math.max(2, Math.ceil(d / 0.01)), k = d * 0.6;
