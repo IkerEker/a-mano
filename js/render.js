@@ -97,7 +97,15 @@ function compositePigment(canvas, dens, bx, by, bw, bh, rgb, mode, alphaMul) {
         // pintura opaca: tapa según la carga; el tono va de lavado (poca) a profundo (mucha)
         const a = 1 - Math.exp(-3.4 * d);
         const e = 0.2 + 0.8 * Math.min(2.2, d);
-        Wb[i] += (Math.exp(L[0] * e) - Wb[i]) * a; Wb[i + 1] += (Math.exp(L[1] * e) - Wb[i + 1]) * a; Wb[i + 2] += (Math.exp(L[2] * e) - Wb[i + 2]) * a;
+        // (una capa fina de pintura no aclara lo que ya está pintado debajo: el borde de una pincelada sobre otra
+        //  no deja un cerco claro; solo el centro, bien cargado, tapa del todo)
+        const kl = a * a * a;
+        for (let c = 0; c < 3; c++) {
+          const t = Math.exp(L[c] * e), w0 = Wb[i + c];
+          let w = w0 + (t - w0) * a;
+          if (w > w0) w = w0 + (w - w0) * kl;
+          Wb[i + c] = w;
+        }
         Ab[k] = 1 - (1 - Ab[k]) * (1 - a);
       } else {
         Wb[i] *= Math.exp(L[0] * d); Wb[i + 1] *= Math.exp(L[1] * d); Wb[i + 2] *= Math.exp(L[2] * d);

@@ -185,21 +185,26 @@ function plen(p) { let L = 0; for (let i = 1; i < p.length; i++) L += Math.hypot
 // len: largo de cada ida (em); cover: cuánto se llena; loose: rayas sueltas; cross: garabatos cruzados;
 // split: cada cuántas idas se parte el trazo (donde se monta, la tinta oscurece); alpha: carga de cada garabato
 const STYLE = {
-  boli: { fill: ['boli', 'bic'], line: ['boli', 'bic'], rFill: 0.0065, rLine: 0.0065, step: 1.15, legs: [8, 28], len: [0.2, 0.5], cover: 0.88, loose: 0.35, cross: 0.3, split: 8, alpha: 1 },
-  rotulador: { fill: ['rotulador', 'gordo'], line: ['rotulador', 'fino'], rFill: 0.03, rLine: 0.016, step: 0.95, legs: [3, 7], len: [0.5, 1.0], cover: 0.92, loose: 0.25, cross: 0.3, split: 2, alpha: 0.55, base: 0.5 },
-  lapiz: { fill: ['lapiz', 'blando'], line: ['lapiz', 'hb'], rFill: 0.016, rLine: 0.0095, step: 0.85, legs: [8, 16], len: [0.3, 0.6], cover: 0.92, loose: 0.25, cross: 0.25, split: 5, alpha: 0.72 },
-  carbon: { fill: ['carbon', 'suave'], line: ['carbon', 'fino'], rFill: 0.032, rLine: 0.02, step: 0.8, legs: [5, 9], len: [0.35, 0.7], cover: 0.95, loose: 0.2, cross: 0.25, split: 3, alpha: 0.85 },
-  cera: { fill: ['cera', 'cera'], line: ['cera', 'fina'], rFill: 0.024, rLine: 0.018, step: 0.75, legs: [6, 11], len: [0.3, 0.6], cover: 0.94, loose: 0.22, cross: 0.3, split: 3, alpha: 0.9 },
-  pincel: { fill: ['pincel', 'gordo'], line: ['pincel', 'fino'], rFill: 0.11, rLine: 0.024, step: 0.75, legs: [1, 3], len: [0.8, 1.6], cover: 0.9, loose: 0.08, cross: 0.15, split: 1, alpha: 1, base: 1 }
+  boli: { fill: ['boli', 'bic'], rFill: 0.0065, lineK: 1, step: 1.15, legs: [8, 28], len: [0.2, 0.5], cover: 0.88, loose: 0.35, cross: 0.3, split: 8, alpha: 1 },
+  rotulador: { fill: ['rotulador', 'gordo'], rFill: 0.03, lineK: 0.75, step: 0.95, legs: [3, 7], len: [0.5, 1.0], cover: 0.92, loose: 0.25, cross: 0.3, split: 2, alpha: 0.55, base: 0.5 },
+  lapiz: { fill: ['lapiz', 'blando'], rFill: 0.016, lineK: 0.9, step: 0.85, legs: [8, 16], len: [0.3, 0.6], cover: 0.92, loose: 0.25, cross: 0.25, split: 5, alpha: 0.72 },
+  carbon: { fill: ['carbon', 'suave'], rFill: 0.032, lineK: 0.7, step: 0.8, legs: [5, 9], len: [0.35, 0.7], cover: 0.95, loose: 0.2, cross: 0.25, split: 3, alpha: 0.85 },
+  cera: { fill: ['cera', 'cera'], rFill: 0.024, lineK: 0.8, step: 0.75, legs: [6, 11], len: [0.3, 0.6], cover: 0.94, loose: 0.22, cross: 0.3, split: 3, alpha: 0.9 },
+  // pincel: pinceladas gordas y secas, sueltas, en todas direcciones (como el cartel WRONG); el borde de la caja lo
+  // hacen las propias pinceladas al acabar (sin raya)
+  pincel: { fill: ['pincel', 'seco'], rFill: 0.1, lineK: 0.5, step: 1.05, legs: [1, 2], len: [0.7, 1.5], cover: 0.95, loose: 0.12, cross: 0.5, split: 1, alpha: 1, free: true, noBox: true }
 };
 function styleFor(tool, preset) {
   const S = STYLE[tool] || STYLE.lapiz;
   let fill = INK.TOOLS[tool] && INK.TOOLS[tool].presets[preset] ? [tool, preset] : S.fill;
-  if (tool === 'pincel' && preset === 'fino') fill = ['pincel', 'gordo'];
+  if (tool === 'pincel' && preset !== 'humedo') fill = ['pincel', 'seco'];
   // (relleno: sin carga en los extremos ni puntas afiladas, si no cada vuelta deja un punto o un hueco)
-  const fp = INK.preset(fill[0], fill[1]), lp = tool === 'boli' || tool === 'lapiz' || tool === 'pincel' ? INK.preset(S.line[0], S.line[1]) : INK.preset(fill[0], fill[1]);
-  const soft = q => Object.assign({}, q, { endDry: q.proc && !q.pen ? 0.85 : 0, wet: (q.wet || 0) * 0.3, pool: (q.pool || 0) * 0.2, tIn: Math.max(q.tIn, 0.9), tOut: Math.max(q.tOut, 0.85), up: 0, dry: (q.dry || 0) * 0.5, skipCaps: !q.proc, tone: (q.tone || 0) * (q.blend === 'over' ? 0.35 : 1), load: (q.load || 0) * (q.blend === 'over' ? 0.4 : 1), down: 0 });
-  return Object.assign({}, S, { fillP: soft(fp), lineP: soft(lp) });
+  const fp = INK.preset(fill[0], fill[1]), lp = fp;
+  const soft = q => Object.assign({}, q, { endDry: q.proc && !q.pen ? 0.85 : 0, wet: (q.wet || 0) * 0.3, pool: (q.pool || 0) * 0.2, tIn: Math.max(q.tIn, 0.9), tOut: Math.max(q.tOut, 0.85), up: 0, dry: (q.dry || 0) * (tool === 'pincel' ? 1.1 : 0.5), skipCaps: !q.proc && tool !== 'pincel', tone: (q.tone || 0) * (q.blend === 'over' ? 0.35 : 1), load: (q.load || 0) * (q.blend === 'over' ? 0.4 : 1), down: 0 });
+  const F = soft(fp);
+  // pincel: el relleno con las pinceladas secas de verdad (cerdas abiertas, entradas y salidas de los escaneos)
+  if (tool === 'pincel' && preset !== 'humedo') Object.assign(F, { fams: ['pincel', 'brocha'], tIn: 0.75, tOut: 0.6, capSkip: 0 });
+  return Object.assign({}, S, { fillP: F, lineP: Object.assign(soft(lp), { endDry: 0 }) });
 }
 
 // Douglas-Peucker (tramos rectos)
@@ -271,11 +276,11 @@ function plan(o) {
   const rr = (a) => a[0] + (a[1] - a[0]) * rnd();
   const em = o.em, wm = o.width || 1;
   const S = styleFor(o.tool, o.preset), P = S.fillP;
-  const rF = Math.max(0.8, S.rFill * em * Math.sqrt(wm)), rL = Math.max(0.7, S.rLine * em * Math.sqrt(wm));
+  const rF = Math.max(0.8, S.rFill * em * Math.sqrt(wm)), rL = Math.max(0.7, rF * S.lineK);
   // cajas: cuadriláteros con las esquinas movidas (en unidades de la caja) y su mapa al documento
   const quads = o.boxes.map(B => {
-    const j = () => g() * 0.07 * B.H;
-    const c = [[j(), j()], [B.W + j(), j()], [B.W + j(), B.H + j()], [j(), B.H + j()]];
+    const j = () => Math.max(-0.012, Math.min(0.08, Math.abs(g()) * 0.045 - 0.008)) * B.H;   // hacia dentro (+)
+    const c = [[j(), j()], [B.W - j(), j()], [B.W - j(), B.H - j()], [j(), B.H - j()]];
     const uv = (s, t) => [(1 - s) * (1 - t) * c[0][0] + s * (1 - t) * c[1][0] + s * t * c[2][0] + (1 - s) * t * c[3][0], (1 - s) * (1 - t) * c[0][1] + s * (1 - t) * c[1][1] + s * t * c[2][1] + (1 - s) * t * c[3][1]];
     const at = (s, t) => { const q = uv(s, t); return B.toDoc(q[0], q[1]); };
     const a = at(0.5, 0), b = at(0.5, 1), l = at(0, 0.5), rr = at(1, 0.5);
@@ -352,6 +357,7 @@ function plan(o) {
     const hk = hand == null ? 1 : hand;
     const bw = (bow || 0) + hk * g() * L * 0.012;
     const wv = hk * (0.25 + 0.75 * rnd()) * (L * 0.004 + r * 0.35), ws = (rnd() * 1e5) | 0, wf = 1.2 + 2 * rnd();
+    const wv2 = hk * (0.3 + 0.7 * rnd()) * (L * 0.002 + r * 0.3), wf2 = (L / Math.max(4, r * 8)) * (0.6 + 0.8 * rnd());
     const hook = hk * (rnd() < 0.35 ? g() * Math.min(L * 0.03, r * 3) : 0);
     const pts = [];
     let j = 0;
@@ -360,7 +366,7 @@ function plan(o) {
       while (j < src.length - 2 && S0[j + 1] < d) j++;
       const a = src[j], b = src[j + 1], sl = (S0[j + 1] - S0[j]) || 1, t = (d - S0[j]) / sl;
       const tx = (b[0] - a[0]) / sl, ty = (b[1] - a[1]) / sl;
-      const f = k / n, o = bw * 4 * f * (1 - f) + wv * R.noise1(f * wf, ws) + hook * Math.pow(f, 6);
+      const f = k / n, o = bw * 4 * f * (1 - f) + wv * R.noise1(f * wf, ws) + wv2 * R.noise1(f * wf2, ws + 7) + hook * Math.pow(f, 6);
       pts.push({ x: a[0] + (b[0] - a[0]) * t - ty * o, y: a[1] + (b[1] - a[1]) * t + tx * o, w: 1 });
     }
     push(pts, PP, r, mask, alpha, L0);
@@ -408,29 +414,37 @@ function plan(o) {
     }
     void closed;
   }
-  // ---- 2. la caja, lado a lado (cada esquina distinta: cierra justa, se queda corta o se cruza)
-  for (const Q of quads) {
+  // ---- 2. la caja, lado a lado: de uno a tres golpes por lado (a cachos, a veces con un hueco, a veces montados),
+  // cada golpe con su torcedura propia, ni recto ni curvo regular; ~30 % de los lados, repasados
+  if (!S.noBox) for (const Q of quads) {
     const cs = [[0, 0], [1, 0], [1, 1], [0, 1]];
-    // cuánto se pasa cada punta (em): se queda corta, cierra justa, se pasa poco o se pasa mucho
-    const ext = () => { const u = rnd(); return em * (u < 0.2 ? -0.02 - 0.06 * rnd() : u < 0.45 ? 0.01 * rnd() : u < 0.82 ? 0.02 + 0.1 * rnd() : 0.12 + 0.2 * rnd()); };
+    const ext = () => { const u = rnd(); return em * (u < 0.22 ? -0.015 - 0.04 * rnd() : u < 0.5 ? 0.008 * rnd() : u < 0.88 ? 0.015 + 0.06 * rnd() : 0.08 + 0.1 * rnd()); };
     for (let k = 0; k < 4; k++) {
       const A0 = cs[k], B0 = cs[(k + 1) % 4];
-      const passes = rnd() < 0.4 ? 2 : 1;
+      const at = f => Q.at(A0[0] + (B0[0] - A0[0]) * f, A0[1] + (B0[1] - A0[1]) * f);
+      const p0 = at(0), p1 = at(1), sl = Math.hypot(p1[0] - p0[0], p1[1] - p0[1]) || 1;
+      // punto del lado en f (fuera de 0..1 sigue la tangente), desplazado «o» hacia fuera
+      const sideAt = (f, o) => {
+        const fc = Math.max(0, Math.min(1, f)), q = at(fc), qa = at(Math.min(1, fc + 0.01)), qb = at(Math.max(0, fc - 0.01));
+        let tx = qa[0] - qb[0], ty = qa[1] - qb[1]; const tl = Math.hypot(tx, ty) || 1; tx /= tl; ty /= tl;
+        const ov = f < 0 ? f * sl : f > 1 ? (f - 1) * sl : 0;
+        return [q[0] + tx * ov + ty * o, q[1] + ty * ov - tx * o];
+      };
+      const passes = rnd() < 0.3 ? 2 : 1;
       for (let ps = 0; ps < passes; ps++) {
-        const e0 = ext(), e1 = ext();
-        const at = f => Q.at(A0[0] + (B0[0] - A0[0]) * f, A0[1] + (B0[1] - A0[1]) * f);
-        const p0 = at(0), p1 = at(1), sl = Math.hypot(p1[0] - p0[0], p1[1] - p0[1]) || 1;
-        // el lado sigue el borde de la caja (en un arco, se curva con él); la segunda pasada, algo torcida
-        const f0 = -e0 / sl, f1 = 1 + e1 / sl, nS = 16, tw = ps ? g() * rL * 1.5 : 0;
-        const pc = [];
-        for (let j = 0; j <= nS; j++) {
-          const f = f0 + (f1 - f0) * j / nS, q = at(Math.max(0, Math.min(1, f))), qa = at(Math.max(0, Math.min(1, f)) + 0.01), qb = at(Math.max(0, Math.min(1, f)) - 0.01);
-          let tx = qa[0] - qb[0], ty = qa[1] - qb[1]; const tl = Math.hypot(tx, ty) || 1; tx /= tl; ty /= tl;
-          const over = f < 0 ? f * sl : f > 1 ? (f - 1) * sl : 0;       // fuera de la esquina: sigue la tangente
-          const tws = tw * (2 * j / nS - 1);
-          pc.push([q[0] + tx * over - ty * tws, q[1] + ty * over + tx * tws]);
+        const nCh = rnd() < 0.5 ? 1 : rnd() < 0.7 ? 2 : 3;
+        let fA = -ext() / sl;
+        const fEnd = 1 + ext() / sl;
+        for (let c = 0; c < nCh; c++) {
+          const fB = c === nCh - 1 ? fEnd : fA + (fEnd - fA) * (1 / (nCh - c)) * (0.75 + 0.5 * rnd());
+          // torcedura del golpe: entra y sale a distinta distancia del borde, con un combado propio
+          const oA = g() * rL * 1.4 + (ps ? g() * rL * 1.2 : 0), oB = g() * rL * 1.4 + (ps ? g() * rL * 1.2 : 0);
+          const bowc = g() * (rL * 1.2 + (fB - fA) * sl * 0.008), nS = 14, pc = [];
+          for (let j = 0; j <= nS; j++) { const t = j / nS; pc.push(sideAt(fA + (fB - fA) * t, oA + (oB - oA) * t + bowc * 4 * t * (1 - t))); }
+          handPoly(rnd() < 0.5 ? pc : pc.reverse(), S.lineP, rL * (0.9 + 0.35 * rnd()), Mline, 1, 1.3);
+          // siguiente golpe: a veces se monta un poco, a veces deja un hueco pequeño
+          fA = fB + (rnd() < 0.6 ? -1 : 1) * (0.005 + 0.025 * rnd()) * em / sl;
         }
-        handPoly(rnd() < 0.5 ? pc : pc.reverse(), S.lineP, rL * (1 + 0.25 * rnd()), Mline, 1, 1.2);
       }
     }
   }
@@ -453,7 +467,7 @@ function plan(o) {
     return Math.hypot(gx, gy) > 1e-6 ? Math.atan2(gx, -gy) : rnd() * Math.PI;
   };
   // ¿se puede pintar aquí? (fuera de las letras y sus vecinas; dentro de la caja o saliéndose un poco)
-  const kE = P.proc ? 1.0 : 1.2;
+  const kE = S.free ? 0.85 : P.proc ? 1.0 : 1.2;
   let rCur = rF;   // grosor del garabato que se está pintando
   const okAt = (x, y, over, rr0) => fAt(Mline.d, x, y) > 0.5 && fAt(D, x, y) > dIn + (rr0 || rCur) * kE && fAt(DO, x, y) <= over;
   // hasta dónde se puede ir desde (x, y) en la dirección (dx, dy), como mucho «max»
@@ -476,7 +490,7 @@ function plan(o) {
     let pts = [], dir = rnd() < 0.5 ? 1 : -1, n = -legs * step / 2;
     const fan = (0.15 + 0.45 * rnd()) * (rnd() < 0.5 ? -1 : 1), lean = g() * 0.1;
     const anchorEnd = rnd() < 0.5 ? 1 : -1;
-    const over = rCur * (rnd() < 0.4 ? 1.6 : 0.4);               // si sale del borde, cuánto
+    const over = S.free ? rCur * (0.4 + 1.6 * rnd()) : rCur * (rnd() < 0.4 ? 1.6 : 0.4);               // si sale del borde, cuánto
     let legCount = 0, used = 0, nMin = Infinity, nMax = -Infinity;
     const flush = () => { if (pts.length > 1) push(pts, P, rCur * (0.9 + 0.2 * rnd()), Mfill, alpha * (0.85 + 0.3 * rnd()), L0); pts = []; legCount = 0; };
     for (let k = 0; k < legs; k++) {
@@ -555,47 +569,6 @@ function plan(o) {
   // PINCEL: como lo hace un pintor. Primero la capa, con pinceladas largas a lo largo de la caja y otra tanda en
   // diagonal; luego, ENCIMA, se recorta con el pincel fino el canto de cada letra y el borde de la caja (el recorte
   // tapa donde acaba la capa: no se ven cortes).
-  if (o.tool === 'pincel') {
-    const Mc = { x0: G.x0, y0: G.y0, w: G.w, h: G.h, s: G.s, d: new Float32Array(D.length), out: 0 };
-    for (let i = 0; i < D.length; i++) Mc.d[i] = Mline.d[i] * smooth01(dIn + rL * 0.7, dIn + rL * 0.9, D[i]) * (1 - smooth01(rL * 0.5, rL * 0.5 + 1, DO[i]));
-    const rC = rF * 0.8 * (0.85 + 0.3 * tup);
-    // la pincelada entra y sale afilada (sin bolas donde empieza)
-    const Pc = Object.assign({}, P, { tIn: 0.35, tOut: 0.3, inL: 2.5, outL: 3.5, minR: 0.5 });
-    for (const Q of quads) {
-      const layers = [[0, 1], [0.35 + 0.15 * rnd(), 0.75], [-(0.3 + 0.2 * rnd()), 0.6]];
-      for (const [ang0, al] of layers) {
-        const ca = Math.cos(ang0), sa = Math.sin(ang0);
-        // filas en el marco de la caja (u a lo largo, v a lo alto), giradas ang0
-        const span = 1.6, nRow = Math.max(2, Math.ceil(span * Q.Hpx / (rC * 1.7) * (ang0 ? Math.abs(sa) * Q.Wpx / Q.Hpx * 0.5 + 0.6 : 1)));
-        for (let i = 0; i < nRow; i++) {
-          if (ang0 && rnd() > 0.55 + 0.4 * tup) continue;
-          const c = -0.3 + 1.6 * (i + 0.5 + (rnd() - 0.5) * 0.4) / nRow;
-          let s0 = -0.03 * rnd();
-          while (s0 < 1.02) {
-            const s1 = s0 + 0.25 + 0.45 * rnd(), pts = [], bw = g() * 0.03, ws = (rnd() * 1e5) | 0;
-            for (let j = 0; j <= 10; j++) {
-              const f = s0 + (s1 - s0) * j / 10;
-              // punto en la caja: a lo largo «f», con la inclinación de la capa
-              const uu = ang0 ? 0.5 + (f - 0.5) * ca * 1.2 - (c - 0.5) * sa * Q.Hpx / Q.Wpx : f;
-              const vv = ang0 ? 0.5 + (f - 0.5) * sa * Q.Wpx / Q.Hpx * 0.6 + (c - 0.5) * ca : c;
-              const v2 = vv + bw * 4 * (j / 10) * (1 - j / 10) + 0.02 * R.noise1(j / 10 * 2, ws);
-              // solo lo que cae en la caja (fuera, el mapa de la forma lo aplastaría contra el borde)
-              if (uu < -0.015 || uu > 1.015 || v2 < -0.03 || v2 > 1.03) { if (pts.length > 2) break; pts.length = 0; continue; }
-              const q = Q.at(uu, v2);
-              pts.push({ x: q[0], y: q[1] });
-            }
-            if (rnd() < 0.5) pts.reverse();
-            if (pts.length > 2) push(pts, Pc, rC * (0.85 + 0.3 * rnd()), Mc, al * alphaK, L0);
-            s0 = s1 - 0.05 - 0.08 * rnd();
-          }
-        }
-      }
-    }
-    // el recorte (perfiles y caja) va encima
-    const lines = out.splice(lineStart, lineEnd - lineStart);
-    for (const l of lines) out.push(l);
-    return { strokes: out, mask: Mc };
-  }
   let guard = 0, nScr = 0;
   const target = Math.min(0.995, S.cover + (tup - 0.5) * 0.2) * nValid;
   // huecos sin pintar (pocos, más cuanto menos tupido): se marcan como hechos y nadie va a buscarlos
@@ -626,11 +599,14 @@ function plan(o) {
     if (best < 0) { for (let k = free.length - 1; k >= 0; k--) if (done[free[k]]) free.splice(k, 1); continue; }
     const x = cx0 + ((best % cw) + 0.5) * cell + (rnd() - 0.5) * cell, y = cy0 + (((best / cw) | 0) + 0.5) * cell + (rnd() - 0.5) * cell;
     let ang = tangentAt(x, y) + g() * 0.25;
-    if (rnd() < S.cross) ang += (rnd() < 0.5 ? 1 : -1) * (0.4 + 0.8 * rnd());
+    if (S.free) {
+      // pincel: casi vertical o casi a lo largo de la caja (con su giro), según caiga; junto a una letra, a lo largo de ella
+      if (fAt(D, x, y) > rF * 3) { const q0 = quads[0].at(0.5, 0.5), q1 = quads[0].at(0.6, 0.5); const base = Math.atan2(q1[1] - q0[1], q1[0] - q0[0]); ang = base + (rnd() < 0.55 ? Math.PI / 2 : 0) + g() * 0.35; }
+    } else if (rnd() < S.cross) ang += (rnd() < 0.5 ? 1 : -1) * (0.4 + 0.8 * rnd());
     // tamaño del hueco: a lo largo y a lo ancho (medido con el trazo más fino); el grosor, el que cabe
     const ux = Math.cos(ang), uy = Math.sin(ang);
     rCur = rF * 0.35;
-    { const ac = reach(x, y, -uy, ux, em, rF) + reach(x, y, uy, -ux, em, rF); rCur = Math.max(rF * 0.35, Math.min(rF, ac * 0.3 + rF * 0.35 * rnd())); }
+    { const ac = reach(x, y, -uy, ux, em, rF) + reach(x, y, uy, -ux, em, rF), lo = S.free ? 0.6 : 0.35; rCur = Math.max(rF * lo, Math.min(rF, ac * 0.3 + rF * 0.35 * rnd())); }
     const along = reach(x, y, ux, uy, em * 2, rF) + reach(x, y, -ux, -uy, em * 2, rF);
     const across = reach(x, y, -uy, ux, em * 2, rF) + reach(x, y, uy, -ux, em * 2, rF);
     const small = Math.min(1, Math.min(along, across) / (em * 0.45));
@@ -730,7 +706,26 @@ function planWords(lay, out, p, seed, wordExt) {
     for (const wi of grp) { const E = wordExt && wordExt.get(wi); if (E) { x0 = Math.min(x0, E.x0); x1 = Math.max(x1, E.x1); y0 = Math.min(y0, E.y0); y1 = Math.max(y1, E.y1); } }
     const rnd = R.mulberry32((seed + grp[0] * 977 + 404) >>> 0);
     const pad = sz * (0.17 + 0.072);
-    const X0 = x0 - pad * (1 + 0.3 * rnd()), X1 = x1 + pad * (1 + 0.3 * rnd()), Y0 = y0 - pad * (0.8 + 0.3 * rnd()), Y1 = y1 + pad * (0.8 + 0.3 * rnd());
+    let X0 = x0 - pad * (1 + 0.3 * rnd()), X1 = x1 + pad * (1 + 0.3 * rnd()), Y0 = y0 - pad * (0.8 + 0.3 * rnd()), Y1 = y1 + pad * (0.8 + 0.3 * rnd());
+    // la caja no pisa letras de otras palabras: si alguna se mete, se recorta la CAJA (por el lado que menos pierde),
+    // sin entrar en las letras propias
+    if (wordExt) {
+      const gap = sz * 0.07, pmin = sz * 0.07;
+      for (const [wj, E] of wordExt) {
+        if (grp.indexOf(wj) >= 0 || !isFinite(E.x0)) continue;
+        const ex0 = E.x0 - gap, ex1 = E.x1 + gap, ey0 = E.y0 - gap, ey1 = E.y1 + gap;
+        if (ex1 <= X0 || ex0 >= X1 || ey1 <= Y0 || ey0 >= Y1) continue;
+        const opts = [];
+        if (ex1 <= x0 - pmin) opts.push(['X0', ex1, (ex1 - X0) * (Y1 - Y0)]);
+        if (ex0 >= x1 + pmin) opts.push(['X1', ex0, (X1 - ex0) * (Y1 - Y0)]);
+        if (ey1 <= y0 - pmin) opts.push(['Y0', ey1, (ey1 - Y0) * (X1 - X0)]);
+        if (ey0 >= y1 + pmin) opts.push(['Y1', ey0, (Y1 - ey0) * (X1 - X0)]);
+        if (!opts.length) continue;             // (no se puede sin tocar las propias: la máscara rodea esas letras)
+        opts.sort((a, b) => a[2] - b[2]);
+        const [side, v] = opts[0];
+        if (side === 'X0') X0 = v; else if (side === 'X1') X1 = v; else if (side === 'Y0') Y0 = v; else Y1 = v;
+      }
+    }
     const box = { W: X1 - X0, H: Y1 - Y0, letter: lay.letters.indexOf(ls[0]), toDoc: (u, v) => lay.map(X0 + u, Y0 + v) };
     let bx0 = Infinity, by0 = Infinity, bx1 = -Infinity, by1 = -Infinity;
     for (const [u, v] of [[0, 0], [box.W, 0], [box.W, box.H], [0, box.H], [box.W / 2, 0], [box.W / 2, box.H]]) { const q = box.toDoc(u, v); bx0 = Math.min(bx0, q[0]); by0 = Math.min(by0, q[1]); bx1 = Math.max(bx1, q[0]); by1 = Math.max(by1, q[1]); }

@@ -60,7 +60,7 @@ function measure(tokens, levels, o) {
     // el subrayado necesita sitio debajo; el negativo, su caja alrededor
     let descU = under && !neg ? Math.max(desc, 0.1) + 0.2 : desc, ascN = asc, set = sw;
     if (neg) {
-      const NP = 0.16 + pad;
+      const NP = 0.24 + pad;
       set = Object.assign({}, sw, { width: sw.width + 2 * NP, glyphs: sw.glyphs.map(q => Object.assign({}, q, { x: q.x + NP })) });
       ascN += NP * 0.9; descU += NP * 0.9;
     }

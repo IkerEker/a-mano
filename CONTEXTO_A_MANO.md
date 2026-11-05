@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.9)
+## 2. Cómo se usa (2.10)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -304,6 +304,25 @@ en azul, pincel en azul y burdeos, autoencajar en arco con líneas montadas)
 - Velocidad: distancia exacta de Felzenszwalb (`fastEDT`, lineal) en vez del chaflán; rejilla de 1,6 Mpx;
   cobertura incremental; sin borde húmedo cuando no aporta. Un negativo pasa de ~6 s a ~1,3–2,3 s.
 
+### Tras probar la 2.9 (referencia de pincel: cartel WRONG, `referencias/negativo_pincel_wrong.jpg`)
+- «Que no se cruce bloque de negativo con letra normal; si se tienen que cruzar, cómete el bloque, no la letra.»
+- «Las líneas de los bloques demasiado regulares: más irregulares, a cachos, el 30 % repasadas.»
+- «Las líneas que sobredibujan las letras del negativo, iguales a las del relleno (no finísimas, fuera de técnica).»
+- «Los bordecitos grises entre pinceladas en ceras y óleo, quítalos.» «El relleno de pincel, entero mal.»
+
+### Qué se hizo en la 2.10
+- Caja recortada contra las otras palabras (`planWords`: si una palabra vecina entra, se recorta el lado que menos
+  área pierde sin entrar en las letras propias); esquinas que solo se mueven hacia dentro; la maqueta reserva más
+  sitio alrededor de las palabras en negativo (0,24 em + grosor).
+- Perfil y caja con la MISMA herramienta que el relleno (`lineP = fillP`, grosor `rF × lineK`).
+- Lados de la caja: 1–3 golpes por lado (a cachos, montados o con un hueco), cada uno con su torcedura (entra y
+  sale a distinta distancia, combado propio, ondulación a dos escalas); ~30 % de los lados repasados.
+- Pintura que tapa (`compositePigment` modo over): una capa fina no aclara lo que ya está pintado (el aclarado
+  solo se permite con a³): sin cercos claros entre pinceladas (cera, óleo, pincel).
+- Pincel: sin la capa «de pintor»; pinceladas gordas y secas (texturas pincel + brocha con sus entradas y salidas
+  reales, `dry` alto), sueltas, casi verticales o a lo largo de la caja, que se salen de la caja (el borde lo
+  hacen ellas, sin raya); recorte de letras con el mismo pincel.
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -362,7 +381,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.9.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.10.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)
