@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.6)
+## 2. Cómo se usa (2.7)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -237,6 +237,29 @@ en azul, pincel en azul y burdeos, autoencajar en arco con líneas montadas)
 - Las letras vecinas que se meten en la caja se respetan (el relleno las rodea); en autoencajar las letras en
   negativo no se meten en otras líneas.
 
+### Tras probar la 2.6 (referencias: `referencias/negativo_TEA_boli_rotu_lapiz.png`, `relleno_garabato_a_mano.png`)
+- «Dos palabras juntas en negativo: la caja tiene que unirse.» «Las esquinas de la letra del negativo tienen que
+  ser duras, trazos rectos.» «La textura muchísimo más realista.» «El boli que haga bolitas o espirales, quítalo.»
+  «Las esquinas de las cajas, todas iguales, es terrible: muchísima más variedad.»
+- Cómo se hace a mano: las letras primero con línea, luego la caja, luego se rellena entre medias. Los bordes de la
+  caja son irregulares: a veces cierran, a veces no, a veces se cruzan, y al rellenar se marcan más. El relleno es
+  un garabato de ida y vuelta sin levantar el boli (un muelle apretado); con eso se llena ~80 %, el resto son rayas
+  sueltas que remarcan y huecos (más con boli: da pereza rellenar).
+
+### Qué se hizo en la 2.7 (`js/negativo.js`)
+- **Caja única** para palabras en negativo seguidas en la misma línea (`planWords` agrupa).
+- **Letra de esquinas duras**: el estilo `bloque` es poligonal (`angular: 1`); los trazos se simplifican
+  (Douglas-Peucker) y se estampan con su contorno en inglete (`stampBlocks`: esquinas vivas, bisel solo en picos
+  muy agudos, remates cuadrados); los trozos que el escritor parte en los picos se vuelven a unir. Grosor 0,072 em.
+- **Orden de pintado**: 1) perfil de las letras en tramos rectos que se pasan (o no llegan) en cada punta; 2) caja
+  lado a lado, cada punta con su salida al azar (corta, justa, poco, mucho; en em) y a veces dos pasadas torcidas;
+  3) fondo (solo rotulador y pincel: pasadas largas casi seguidas); 4) **garabatos** donde aún falta (rejilla de
+  cobertura; se elige el hueco más grande; idas y vueltas con vuelta redonda, un extremo «ancla» y el otro en
+  abanico; dirección = borde más cercano, a veces cruzada; se parte cada `split` idas para que se monte la tinta)
+  hasta `cover`; 5) rayas sueltas que remarcan junto a los lados de la caja y por dentro.
+- Parámetros por técnica en `STYLE` (boli: líneas finas, muchas idas, huecos; rotulador: base + pasadas largas
+  sueltas; lápiz: más gris; carboncillo, cera, pincel). Sin bucles ni espirales.
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -295,7 +318,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.6.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.7.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)

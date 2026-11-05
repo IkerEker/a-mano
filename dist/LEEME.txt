@@ -1,8 +1,8 @@
-A MANO 2.6 · plugin para Photoshop (2024 o posterior)
+A MANO 2.7 · plugin para Photoshop (2024 o posterior)
 =====================================================
 
 INSTALAR
-- Doble clic en A_mano_v2.6.0.ccx -> Creative Cloud avisa de que no viene del
+- Doble clic en A_mano_v2.7.0.ccx -> Creative Cloud avisa de que no viene del
   Marketplace -> "Instalar". Sustituye a las versiones anteriores. Es independiente de Cartelator.
 - En Photoshop: Plugins > A mano.
 
@@ -21,9 +21,9 @@ GENERAR, de arriba abajo
    Las importantes salen más grandes y repasadas (varias pasadas encima).
    NEGRITA, SUBRAYADA y NEGATIVO (fila de abajo): la negrita se repasa a mano con las pasadas
    a la vista; la subrayada lleva una raya a mano debajo; en NEGATIVO la palabra queda en
-   blanco y se pinta su caja alrededor, con la técnica elegida (cada una rellena a su manera:
-   lápiz sombreado, carboncillo barrido, cera en zigzag, boli en bucles, rotulador a pasadas,
-   pincel a pinceladas) y perfilando cada letra. Valen también en Autoencajar.
+   blanco (letra de bloque, esquinas duras) y se pinta su caja alrededor con la técnica
+   elegida: primero el perfil de las letras, luego la caja y luego el relleno a garabatos.
+   Varias palabras seguidas en negativo comparten caja. Valen también en Autoencajar.
    AUTOENCAJAR (debajo de la casilla): se olvida de las importancias (no de negrita y subrayado) y llena la forma
    al máximo, letra a letra: cada letra crece hasta el hueco que le dejan las de
    arriba y las de abajo (bajo una letra baja va una alta, y al revés). Las letras no
