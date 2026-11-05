@@ -75,6 +75,15 @@ const { open } = require('./setup.js');
   await rec('G2d negrita y subrayado en autoencajar' + (marksOk ? '' : ' (FALLO marcas)'), marksOk ? sm : Object.assign({}, sm, { cls: 'err' }));
   await snap('g_marcas');
   await run(() => { T.style('había', 'clean'); T.style('sótano', 'clean'); T.seg('textModeSeg', 'importancia'); });
+  // 2e0. el deslizador «tupido» solo aparece si hay alguna palabra en negativo
+  {
+    const h0 = await run(() => document.getElementById('negBox').classList.contains('hidden'));
+    await run(() => T.style('había', 'negv'));
+    const h1 = await run(() => document.getElementById('negBox').classList.contains('hidden'));
+    await run(() => T.style('había', 'clean'));
+    const h2 = await run(() => document.getElementById('negBox').classList.contains('hidden'));
+    await rec('G2e0 deslizador tupido solo con negativos (' + h0 + '/' + h1 + '/' + h2 + ')', { text: 'ok', cls: h0 && !h1 && h2 ? 'ok' : 'err' });
+  }
   // 2e. negativo (marca de palabra), con cada técnica
   for (const [tool, pk] of [['lapiz', 'blando'], ['carbon', 'suave'], ['cera', 'cera'], ['boli', 'bic'], ['rotulador', 'gordo'], ['pincel', 'seco']]) {
     await newDoc(3000, 1900); await refresh();

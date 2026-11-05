@@ -30,7 +30,7 @@ const store = {
 const DEF = {
   tab: 'gen', tool: 'rotulador', preset: 'fino', fill: '', color: '#1d1d1f', persona: 'adulta', version: 'a', mode: 'mayus', textMode: 'importancia', repaso: 'auto', legib: 70,
   grosor: 0, tinta: 55, pulso: 40, repasado: 50, follow: 'auto', locura: 50, prisa: 15, tight: 0,
-  contraste: 50, inter: 100, llenar: 30, margen: 5, align: 'center', kind: 'imagen', colorMode: 'uno', colorVar: 45,
+  contraste: 50, inter: 100, llenar: 30, margen: 5, align: 'center', kind: 'imagen', colorMode: 'uno', colorVar: 45, tupido: 60,
   text: 'Nadie había cerrado\nla puerta del sótano', levels: [0, 2, 1, 0, 0, -1, 0], marks: []
 };
 const st = Object.assign({}, DEF, store.get('settings2', {}));
@@ -89,7 +89,7 @@ function chaos() { return Math.max(0, 1 - st.legib / 100); }
 function genParams() {
   return {
     persona: st.persona + '_' + st.version, mode: st.mode, tool: st.tool, preset: st.preset, color: st.color,
-    colorVar: st.colorMode === 'letras' ? Math.max(0.02, st.colorVar / 100) : 0,
+    colorVar: st.colorMode === 'letras' ? Math.max(0.02, st.colorVar / 100) : 0, tupido: st.tupido / 100,
     auto: st.textMode === 'auto', repaso: st.repaso, marks: st.marks || [],
     legib: st.legib / 100, locura: st.locura / 50, pulso: st.pulso / 100, prisa: st.prisa / 100,
     width: Math.pow(2, st.grosor / 50), repasado: st.repasado / 50, tinta: st.tinta / 100,
@@ -101,7 +101,7 @@ function genParams() {
 function handParams() {
   // la legibilidad manda; «locura» la escala (50 = normal)
   const loc = Math.min(1.4, chaos() * 1.8 * (st.locura / 50));
-  return { colorVar: st.colorMode === 'letras' ? Math.max(0.02, st.colorVar / 100) : 0, tool: st.tool, preset: st.preset, fill: st.fill || '', follow: st.follow, repaso: st.repaso, width: Math.pow(2, st.grosor / 50), locura: loc, pulso: st.pulso / 100, prisa: st.prisa / 100, tight: st.tight / 150, ink: st.tinta / 100 };
+  return { tupido: st.tupido / 100, colorVar: st.colorMode === 'letras' ? Math.max(0.02, st.colorVar / 100) : 0, tool: st.tool, preset: st.preset, fill: st.fill || '', follow: st.follow, repaso: st.repaso, width: Math.pow(2, st.grosor / 50), locura: loc, pulso: st.pulso / 100, prisa: st.prisa / 100, tight: st.tight / 150, ink: st.tinta / 100 };
 }
 
 // ------------------------------------------------------------------ segmentados
@@ -133,7 +133,13 @@ function relevel(oldToks, oldLv, newToks) {
   }
   return out;
 }
+// el deslizador de «tupido» solo se ve si hay algún negativo (palabra marcada o relleno Negativo en CALCAR)
+function syncNeg() {
+  const on = st.tab === 'calc' ? st.fill === 'negativo' : (st.marks || []).some(m => m && m.indexOf('n') >= 0);
+  show($('negBox'), on);
+}
 function renderBoard() {
+  syncNeg();
   const b = $('board'); if (!b) return;
   const toks = tokens();
   while (b.firstChild) b.removeChild(b.firstChild);
@@ -239,7 +245,7 @@ async function refreshCtx() {
     else { ctxC.textContent = 'Selecciona en Capas las capas de texto que quieras pasar a mano (o un grupo que las contenga).'; ctxC.className = 'ctx'; }
   }
 }
-const SAVED_KEYS = ['text', 'levels', 'marks', 'persona', 'version', 'mode', 'textMode', 'tool', 'preset', 'color', 'colorMode', 'colorVar', 'legib'];
+const SAVED_KEYS = ['text', 'levels', 'marks', 'tupido', 'persona', 'version', 'mode', 'textMode', 'tool', 'preset', 'color', 'colorMode', 'colorVar', 'legib'];
 function loadSaved(saved) {
   for (const k of SAVED_KEYS) if (saved[k] != null) st[k] = Array.isArray(saved[k]) ? saved[k].slice() : saved[k];
   save(); syncControls();
@@ -447,13 +453,14 @@ function setTab(t) {
   $('numStyle').textContent = t === 'gen' ? '3' : '1';
   const go = $('btnGo'); if (go) go.textContent = t === 'gen' ? 'Escribir en la forma' : 'Aplicar a lo seleccionado';
   lastShapeKey = null;
+  syncNeg();
   scheduleRefresh();
 }
 function setColor(hex) {
   st.color = hex; save();
   const sw = $('swColor'); if (sw) sw.style.backgroundColor = hex;
 }
-const SLIDERS = { slColorVar: 'colorVar', slLegib: 'legib', slGrosor: 'grosor', slTinta: 'tinta', slPulso: 'pulso', slRepasado: 'repasado', slLocura: 'locura', slPrisa: 'prisa', slTight: 'tight', slContraste: 'contraste', slInter: 'inter', slLlenar: 'llenar', slMargen: 'margen' };
+const SLIDERS = { slTupido: 'tupido', slColorVar: 'colorVar', slLegib: 'legib', slGrosor: 'grosor', slTinta: 'tinta', slPulso: 'pulso', slRepasado: 'repasado', slLocura: 'locura', slPrisa: 'prisa', slTight: 'tight', slContraste: 'contraste', slInter: 'inter', slLlenar: 'llenar', slMargen: 'margen' };
 function syncControls() {
   segSet('toolSeg', st.tool); renderPresets(); segSet('fillSeg', st.fill || ''); segSet('fontSeg', st.persona); segSet('caseSeg', st.mode);
   segSet('versionSeg', st.version); segSet('colorModeSeg', st.colorMode); show($('multiBox'), st.colorMode === 'letras'); segSet('textModeSeg', st.textMode); segSet('repasoSeg', st.repaso); syncText();
@@ -481,7 +488,7 @@ function bind() {
   });
   segBind('toolSeg', v => { st.tool = v; st.preset = Object.keys(INK.TOOLS[v].presets)[0]; save(); segSet('toolSeg', v); renderPresets(); });
   segBind('presetSeg', v => { st.preset = v; save(); segSet('presetSeg', v); });
-  segBind('fillSeg', v => { st.fill = v; save(); segSet('fillSeg', v); });
+  segBind('fillSeg', v => { st.fill = v; save(); segSet('fillSeg', v); syncNeg(); });
   segBind('colorModeSeg', v => { st.colorMode = v; save(); segSet('colorModeSeg', v); show($('multiBox'), v === 'letras'); });
   segBind('fontSeg', v => { st.persona = v; save(); segSet('fontSeg', v); syncText(); });
   segBind('versionSeg', v => { st.version = v; save(); segSet('versionSeg', v); syncText(); });

@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.8)
+## 2. Cómo se usa (2.9)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -278,6 +278,32 @@ en azul, pincel en azul y burdeos, autoencajar en arco con líneas montadas)
   relleno (`endDry`) la entrada y sobre todo la salida se abren en fibras secas (pasada rápida). Fondo del negativo
   a pasadas cortas, torcidas y onduladas.
 
+### Tras probar la 2.8 (y «LO DEMÁS DÉJALO IGUAL»)
+- Rayas sueltas en las cajas curvas; la negrita poco realista; cortes de máscara; O y D demasiado picudas; un punto
+  en el palo de la H con pincel; texturas de negativo malas en pincel y rotulador, mejorables en lápiz y boli;
+  «más tupido, con zonas en blanco, que no quede todo gris»; un deslizador TUPIDO que solo aparezca si hay alguna
+  palabra en negativo. Después: «va muy lento» y «el perfil de cada letra, con la misma técnica (carbón con carbón)».
+
+### Qué se hizo en la 2.9
+- Lados de la caja: siguen su borde (en un arco, se curvan) — antes eran rectas entre las esquinas (`handPoly`).
+- Perfil de las letras: tramos entre esquinas (giro > 0,55 rad); las curvas siguen la curva, las esquinas se pasan.
+  Letra `bloque` otra vez redonda (`angular: 0`, simplificado 0,005 em): solo los picos son picos.
+- Perfil con la misma técnica que el relleno (carboncillo, cera, rotulador; boli y lápiz con su punta fina; pincel
+  con pincel fino), más grueso en carboncillo/cera/rotulador.
+- Sin cortes: el fondo y las rayas sueltas también se adaptan al hueco; cada garabato elige su grosor según el
+  hueco (`rCur`: gordo en lo abierto, más fino entre letras); el relleno se salta el arranque cargado de la cinta
+  (`skipCaps`).
+- PINCEL: como un pintor — capa de pinceladas largas (a lo largo y dos tandas en diagonal, afiladas en los
+  extremos, solo dentro de la caja) y encima el recorte con pincel fino de letras y caja (tapa donde acaba la capa).
+- TUPIDO (`st.tupido`, deslizador `slTupido` en `negBox`, visible solo con alguna palabra en negativo o con relleno
+  Negativo en CALCAR): cobertura, carga, apretado, huecos sin pintar (más cuanto menos tupido) y zonas más
+  cargadas por partes (otra tanda de garabatos al azar). Por defecto 60, más tupido que antes.
+- Negrita/repasado: la otra pasada casi encima (0,15–0,5 del medio ancho), casi sin giro, entra algo después y
+  acaba algo antes o después. El trazo en dos golpes (imperfección) solo con boli y rotulador (con pincel dejaba
+  un punto de carga en el palo).
+- Velocidad: distancia exacta de Felzenszwalb (`fastEDT`, lineal) en vez del chaflán; rejilla de 1,6 Mpx;
+  cobertura incremental; sin borde húmedo cuando no aporta. Un negativo pasa de ~6 s a ~1,3–2,3 s.
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -336,7 +362,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.8.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.9.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)

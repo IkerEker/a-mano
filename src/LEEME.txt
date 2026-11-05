@@ -1,8 +1,8 @@
-A MANO 2.8 · plugin para Photoshop (2024 o posterior)
+A MANO 2.9 · plugin para Photoshop (2024 o posterior)
 =====================================================
 
 INSTALAR
-- Doble clic en A_mano_v2.8.0.ccx -> Creative Cloud avisa de que no viene del
+- Doble clic en A_mano_v2.9.0.ccx -> Creative Cloud avisa de que no viene del
   Marketplace -> "Instalar". Sustituye a las versiones anteriores. Es independiente de Cartelator.
 - En Photoshop: Plugins > A mano.
 
@@ -24,6 +24,7 @@ GENERAR, de arriba abajo
    blanco (letra de bloque, esquinas duras) y se pinta su caja alrededor con la técnica
    elegida: primero el perfil de las letras, luego la caja y luego el relleno a garabatos.
    Varias palabras seguidas en negativo comparten caja. Valen también en Autoencajar.
+   Con alguna palabra en negativo aparece «Tupido»: de dejar huecos a muy cargado.
    AUTOENCAJAR (debajo de la casilla): se olvida de las importancias (no de negrita y subrayado) y llena la forma
    al máximo, letra a letra: cada letra crece hasta el hueco que le dejan las de
    arriba y las de abajo (bajo una letra baja va una alta, y al revés). Las letras no

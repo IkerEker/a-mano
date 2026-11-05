@@ -285,8 +285,9 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
     return a * (cap ? 1 : 1);
   };
   // no siempre se usa el inicio exacto: a veces el trazo «entra» ya cargado
-  const skipIn = rnd() < P.capSkip ? rnd() * Math.max(0, Math.min(Lr - need, Lr * 0.15)) : 0;
-  const skipOut = rnd() < P.capSkip ? rnd() * Math.max(0, Math.min(Lr - need - skipIn, Lr * 0.15)) : 0;
+  // (skipCaps: relleno de negativos; se salta el arranque cargado del escaneo)
+  const skipIn = P.skipCaps ? Math.max(0, Math.min(Lr - need, Lr * 0.22)) * (0.7 + 0.3 * rnd()) : rnd() < P.capSkip ? rnd() * Math.max(0, Math.min(Lr - need, Lr * 0.15)) : 0;
+  const skipOut = P.skipCaps ? Math.max(0, Math.min(Lr - need - skipIn, Lr * 0.15)) * rnd() : rnd() < P.capSkip ? rnd() * Math.max(0, Math.min(Lr - need - skipIn, Lr * 0.15)) : 0;
   const capR = Math.min(Lr * 0.3, Math.max(4, Lr * 0.18));
   const midA = capR, midB = Lr - capR, midL = Math.max(1, midB - midA);
   const midOff = rnd() * midL * 2;
@@ -413,7 +414,7 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
     }
   }
   // borde húmedo: la tinta se acumula en el borde de la mancha
-  if (P.wet > 0) wetEdge(buf, bw, bh, Math.max(1, Math.round(r * 0.45)), P.wet);
+  if (P.wet > 0.05) wetEdge(buf, bw, bh, Math.max(1, Math.round(r * 0.45)), P.wet);
   // máscara (negativos): donde vale 0 no se pinta (las letras quedan libres)
   if (opts.mask) applyMask(buf, bx0, by0, bw, bh, opts.mask);
   RD.compositePigment(canvas, buf, bx0, by0, bw, bh, rgb, opts.blend || P.blend, opts.alphaMul == null ? 1 : opts.alphaMul);

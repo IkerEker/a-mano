@@ -231,7 +231,7 @@ function plan(lay, p, seed) {
         // el palo (el trazo largo) casi siempre; a veces otro
         const pick = body[ri() < 0.7 ? 0 : Math.min(body.length - 1, 1)];
         if (pick.L > 0.12 * em) strokes[pick.k].retrace = true;
-      } else if (ri() < 0.03 && body[0].L > 0.45 * em && !strokes[body[0].k].closed) {
+      } else if (ri() < 0.03 && P.proc && body[0].L > 0.45 * em && !strokes[body[0].k].closed) {
         const st0 = strokes[body[0].k], pts = st0.pts, n = pts.length;
         const cut = Math.max(2, Math.min(n - 3, Math.round(n * (0.35 + 0.3 * ri()))));
         const back = Math.max(1, Math.round(n * 0.04));
@@ -368,8 +368,8 @@ function plan(lay, p, seed) {
         if (pass > 0) {
           // la otra pasada: el mismo gesto otra vez, algo desplazado y girado, que se pasa o se queda corto en
           // los extremos (nunca un trozo suelto a mitad de la letra)
-          const ang = rs() * 6.283, d = (s.retrace && passes < 2 ? 0.35 + 0.35 * rs() : 0.3 + 0.5 * rs()) * hw * 1.4;
-          const ox = Math.cos(ang) * d, oy = Math.sin(ang) * d, rot = g(rs) * 0.018, cr = Math.cos(rot), sr = Math.sin(rot);
+          const ang = rs() * 6.283, d = (s.retrace && passes < 2 ? 0.3 + 0.3 * rs() : 0.15 + 0.35 * rs()) * hw * 1.4;
+          const ox = Math.cos(ang) * d, oy = Math.sin(ang) * d, rot = g(rs) * 0.008, cr = Math.cos(rot), sr = Math.sin(rot);
           const lam = (0.25 + 0.2 * rs()) * L.size, ns = (seed + li * 31 + si * 7 + pass * 101) | 0, A = 0.5 * hw;
           let acc = 0;
           pts = pts.map((q, k) => {
@@ -380,7 +380,7 @@ function plan(lay, p, seed) {
             const x = q[0] - smx, y = q[1] - smy;
             return [smx + cr * x - sr * y + ox - ty / tl * o, smy + sr * x + cr * y + oy + tx / tl * o];
           });
-          if (!s.closed && pts.length > 3) pts = trimEnds(pts, (rs() - 0.35) * 0.05 * L.size, (rs() - 0.3) * 0.06 * L.size);
+          if (!s.closed && pts.length > 3) pts = trimEnds(pts, -(0.01 + 0.04 * rs()) * L.size, (rs() - 0.6) * 0.05 * L.size);
         }
         // pincel: algunos trazos verticales empiezan por abajo
         if (P.up && !s.fill && pts.length > 2) {
