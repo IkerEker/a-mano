@@ -56,8 +56,8 @@ const TOOLS = {
   },
   rotulador: {
     label: 'Rotulador', presets: {
-      fino: { label: 'Fino', proc: 'marker', load: 0.15, w: 0.022, dens: 0.88, tIn: 0.95, tOut: 0.92, inL: 1, outL: 1.2, press: 0.04, wet: 0.35, pool: 0.4, tremor: 0.75, lift: 0.1, tone: 0.12, grain: 0.06, fuse: true },
-      gordo: { label: 'Gordo', useFont: true, proc: 'marker', load: 0.18, w: 0.055, dens: 0.8, tIn: 0.97, tOut: 0.95, inL: 0.8, outL: 1, press: 0.03, wet: 0.45, pool: 0.35, tremor: 0.7, lift: 0.08, tone: 0.1, grain: 0.07, fuse: true },
+      fino: { label: 'Fino', proc: 'marker', load: 0.15, w: 0.022, dens: 0.93, tIn: 0.95, tOut: 0.92, inL: 1, outL: 1.2, press: 0.04, wet: 0.1, pool: 0.4, tremor: 0.75, lift: 0.1, tone: 0.12, grain: 0.06, fuse: true },
+      gordo: { label: 'Gordo', useFont: true, proc: 'marker', load: 0.18, w: 0.055, dens: 0.9, tIn: 0.97, tOut: 0.95, inL: 0.8, outL: 1, press: 0.03, wet: 0.1, pool: 0.35, tremor: 0.7, lift: 0.08, tone: 0.1, grain: 0.07, fuse: true },
       gastado: { label: 'Gastado', proc: 'marker', w: 0.05, dens: 0.95, tIn: 0.95, tOut: 0.9, inL: 0.8, outL: 1, press: 0.05, wet: 0.15, pool: 0.15, dry: 0.75, tremor: 0.75, lift: 0.1, tone: 0.15, load: 0.3, grain: 0.12, fuse: true }
     }
   },
@@ -233,7 +233,9 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
     // grumo: la punta se ha quedado un momento quieta al empezar y suelta un punto de tinta
     if (opts.blob && s < Ls / 2) bleed += (1 - smooth01(0, hh * 1.3, Math.max(0, s))) * 0.9;
     // borde: casi limpio (el fieltro y la bola no tiemblan); solo el diente del papel lo muerde un poco
-    const rough = 0.016 * R.noise1(s / (r * 2.5 + 1), mSeed + (v > 0 ? 1 : 2)) + 0.03 * (R.hash2(px, py, mSeed) - 0.5);
+    // (rotulador: el fieltro sangra un poco en el papel: canto algo deshilachado a dos escalas)
+    const rough = P.pen ? 0.016 * R.noise1(s / (r * 2.5 + 1), mSeed + (v > 0 ? 1 : 2)) + 0.03 * (R.hash2(px, py, mSeed) - 0.5)
+      : 0.03 * R.noise1(s / (r * 1.2 + 1), mSeed + (v > 0 ? 1 : 2)) + 0.045 * R.noise1(s / (r * 0.25 + 0.5), mSeed + (v > 0 ? 3 : 4)) + 0.05 * (R.hash2(px, py, mSeed) - 0.5);
     const edge = 1 + rough + 0.14 * bleed;
     const aa = Math.max(0.04, (P.pen ? 0.55 : 0.7) / Math.max(1, r));
     const inside = smooth01(edge + aa, edge - aa, ve);
@@ -250,6 +252,18 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
     const rim = P.pen ? (P.wet || 0) * (smooth01(0.25, 0.75, ve / edge) - 0.35) * 0.5   // carriles del surco
       : (P.wet || 0) * 0.55 * smooth01(0.8, 0.97, ve / edge) * (1 - smooth01(0.97, 1.02, ve / edge) * 0.5);
     let a = inside * (0.86 + (P.streak == null ? 1 : P.streak) * streak + mott + rim) * (1 + 0.3 * bleed);
+    // rotulador: moteado fino y claro (el papel no absorbe igual en todas partes)
+    if (!P.pen) { const pf = paper[(((py * 1.7 + 31) & 255) << 8) | ((px * 1.7 + 17) & 255)]; a *= 1 - 0.28 * smooth01(0.58, 0.85, pf); }
+    // pasada rápida: al soltar, la punta se abre en fibras secas (más cuanto más cerca del final)
+    if (P.endDry) {
+      const dl = Ls - s, Lz = Math.min(Ls * 0.45, hEnd1 * (3 + 3 * R.hash2(3, 7, mSeed))), Lz0 = Math.min(Ls * 0.3, hEnd0 * (1.5 + 2 * R.hash2(5, 9, mSeed)));
+      // (al soltar se abre en fibras; al entrar en marcha, algo menos)
+      const e = Math.max(1 - smooth01(-hEnd1 * 0.6, Lz, dl), 0.7 * (1 - smooth01(-hEnd0 * 0.6, Lz0, s)));
+      if (e > 0.01) {
+        const z = 0.5 + 0.5 * R.noise1(vs * 9 + 0.15 * R.noise1(s / (r * 3 + 1), mSeed + 41), mSeed + 43);
+        a *= smooth01(e * P.endDry * 0.9, e * P.endDry * 0.9 + 0.2, z) * (1 - 0.3 * e);
+      }
+    }
     // boli: la bola salta a ratos (claros finos a lo ancho), más en los trazos rápidos
     if (P.skip) {
       const z = 0.5 + 0.5 * R.noise1(s / (r * 4 + 1), mSeed + 23), z2 = R.hash2(Math.floor(s / Math.max(1, r * 0.8)), 3, mSeed + 29);

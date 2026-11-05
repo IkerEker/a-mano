@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.7)
+## 2. Cómo se usa (2.8)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -260,6 +260,24 @@ en azul, pincel en azul y burdeos, autoencajar en arco con líneas montadas)
 - Parámetros por técnica en `STYLE` (boli: líneas finas, muchas idas, huecos; rotulador: base + pasadas largas
   sueltas; lápiz: más gris; carboncillo, cera, pincel). Sin bucles ni espirales.
 
+### Tras probar la 2.7
+- «Las líneas de la caja no pueden ser completamente rectas: hechas a mano, irregulares, ligerísimamente curvas,
+  nunca dos iguales.» «Los garabatos de relleno muy regulares: son siempre distintos, con más o menos trazos; en una
+  zona pequeña se apelotonan más; tienen forma de abanico.» «Los que llegan a los bordes a veces se salen un poco.»
+  «En las esquinas no se cortan como con una máscara: se adaptan a la forma.» «El rotulador sigue poco realista.»
+
+### Qué se hizo en la 2.8
+- `line()` a mano: combada (±1,2 % del largo), ondulación lenta, a veces la punta se tuerce al soltar; cada línea
+  distinta. En los perfiles de letra, más contenida.
+- Garabatos que se ADAPTAN: cada ida llega hasta donde hay sitio (`reach` sobre el campo de distancia a letras,
+  vecinas y caja), a veces se queda corta, a veces sale un poco de la caja (distancia por fuera `DO`, con el borde
+  del lienzo de cálculo descartado). La máscara ya solo es seguridad (canto vivo a ~2,4 grosores de la caja).
+- Cada garabato distinto: nº de idas ×0,5–1,4, apretado ×0,55–1,45, abanico de 0,15–0,6 rad con pivote en un
+  extremo, idas combadas; en huecos pequeños menos largo, más apretado (`small`).
+- Rotulador: sin canto oscuro (wet 0,1), más opaco, canto deshilachado a dos escalas, moteado claro fino; en el
+  relleno (`endDry`) la entrada y sobre todo la salida se abren en fibras secas (pasada rápida). Fondo del negativo
+  a pasadas cortas, torcidas y onduladas.
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -318,7 +336,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.7.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.8.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)
