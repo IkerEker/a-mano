@@ -62,7 +62,7 @@ function fastEDT(bin, w, h) {
 // ------------------------------------------------------------------ máscara de letras
 function makeGrid(bounds, maxPx) {
   const W = bounds.right - bounds.left, H = bounds.bottom - bounds.top;
-  const s = Math.min(1, Math.sqrt((maxPx || 1.6e6) / Math.max(1, W * H)));
+  const s = Math.min(1, Math.sqrt((maxPx || 2.4e6) / Math.max(1, W * H)));
   const w = Math.max(4, Math.ceil(W * s)), h = Math.max(4, Math.ceil(H * s));
   return { x0: bounds.left, y0: bounds.top, w, h, s, d: new Float32Array(w * h) };
 }
@@ -189,7 +189,7 @@ const STYLE = {
   rotulador: { fill: ['rotulador', 'gordo'], rFill: 0.03, lineK: 0.75, step: 0.95, legs: [3, 7], len: [0.5, 1.0], cover: 0.92, loose: 0.25, cross: 0.3, split: 2, alpha: 0.55, base: 0.5 },
   lapiz: { fill: ['lapiz', 'blando'], rFill: 0.016, lineK: 0.9, step: 0.85, legs: [8, 16], len: [0.3, 0.6], cover: 0.92, loose: 0.25, cross: 0.25, split: 5, alpha: 0.72 },
   carbon: { fill: ['carbon', 'suave'], rFill: 0.032, lineK: 0.7, step: 0.8, legs: [5, 9], len: [0.35, 0.7], cover: 0.95, loose: 0.2, cross: 0.25, split: 3, alpha: 0.85 },
-  cera: { fill: ['cera', 'cera'], rFill: 0.024, lineK: 0.8, step: 0.75, legs: [6, 11], len: [0.3, 0.6], cover: 0.94, loose: 0.22, cross: 0.3, split: 3, alpha: 0.9 },
+  cera: { fill: ['cera', 'cera'], rFill: 0.024, lineK: 0.8, step: 0.8, legs: [5, 11], len: [0.3, 0.65], cover: 0.9, loose: 0.3, cross: 0.35, split: 3, alpha: 0.62, extra: 2.2, glaze: true },
   // pincel: pinceladas gordas y secas, sueltas, en todas direcciones (como el cartel WRONG); el borde de la caja lo
   // hacen las propias pinceladas al acabar (sin raya)
   pincel: { fill: ['pincel', 'seco'], rFill: 0.1, lineK: 0.5, step: 1.05, legs: [1, 2], len: [0.7, 1.5], cover: 0.95, loose: 0.12, cross: 0.5, split: 1, alpha: 1, free: true, noBox: true }
@@ -202,6 +202,8 @@ function styleFor(tool, preset) {
   const fp = INK.preset(fill[0], fill[1]), lp = fp;
   const soft = q => Object.assign({}, q, { endDry: q.proc && !q.pen ? 0.85 : 0, wet: (q.wet || 0) * 0.3, pool: (q.pool || 0) * 0.2, tIn: Math.max(q.tIn, 0.9), tOut: Math.max(q.tOut, 0.85), up: 0, dry: (q.dry || 0) * (tool === 'pincel' ? 1.1 : 0.5), skipCaps: !q.proc && tool !== 'pincel', tone: (q.tone || 0) * (q.blend === 'over' ? 0.35 : 1), load: (q.load || 0) * (q.blend === 'over' ? 0.4 : 1), down: 0 });
   const F = soft(fp);
+  // cera: las pasadas se montan (veladura): donde se insiste, más oscuro; con el grano a la vista
+  if (S.glaze) Object.assign(F, { blend: 'multiply', grain: Math.max(F.grain || 0, 0.35), tone: 0.45 });
   // pincel: el relleno con las pinceladas secas de verdad (cerdas abiertas, entradas y salidas de los escaneos)
   if (tool === 'pincel' && preset !== 'humedo') Object.assign(F, { fams: ['pincel', 'brocha'], tIn: 0.75, tOut: 0.6, capSkip: 0 });
   return Object.assign({}, S, { fillP: F, lineP: Object.assign(soft(lp), { endDry: 0 }) });
@@ -227,36 +229,56 @@ function simplify(p, tol) {
 }
 // trazos de letra con cantos y esquinas DUROS: cada tramo recto es un rectángulo que se alarga r por los dos
 // lados (las uniones salen en esquina, no redondas)
-function stampBlocks(G, strokes) {
-  // contorno de cada trazo con uniones en inglete (esquina viva; si el pico es muy agudo, se corta en bisel)
-  // y remates cuadrados
+function stampBlocks(G, strokes, seed) {
+  // letra de bloque DIBUJADA A MANO (como un TEA hecho con rotulador): cada palo con su grosor (más ancho en una
+  // punta, a veces abierto en las dos), los dos cantos con su propio temblor (no paralelos), remates cortados en
+  // sesgo; esquinas vivas en los cambios de dirección
   const ras = new Raster(G.w, G.h);
+  let si = 0;
   for (const st of strokes) {
-    let P = st.pts.map(q => [(q[0] - G.x0) * G.s, (q[1] - G.y0) * G.s]);
-    P = P.filter((q, i) => i === 0 || Math.hypot(q[0] - P[i - 1][0], q[1] - P[i - 1][1]) > 0.5);
-    const n = P.length, r = st.r * G.s;
-    if (n < 2) continue;
+    si++;
+    let P0 = st.pts.map(q => [(q[0] - G.x0) * G.s, (q[1] - G.y0) * G.s]);
+    P0 = P0.filter((q, i) => i === 0 || Math.hypot(q[0] - P0[i - 1][0], q[1] - P0[i - 1][1]) > 0.5);
+    if (P0.length < 2) continue;
+    const r = st.r * G.s, sd = ((seed || 1) * 131 + si * 977) | 0;
+    const rnd = R.mulberry32(sd >>> 0);
+    // densifica (para que el grosor y el temblor varíen a lo largo) guardando las esquinas
+    const P = [P0[0]], corner = [true];
+    for (let i = 1; i < P0.length; i++) {
+      const a = P0[i - 1], b = P0[i], L = Math.hypot(b[0] - a[0], b[1] - a[1]), m = Math.max(1, Math.ceil(L / Math.max(1.5, r * 0.5)));
+      for (let k = 1; k <= m; k++) { P.push([a[0] + (b[0] - a[0]) * k / m, a[1] + (b[1] - a[1]) * k / m]); corner.push(k === m); }
+    }
+    const n = P.length;
+    const S = [0]; for (let i = 1; i < n; i++) S.push(S[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]));
+    const Lt = S[n - 1] || 1;
+    // grosor a lo largo: una punta más ancha que otra, y a veces se abre en los extremos
+    const wa = 0.82 + 0.4 * rnd(), wb = 0.82 + 0.4 * rnd(), fl = rnd() < 0.55 ? 0.15 + 0.3 * rnd() : 0;
+    const width = f => (wa + (wb - wa) * f) * (1 + fl * (Math.pow(1 - f, 6) + Math.pow(f, 6)));
+    const edgeN = (f, sg) => 0.14 * R.noise1(f * Lt / (r * 2.2 + 1), sd + (sg > 0 ? 3 : 7)) + 0.05 * R.noise1(f * Lt / (r * 0.6 + 1), sd + (sg > 0 ? 11 : 13));
     const dir = i => { const a = P[i], b = P[i + 1], L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1; return [(b[0] - a[0]) / L, (b[1] - a[1]) / L]; };
+    // remates en sesgo: cuánto adelanta un canto respecto al otro en cada punta
+    const skew0 = (rnd() - 0.5) * 0.9 * r, skew1 = (rnd() - 0.5) * 0.9 * r;
     const side = sg => {
       const out = [];
       for (let i = 0; i < n; i++) {
+        const f = S[i] / Lt, rr = r * Math.max(0.55, width(f) + edgeN(f, sg));
         if (i === 0 || i === n - 1) {
-          const d = dir(i === 0 ? 0 : n - 2), nx = -d[1] * sg, ny = d[0] * sg, e = i === 0 ? -r : r;
-          out.push([P[i][0] + nx * r + d[0] * e, P[i][1] + ny * r + d[1] * e]);
+          const d = dir(i === 0 ? 0 : n - 2), nx = -d[1] * sg, ny = d[0] * sg, e = (i === 0 ? -1 : 1) * (r * 0.85 + sg * (i === 0 ? skew0 : skew1));
+          out.push([P[i][0] + nx * rr + d[0] * e, P[i][1] + ny * rr + d[1] * e]);
           continue;
         }
         const d0 = dir(i - 1), d1 = dir(i);
         const n0 = [-d0[1] * sg, d0[0] * sg], n1 = [-d1[1] * sg, d1[0] * sg];
         const mx = n0[0] + n1[0], my = n0[1] + n1[1], ml = Math.hypot(mx, my);
-        const cosH = ml / 2;                                   // cos de medio ángulo
-        if (cosH > 0.38) { const k = r / cosH; out.push([P[i][0] + mx / ml * k, P[i][1] + my / ml * k]); }
-        else { out.push([P[i][0] + n0[0] * r, P[i][1] + n0[1] * r]); out.push([P[i][0] + n1[0] * r, P[i][1] + n1[1] * r]); }
+        const cosH = ml / 2;
+        if (cosH > 0.38) { const k = rr / cosH; out.push([P[i][0] + mx / ml * k, P[i][1] + my / ml * k]); }
+        else { out.push([P[i][0] + n0[0] * rr, P[i][1] + n0[1] * rr]); out.push([P[i][0] + n1[0] * rr, P[i][1] + n1[1] * rr]); }
       }
       return out;
     };
+    void corner;
     const L = side(1), Rr = side(-1).reverse();
     const poly = L.concat(Rr);
-    // sentido fijo (los solapes no se restan)
     let area = 0; for (let i = 0; i < poly.length; i++) { const a = poly[i], b = poly[(i + 1) % poly.length]; area += a[0] * b[1] - b[0] * a[1]; }
     if (area < 0) poly.reverse();
     const f = new Float64Array(poly.length * 2);
@@ -292,7 +314,7 @@ function plan(o) {
   }
   const marg = rF * 4 + em * 0.15;
   const G = makeGrid({ left: bx0 - marg, top: by0 - marg, right: bx1 + marg, bottom: by1 + marg });
-  if (o.letterStrokes) stampBlocks(G, o.letterStrokes);
+  if (o.letterStrokes) stampBlocks(G, o.letterStrokes, o.seed);
   if (o.letterPolys) stampPolys(G, o.letterPolys);
   const binL = new Uint8Array(G.w * G.h);
   for (let i = 0; i < binL.length; i++) binL[i] = G.d[i] < 0.5 ? 1 : 0;
@@ -326,8 +348,9 @@ function plan(o) {
   const Mfill = { x0: G.x0, y0: G.y0, w: G.w, h: G.h, s: G.s, d: new Float32Array(D.length), out: 0 };
   const Mline = { x0: G.x0, y0: G.y0, w: G.w, h: G.h, s: G.s, d: new Float32Array(D.length), out: 1 };
   for (let i = 0; i < D.length; i++) {
-    const lt = smooth01(dIn * 0.3, dIn + 0.6, D[i]) * (1 - G.d[i]);
-    Mline.d[i] = lt; Mfill.d[i] = lt * Math.max(cov[i], 1 - smooth01(rF * 3.4, rF * 3.4 + 1.2, DO[i]));
+    const aw = Math.max(0.6, 1.6 / G.s);
+    const lt = smooth01(dIn * 0.3, dIn + aw, D[i]) * (1 - G.d[i]);
+    Mline.d[i] = lt; Mfill.d[i] = lt * Math.max(cov[i], 1 - smooth01(rF * 3.4, rF * 3.4 + Math.max(1.2, 2 / G.s), DO[i]));
   }
   // letras vecinas (de otras palabras) que se meten en la caja: el relleno las rodea, no las tapa
   if (o.avoidStrokes && o.avoidStrokes.length) {
@@ -430,18 +453,24 @@ function plan(o) {
         const ov = f < 0 ? f * sl : f > 1 ? (f - 1) * sl : 0;
         return [q[0] + tx * ov + ty * o, q[1] + ty * ov - tx * o];
       };
-      const passes = rnd() < 0.3 ? 2 : 1;
+      const passes = rnd() < 0.38 ? 2 : 1;
       for (let ps = 0; ps < passes; ps++) {
-        const nCh = rnd() < 0.5 ? 1 : rnd() < 0.7 ? 2 : 3;
+        const nCh = rnd() < 0.35 ? 1 : rnd() < 0.6 ? 2 : rnd() < 0.7 ? 3 : 4;
         let fA = -ext() / sl;
         const fEnd = 1 + ext() / sl;
         for (let c = 0; c < nCh; c++) {
           const fB = c === nCh - 1 ? fEnd : fA + (fEnd - fA) * (1 / (nCh - c)) * (0.75 + 0.5 * rnd());
           // torcedura del golpe: entra y sale a distinta distancia del borde, con un combado propio
-          const oA = g() * rL * 1.4 + (ps ? g() * rL * 1.2 : 0), oB = g() * rL * 1.4 + (ps ? g() * rL * 1.2 : 0);
-          const bowc = g() * (rL * 1.2 + (fB - fA) * sl * 0.008), nS = 14, pc = [];
-          for (let j = 0; j <= nS; j++) { const t = j / nS; pc.push(sideAt(fA + (fB - fA) * t, oA + (oB - oA) * t + bowc * 4 * t * (1 - t))); }
-          handPoly(rnd() < 0.5 ? pc : pc.reverse(), S.lineP, rL * (0.9 + 0.35 * rnd()), Mline, 1, 1.3);
+          const sc = em * 0.012 + rL;
+          const oA = g() * sc * 1.6 + (ps ? g() * sc * 1.3 : 0), oB = g() * sc * 1.6 + (ps ? g() * sc * 1.3 : 0);
+          const bowc = g() * (sc * 1.3 + (fB - fA) * sl * 0.012), nS = 18, pc = [];
+          // un quiebro: a mitad del golpe la mano corrige la dirección
+          const kink = rnd() < 0.45 ? { t: 0.25 + 0.5 * rnd(), o: g() * sc * 1.2 } : null;
+          for (let j = 0; j <= nS; j++) {
+            const t = j / nS, kk = kink ? kink.o * (t < kink.t ? t / kink.t : (1 - t) / (1 - kink.t)) : 0;
+            pc.push(sideAt(fA + (fB - fA) * t, oA + (oB - oA) * t + bowc * 4 * t * (1 - t) + kk));
+          }
+          handPoly(rnd() < 0.5 ? pc : pc.reverse(), S.lineP, rL * (0.8 + 0.5 * rnd()), Mline, 1, 1.6);
           // siguiente golpe: a veces se monta un poco, a veces deja un hueco pequeño
           fA = fB + (rnd() < 0.6 ? -1 : 1) * (0.005 + 0.025 * rnd()) * em / sl;
         }
@@ -606,7 +635,7 @@ function plan(o) {
     // tamaño del hueco: a lo largo y a lo ancho (medido con el trazo más fino); el grosor, el que cabe
     const ux = Math.cos(ang), uy = Math.sin(ang);
     rCur = rF * 0.35;
-    { const ac = reach(x, y, -uy, ux, em, rF) + reach(x, y, uy, -ux, em, rF), lo = S.free ? 0.6 : 0.35; rCur = Math.max(rF * lo, Math.min(rF, ac * 0.3 + rF * 0.35 * rnd())); }
+    { const ac = reach(x, y, -uy, ux, em, rF) + reach(x, y, uy, -ux, em, rF), lo = S.free ? 0.6 : 0.35; rCur = Math.max(rF * lo, Math.min(rF, ac * 0.3 + rF * 0.35 * rnd())); if (S.free) rCur *= 0.55 + 0.75 * rnd(); }
     const along = reach(x, y, ux, uy, em * 2, rF) + reach(x, y, -ux, -uy, em * 2, rF);
     const across = reach(x, y, -uy, ux, em * 2, rF) + reach(x, y, uy, -ux, em * 2, rF);
     const small = Math.min(1, Math.min(along, across) / (em * 0.45));
@@ -620,7 +649,7 @@ function plan(o) {
     nScr++;
   }
   // zonas más cargadas (por partes): otra tanda encima, en sitios al azar
-  const nExtra = Math.round(nScr * (0.1 + 0.45 * tup));
+  const nExtra = Math.round(nScr * (0.1 + 0.45 * tup) * (S.extra || 1));
   for (let k = 0; k < nExtra && free.length; k++) {
     const q = free[(rnd() * free.length) | 0], x = cx0 + ((q % cw) + 0.5) * cell, y = cy0 + (((q / cw) | 0) + 0.5) * cell;
     rCur = rF * (0.35 + 0.4 * rnd());

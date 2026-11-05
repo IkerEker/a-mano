@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.10)
+## 2. Cómo se usa (2.11)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -323,6 +323,21 @@ en azul, pincel en azul y burdeos, autoencajar en arco con líneas montadas)
   reales, `dry` alto), sueltas, casi verticales o a lo largo de la caja, que se salen de la caja (el borde lo
   hacen ellas, sin raya); recorte de letras con el mismo pincel.
 
+### Tras probar la 2.10
+- «La cera se ve rara: más partes oscuras, trazos más realistas.» «Las cajas, aún más irregulares.» «Todos los
+  negativos tienen los palos muy regulares: como en `referencias/letra_bloque_a_mano_TEAT.png`.» «Pincel mucho
+  mejor; quizá esos bordecitos, y trazos de distinto grosor.»
+
+### Qué se hizo en la 2.11
+- `stampBlocks`: letra de bloque dibujada a mano — cada palo con su grosor (una punta más ancha, a veces se abre en
+  las dos), los dos cantos con temblor propio (no paralelos), remates cortados en sesgo.
+- Lados de la caja: 1–4 golpes, torcedura mayor (en función del em), un quiebro a mitad del golpe en ~45 %,
+  grosor variable; ~38 % repasados.
+- Cera en negativo: veladura (multiplica) con grano y tono: donde se insiste, más oscuro; más tandas de garabatos
+  en zonas (`extra: 2.2`).
+- Pincel: grosor de cada pincelada ×0,55–1,3; rejilla de 2,4 Mpx y transiciones de máscara de ≥1,6 celdas (sin
+  escalones en los bordes).
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -381,7 +396,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.10.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.11.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)
