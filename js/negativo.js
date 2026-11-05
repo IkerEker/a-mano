@@ -382,8 +382,8 @@ function plan(o) {
     if (L < 1) return;
     const n = Math.max(4, Math.ceil(L / Math.max(2, r * 1.5)));
     const hk = hand == null ? 1 : hand;
-    const bw = (bow || 0) + hk * g() * L * 0.012;
-    const wv = hk * (0.25 + 0.75 * rnd()) * (L * 0.004 + r * 0.35), ws = (rnd() * 1e5) | 0, wf = 1.2 + 2 * rnd();
+    const bw = (bow || 0) + Math.max(-r * 2.2, Math.min(r * 2.2, hk * g() * L * 0.012)), wcap = r * 1.6 + em * 0.006;
+    const wv = Math.min(wcap, hk * (0.25 + 0.75 * rnd()) * (L * 0.004 + r * 0.35)), ws = (rnd() * 1e5) | 0, wf = 1.2 + 2 * rnd();
     const wv2 = hk * (0.3 + 0.7 * rnd()) * (L * 0.002 + r * 0.3), wf2 = (L / Math.max(4, r * 8)) * (0.6 + 0.8 * rnd());
     const hook = hk * (rnd() < 0.35 ? g() * Math.min(L * 0.03, r * 3) : 0);
     const pts = [];
@@ -466,10 +466,12 @@ function plan(o) {
           const fB = c === nCh - 1 ? fEnd : fA + (fEnd - fA) * (1 / (nCh - c)) * (0.75 + 0.5 * rnd());
           // torcedura del golpe: entra y sale a distinta distancia del borde, con un combado propio
           const sc = em * 0.012 + rL;
-          const oA = g() * sc * 1.6 + (ps ? g() * sc * 1.3 : 0), oB = g() * sc * 1.6 + (ps ? g() * sc * 1.3 : 0);
-          const bowc = g() * (sc * 1.3 + (fB - fA) * sl * 0.012), nS = 18, pc = [];
+          // (desplazamiento hacia fuera positivo: como mucho un poco; hacia dentro, lo que quiera: el relleno lo cubre)
+          const inw = () => Math.min(0.35 * sc, -Math.abs(g()) * sc * 1.5 + 0.3 * sc);
+          const oA = inw() - (ps ? Math.abs(g()) * sc * 0.8 : 0), oB = inw() - (ps ? Math.abs(g()) * sc * 0.8 : 0);
+          const bowc = Math.max(-sc * 1.6, Math.min(sc * 0.3, g() * sc * 1.1)), nS = 18, pc = [];
           // un quiebro: a mitad del golpe la mano corrige la dirección
-          const kink = rnd() < 0.45 ? { t: 0.25 + 0.5 * rnd(), o: g() * sc * 1.2 } : null;
+          const kink = rnd() < 0.45 ? { t: 0.25 + 0.5 * rnd(), o: Math.min(sc * 0.3, g() * sc * 1.0) } : null;
           for (let j = 0; j <= nS; j++) {
             const t = j / nS, kk = kink ? kink.o * (t < kink.t ? t / kink.t : (1 - t) / (1 - kink.t)) : 0;
             pc.push(sideAt(fA + (fB - fA) * t, oA + (oB - oA) * t + bowc * 4 * t * (1 - t) + kk));
@@ -603,13 +605,36 @@ function plan(o) {
   // diagonal; luego, ENCIMA, se recorta con el pincel fino el canto de cada letra y el borde de la caja (el recorte
   // tapa donde acaba la capa: no se ven cortes).
   let guard = 0, nScr = 0;
+  // pegado a los lados: tandas de garabatos a lo largo de cada lado (la mano siempre llega hasta el borde que ha
+  // dibujado; lo perezoso queda por dentro, no junto a las rayas)
+  if (!S.noBox) for (const Q of quads) {
+    const cs = [[0, 0], [1, 0], [1, 1], [0, 1]], C = Q.at(0.5, 0.5);
+    for (let k = 0; k < 4; k++) {
+      const A0 = cs[k], B0 = cs[(k + 1) % 4], a = Q.at(A0[0], A0[1]), b = Q.at(B0[0], B0[1]);
+      const sl = Math.hypot(b[0] - a[0], b[1] - a[1]), nSeg = Math.max(1, Math.round(sl / (em * 0.45)));
+      for (let j = 0; j < nSeg; j++) {
+        const f = (j + 0.2 + 0.6 * rnd()) / nSeg;
+        const p0 = Q.at(A0[0] + (B0[0] - A0[0]) * f, A0[1] + (B0[1] - A0[1]) * f);
+        const p1 = Q.at(A0[0] + (B0[0] - A0[0]) * Math.min(1, f + 0.02), A0[1] + (B0[1] - A0[1]) * Math.min(1, f + 0.02));
+        const ang = Math.atan2(p1[1] - p0[1], p1[0] - p0[0]) + g() * 0.15;
+        const dx = C[0] - p0[0], dy = C[1] - p0[1], dl = Math.hypot(dx, dy) || 1;
+        rCur = rF * (0.6 + 0.35 * rnd());
+        const ins = rCur * (1.2 + 0.8 * rnd());
+        const x = p0[0] + dx / dl * ins, y = p0[1] + dy / dl * ins;
+        if (!okAt(x, y, rCur)) continue;
+        const res = scribble(x, y, ang, Math.max(2, Math.round(rr(S.legs) * 0.5)), em * (0.35 + 0.3 * rnd()), S.step * 0.8, S.alpha * alphaK);
+        markRect(x, y, ang, Math.max(res.L, rCur * 4), Math.max(res.W, rCur * 4));
+        nScr++;
+      }
+    }
+  }
   const target = Math.min(0.995, S.cover + (tup - 0.5) * 0.2) * nValid;
   // huecos sin pintar (pocos, más cuanto menos tupido): se marcan como hechos y nadie va a buscarlos
   {
     let area = 0; for (const Q of quads) area += Q.Wpx * Q.Hpx;
     const nH = Math.round(area / (em * em) * (0.15 + 0.55 * (1 - tup)) * (0.6 + 0.8 * rnd()));
     for (let h = 0; h < nH; h++) {
-      const Q = quads[(rnd() * quads.length) | 0], c = Q.at(0.08 + 0.84 * rnd(), 0.1 + 0.8 * rnd());
+      const Q = quads[(rnd() * quads.length) | 0], c = Q.at(0.15 + 0.7 * rnd(), 0.28 + 0.44 * rnd());
       const rad = em * (0.04 + 0.1 * rnd()) * (1.3 - 0.6 * tup), rr2 = rad / cell, ci = Math.floor((c[0] - cx0) / cell), cj = Math.floor((c[1] - cy0) / cell);
       for (let j = Math.floor(cj - rr2); j <= cj + rr2; j++) for (let i = Math.floor(ci - rr2 * 1.6); i <= ci + rr2 * 1.6; i++) {
         if (i < 0 || j < 0 || i >= cw || j >= ch) continue;

@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.12)
+## 2. Cómo se usa (2.13)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -344,6 +344,14 @@ en azul, pincel en azul y burdeos, autoencajar en arco con líneas montadas)
   0,4), se abre en las puntas (hasta +70 %) o se estrecha al medio, remates más sesgados; el temblor de los cantos
   es lento (sin lóbulos).
 
+### 2.13
+- «Estas líneas sueltas, sin que el relleno las siga, no. Una cosa es una mano perezosa que no cubre bien, otra una
+  línea que no responde a nada.» Venían de lados largos cuyo combado crecía con el largo y se iban hacia fuera, y
+  de huecos sin pintar pegados al borde. Ahora: combado y ondulación de `handPoly` con tope (en función del grosor
+  y del em); la torcedura de los lados de la caja va hacia dentro (hacia fuera, como mucho 0,35 del grosor);
+  antes del relleno general, tandas de garabatos a lo largo de cada lado, pegados a él; los huecos «perezosos»
+  solo por dentro (lejos de los lados).
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -402,7 +410,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.12.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.13.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)
