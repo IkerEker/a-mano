@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.11)
+## 2. Cómo se usa (2.12)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -338,6 +338,12 @@ en azul, pincel en azul y burdeos, autoencajar en arco con líneas montadas)
 - Pincel: grosor de cada pincelada ×0,55–1,3; rejilla de 2,4 Mpx y transiciones de máscara de ≥1,6 celdas (sin
   escalones en los bordes).
 
+### 2.12
+- «Más irregular aún la tipografía de negativo, más exagerado el cambio de grosores (no lobulado).» → en
+  `stampBlocks` cada palo va de ×0,5 a ×1,55 de grosor en rampa (una punta fina y otra gorda, diferencia mínima
+  0,4), se abre en las puntas (hasta +70 %) o se estrecha al medio, remates más sesgados; el temblor de los cantos
+  es lento (sin lóbulos).
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -396,7 +402,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.11.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.12.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)

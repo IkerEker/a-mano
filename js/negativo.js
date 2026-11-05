@@ -252,16 +252,20 @@ function stampBlocks(G, strokes, seed) {
     const S = [0]; for (let i = 1; i < n; i++) S.push(S[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]));
     const Lt = S[n - 1] || 1;
     // grosor a lo largo: una punta más ancha que otra, y a veces se abre en los extremos
-    const wa = 0.82 + 0.4 * rnd(), wb = 0.82 + 0.4 * rnd(), fl = rnd() < 0.55 ? 0.15 + 0.3 * rnd() : 0;
-    const width = f => (wa + (wb - wa) * f) * (1 + fl * (Math.pow(1 - f, 6) + Math.pow(f, 6)));
-    const edgeN = (f, sg) => 0.14 * R.noise1(f * Lt / (r * 2.2 + 1), sd + (sg > 0 ? 3 : 7)) + 0.05 * R.noise1(f * Lt / (r * 0.6 + 1), sd + (sg > 0 ? 11 : 13));
+    // (cambios de grosor exagerados pero en rampa, nunca en bultos: una punta fina y la otra gorda, o se abre)
+    let wa = 0.55 + 1.0 * rnd(), wb = 0.55 + 1.0 * rnd();
+    if (Math.abs(wa - wb) < 0.4) { if (wa < wb) { wa = Math.max(0.5, wa - 0.25); wb += 0.2; } else { wb = Math.max(0.5, wb - 0.25); wa += 0.2; } }
+    const fl = rnd() < 0.6 ? 0.25 + 0.45 * rnd() : 0, mid = rnd() < 0.3 ? -(0.1 + 0.2 * rnd()) : 0;   // se abre / se estrecha al medio
+    const width = f => (wa + (wb - wa) * f) * (1 + fl * (Math.pow(1 - f, 4) + Math.pow(f, 4)) + mid * Math.sin(f * Math.PI));
+    // temblor de cada canto: lento (sin lóbulos)
+    const edgeN = (f, sg) => 0.11 * R.noise1(f * Lt / (r * 5 + 1), sd + (sg > 0 ? 3 : 7)) + 0.02 * R.noise1(f * Lt / (r * 1.5 + 1), sd + (sg > 0 ? 11 : 13));
     const dir = i => { const a = P[i], b = P[i + 1], L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1; return [(b[0] - a[0]) / L, (b[1] - a[1]) / L]; };
     // remates en sesgo: cuánto adelanta un canto respecto al otro en cada punta
-    const skew0 = (rnd() - 0.5) * 0.9 * r, skew1 = (rnd() - 0.5) * 0.9 * r;
+    const skew0 = (rnd() - 0.5) * 1.6 * r, skew1 = (rnd() - 0.5) * 1.6 * r;
     const side = sg => {
       const out = [];
       for (let i = 0; i < n; i++) {
-        const f = S[i] / Lt, rr = r * Math.max(0.55, width(f) + edgeN(f, sg));
+        const f = S[i] / Lt, rr = r * Math.max(0.42, width(f) + edgeN(f, sg));
         if (i === 0 || i === n - 1) {
           const d = dir(i === 0 ? 0 : n - 2), nx = -d[1] * sg, ny = d[0] * sg, e = (i === 0 ? -1 : 1) * (r * 0.85 + sg * (i === 0 ? skew0 : skew1));
           out.push([P[i][0] + nx * rr + d[0] * e, P[i][1] + ny * rr + d[1] * e]);
