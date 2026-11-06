@@ -163,6 +163,11 @@ function plan(lay, p, seed) {
     wordC.set(L.word, w);
   }
   const lineSeed = li => seed + 977 * (li + 1);
+  // ritmo (no en autoencajar: ahí todo está medido): cada línea con su pendiente (la mano sube o baja al escribir) y,
+  // a lo largo del texto, la inclinación y el tamaño derivan despacio (no letra a letra)
+  const lineX0 = new Map(), lineSlope = new Map();
+  for (const L of letters) { const x = L.x; if (!lineX0.has(L.line) || x < lineX0.get(L.line)) lineX0.set(L.line, x); }
+  for (const [ln] of lineX0) { const rl = R.mulberry32(seed + ln * 4241 + 9); lineSlope.set(ln, auto ? 0 : g(rl) * (0.006 + 0.016 * c) + (p.prisa || 0) * -0.006); }
   // autoencajar: tamaños y posiciones ya están medidos al milímetro; lo que mueve o agranda letras casi no actúa
   const cp = auto ? c * 0.25 : c;
   // ---- letras -> trazos (en el espacio de maquetación)
@@ -172,9 +177,10 @@ function plan(lay, p, seed) {
     const W = wordT.get(L.word), WC = wordC.get(L.word);
     const em = L.size;
     const rot = g(r) * (0.012 + 0.11 * c) * (0.6 + 0.4 * persona.bounce);
-    const sc = Math.exp(g(r) * (0.02 + 0.09 * cp) * persona.sizeVar * (auto ? 0.4 : 1));
+    const drift = auto ? 0 : 1;
+    const sc = Math.exp(g(r) * (0.02 + 0.09 * cp) * persona.sizeVar * (auto ? 0.4 : 1) + drift * R.noise1(li * 0.09, seed + 661) * (0.025 + 0.035 * c));
     const ax = Math.exp(g(r) * (0.02 + 0.07 * c));
-    const shear = g(r) * (0.025 + 0.1 * c);
+    const shear = g(r) * (0.025 + 0.1 * c) + drift * R.noise1(li * 0.13, seed + 551) * (0.025 + 0.05 * c);
     const ldy = g(r) * (0.008 + 0.05 * cp) * persona.bounce * (auto ? 0.4 : 1);
     const ldx = g(r) * (0.005 + 0.035 * cp);
     const warpA = 0.006 + 0.045 * c, warpL = 0.33;
@@ -196,7 +202,7 @@ function plan(lay, p, seed) {
       const cw = Math.cos(W.rot), sw = Math.sin(W.rot);
       X = wcx + cw * U - sw * V + W.dx * em; Y = L.base + sw * U + cw * V + W.dy * em;
       // línea base que ondula
-      if (!auto) Y += em * (0.012 + 0.05 * c) * persona.bounce * R.noise1(X / 3.2, lineSeed(L.line));
+      if (!auto) Y += em * (0.012 + 0.05 * c) * persona.bounce * R.noise1(X / 3.2, lineSeed(L.line)) + (X - (lineX0.get(L.line) || 0)) * (lineSlope.get(L.line) || 0);
       return [X, Y];
     };
     const strokes = L.g.strokes.map((s, si) => {
@@ -219,7 +225,32 @@ function plan(lay, p, seed) {
         const e0 = Math.max(-0.05, Math.min(0.04, g(rs) * (0.008 + 0.03 * c))), e1 = Math.max(-0.06, Math.min(0.05, g(rs) * (0.01 + 0.035 * c) + (rs() < P.lift ? -0.025 : 0)));
         pts = trimEnds(pts, e0, e1);
       }
-      return { pts: pts.map(tf), closed: s.closed, joinable: true, mark: !!s.mark, extra: !!s.extra };
+      // ---- entradas y salidas de la mano (sutiles): la mano llega al papel desde donde estaba (un ganchito en la
+      // dirección de llegada) y al soltar ya va hacia el trazo siguiente (una salida que se afila)
+      let tipIn = 0, tipOut = 0;
+      if (!s.closed && !s.mark && !persona.geo && pts.length > 3 && plen(pts) > 0.12) {
+        const pr = p.prisa || 0, kH = persona.hook == null ? 1 : persona.hook;
+        const nxt = L.g.strokes[si + 1], prv = L.g.strokes[si - 1];
+        const unit = (x, y) => { const l = Math.hypot(x, y) || 1; return [x / l, y / l]; };
+        if (rs() < (0.07 + 0.2 * c + 0.12 * pr) * kH) {
+          // de dónde llega la mano: del trazo anterior o, si es el primero, de la letra anterior (a la izquierda)
+          const st0 = pts[0], t0 = unit(pts[Math.min(3, pts.length - 1)][0] - st0[0], pts[Math.min(3, pts.length - 1)][1] - st0[1]);
+          let d = prv && prv.pts && prv.pts.length ? unit(st0[0] - prv.pts[prv.pts.length - 1][0], st0[1] - prv.pts[prv.pts.length - 1][1]) : [1, 0.25];
+          d = unit(d[0] * 0.5 + t0[0] * 0.5, d[1] * 0.5 + t0[1] * 0.5);           // nunca un pico cerrado
+          const Lh = (0.015 + 0.025 * rs()) * (1 + c);
+          pts = [[st0[0] - d[0] * Lh, st0[1] - d[1] * Lh], [st0[0] - d[0] * Lh * 0.4 + t0[0] * Lh * 0.1, st0[1] - d[1] * Lh * 0.4 + t0[1] * Lh * 0.1]].concat(pts);
+          tipIn = 2;
+        }
+        if (rs() < (0.12 + 0.24 * c + 0.2 * pr) * kH) {
+          const n = pts.length, e = pts[n - 1], t = unit(e[0] - pts[n - 4][0], e[1] - pts[n - 4][1]);
+          let d = nxt && nxt.pts && nxt.pts.length ? unit(nxt.pts[0][0] - e[0], nxt.pts[0][1] - e[1]) : unit(1, -0.5);
+          d = unit(t[0] * 0.6 + d[0] * 0.4, t[1] * 0.6 + d[1] * 0.4);
+          const Lf = (0.018 + 0.03 * rs()) * (1 + c);
+          pts = pts.concat([[e[0] + t[0] * Lf * 0.45 + d[0] * Lf * 0.1, e[1] + t[1] * Lf * 0.45 + d[1] * Lf * 0.1], [e[0] + t[0] * Lf * 0.4 + d[0] * Lf * 0.6, e[1] + t[1] * Lf * 0.4 + d[1] * Lf * 0.6]]);
+          tipOut = 2;
+        }
+      }
+      return { pts: pts.map(tf), closed: s.closed, joinable: true, mark: !!s.mark, extra: !!s.extra, tipIn, tipOut };
     });
     // ---- imperfecciones (pocas y sutiles, como las de cualquier mano):
     //  · 1 de cada ~20 letras: un trazo se repasa encima, como cuando sale flojo o torcido y se vuelve a pasar
@@ -398,6 +429,9 @@ function plan(lay, p, seed) {
           const nn = tremA * R.noise1(acc / tremL, seed + li * 3 + si * 17 + pass);
           return { x: q[0] - ty / tl * nn, y: q[1] + tx / tl * nn, w: 1 };
         });
+        // (los ganchos y las salidas se afilan: la mano apenas apoya)
+        if (pass === 0 && s.tipIn && fin.length > s.tipIn + 2) for (let k = 0; k <= s.tipIn; k++) fin[k].w = 0.35 + 0.65 * k / s.tipIn;
+        if (pass === 0 && s.tipOut && fin.length > s.tipOut + 2) for (let k = 0; k <= s.tipOut; k++) fin[fin.length - 1 - k].w = 0.3 + 0.7 * k / s.tipOut;
         let r = Math.max(0.5, wEm * emPx * (lv.w || 1) / Math.max(0.5, Math.sqrt(L.size)));
         if (pass > 0) r *= 0.88 + 0.12 * rs();
         if (s.extra) r *= 0.8;

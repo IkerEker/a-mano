@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.13)
+## 2. Cómo se usa (2.14)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -352,6 +352,36 @@ en azul, pincel en azul y burdeos, autoencajar en arco con líneas montadas)
   antes del relleno general, tandas de garabatos a lo largo de cada lado, pegados a él; los huecos «perezosos»
   solo por dentro (lejos de los lados).
 
+### 2.14 — revisión de «qué es una letra hecha a mano de verdad» (la 2.13 está guardada: etiqueta `v2.13.0` y
+`versiones/A_mano_v2.13.0.ccx`)
+Pedido: «dedica horas a pensar, revisa la web, entiende lo que es una letra hecha a mano de verdad, piensa cómo
+aplicarlo y construye».
+Lo aprendido (peritaje de escritura, cinemática de la mano, lettering):
+1. **La velocidad lo gobierna todo**: la mano frena en las curvas cerradas (ley de los dos tercios: v ∝ κ^(-1/3),
+   Lacquaniti/Viviani) y cada trazo arranca, alcanza velocidad y frena (modelo sigma-lognormal de Plamondon).
+   Donde va despacio hay más tinta y más ancho; deprisa, más fino y claro.
+2. **Entradas y salidas al vuelo**: en la escritura genuina muchos trazos empiezan y acaban con la mano en
+   movimiento (punta fina, «flying finish»); las falsificaciones tienen principios y finales romos y grosor
+   uniforme. El boli puede empezar sin tinta («inkless start») y acaba afilándose.
+3. **Ganchos**: la mano llega al papel desde donde estaba y al soltar ya va hacia el trazo siguiente.
+4. **Ritmo**: cada línea sube o baja; inclinación y tamaño derivan despacio a lo largo del texto (no letra a
+   letra); con fatiga, más grande y más suelto.
+5. **Nunca dos letras iguales** (ya se hacía: 3 variantes + variación por letra).
+Qué se construyó:
+- `ink.js`: modelo de velocidad por trazo (curvatura suavizada → v; aceleración al empezar y frenado al acabar);
+  respuesta por herramienta (`SPEED`: vW grosor, vInk tinta, fly probabilidad de entrar/salir al vuelo). Al vuelo
+  se afila (boli, lápiz, pincel) o se aclara apenas adelgazando (rotulador). Puntos y tildes nunca al vuelo. En el
+  rotulador solo algunos extremos cargan punto de tinta (nunca los que salen al vuelo). Los negativos no usan el
+  vuelo (están aprobados así).
+- `writer.js`: ganchos de entrada (dirección de llegada) y salidas hacia el trazo siguiente, afilados (tipIn/tipOut
+  con `w`); pendiente propia de cada línea y deriva lenta de inclinación y tamaño a lo largo del texto (no en
+  autoencajar).
+- Cursiva propia: v y w con el pico en su sitio (antes «iv» se leía «w»), punto de la i y la j más visible y nunca
+  tomado como salida al ligar, espacio entre palabras más corto.
+Fuentes: designrush.com (por qué las letras manuscritas digitales parecen falsas), ojp.gov (morfología del trazo de
+bolígrafo), forensicfield.blog (características individuales de la escritura), Lacquaniti et al. 1983 (ley de los
+dos tercios), Berio/Leymarie/Plamondon IGS 2017 (sigma-lognormal), ojp.gov (fatiga y escritura).
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -410,7 +440,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.13.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.14.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)

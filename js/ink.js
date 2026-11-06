@@ -22,7 +22,7 @@ const TD = require('./texdata.js');
 // load: cuánta carga pierde a lo largo del trazo (el pincel empieza cargado y acaba seco)
 // blend: 'multiply' tinta transparente (se monta y oscurece) u 'over' pintura que tapa (guache, óleo)
 // fuse: el repasado se funde (más pigmento) en vez de verse como líneas sueltas
-const BASE = { capSkip: 0.15, fams: ['rotu'], w: 0.03, dens: 0.92, tIn: 0.6, tOut: 0.5, inL: 1.5, outL: 2.5, press: 0.12, down: 0, grain: 0, wet: 0, pool: 0, dry: 0, tremor: 1, up: 0, lift: 0.2, minR: 0.55, light: 0, tone: 0.2, load: 0, blend: 'multiply', fuse: false };
+const BASE = { capSkip: 0.15, fams: ['rotu'], w: 0.03, dens: 0.92, tIn: 0.6, tOut: 0.5, inL: 1.5, outL: 2.5, press: 0.12, down: 0, grain: 0, wet: 0, pool: 0, dry: 0, tremor: 1, up: 0, lift: 0.2, minR: 0.55, light: 0, tone: 0.2, load: 0, blend: 'multiply', fuse: false, vW: 0.12, vInk: 0.9, fly: 0.3 };
 const TOOLS = {
   lapiz: {
     label: 'Lápiz', presets: {
@@ -72,11 +72,15 @@ const TOOLS = {
 };
 const TOOL_ORDER = ['lapiz', 'carbon', 'cera', 'boli', 'rotulador', 'pincel'];
 
+// respuesta a la velocidad de la mano, por herramienta: vW grosor (más ancho donde va despacio), vInk tinta,
+// fly: cuántos trazos empiezan o acaban «al vuelo» (la mano entra o sale moviéndose: punta afilada y más clara)
+const SPEED = { lapiz: { vW: 0.05, vInk: 1.0, fly: 0.5 }, carbon: { vW: 0.08, vInk: 0.8, fly: 0.35 }, cera: { vW: 0.06, vInk: 0.7, fly: 0.2 },
+  boli: { vW: 0.1, vInk: 1.1, fly: 0.45 }, rotulador: { vW: 0.07, vInk: 0.35, fly: 0.3 }, pincel: { vW: 0.28, vInk: 0.6, fly: 0.18 } };
 function preset(tool, pk) {
   const T = TOOLS[tool] || TOOLS.rotulador;
   const keys = Object.keys(T.presets);
   const p = T.presets[pk] || T.presets[keys[0]];
-  return Object.assign({}, BASE, p, { tool: TOOLS[tool] ? tool : 'rotulador', preset: T.presets[pk] ? pk : keys[0] });
+  return Object.assign({}, BASE, SPEED[tool] || {}, p, { tool: TOOLS[tool] ? tool : 'rotulador', preset: T.presets[pk] ? pk : keys[0] });
 }
 
 // ------------------------------------------------------------------ texturas
@@ -178,6 +182,42 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
     let tx = b.x - a.x, ty = b.y - a.y; const tl = Math.hypot(tx, ty) || 1;
     Q[i].tx = tx / tl; Q[i].ty = ty / tl;
   }
+  // ---- VELOCIDAD DE LA MANO (cinemática de la escritura): la mano frena en las curvas cerradas (ley de los dos
+  // tercios: v ∝ curvatura^(-1/3)), arranca acelerando y frena al final (perfil lognormal de cada trazo). Donde va
+  // despacio deja más tinta y algo más de ancho; donde va deprisa, el trazo es más fino y más claro.
+  // Algunos trazos entran o salen «al vuelo»: la mano ya se mueve cuando toca el papel o aún se mueve al soltar:
+  // punta afilada y más clara (lo que distingue una escritura suelta de una dibujada despacio).
+  {
+    const kw2 = Math.max(2, Math.round(r * 1.2 / step));
+    const kap = new Float32Array(n);
+    for (let i = 0; i < n; i++) {
+      const a = Q[Math.max(0, i - kw2)], b = Q[Math.min(n - 1, i + kw2)];
+      kap[i] = Math.acos(Math.max(-1, Math.min(1, a.tx * b.tx + a.ty * b.ty))) / Math.max(1e-6, b.s - a.s);
+    }
+    var flyIn0, flyOut0;
+    const shortS = Ls < r * 7;      // puntos y tildes: nunca al vuelo (se quedarían en nada)
+    const flyIn = !shortS && rnd() < (P.fly || 0) * 0.6 * (opts.flyMul == null ? 1 : opts.flyMul), flyOut = !shortS && rnd() < (P.fly || 0) * (opts.flyMul == null ? 1 : opts.flyMul);
+    flyIn0 = flyIn; flyOut0 = flyOut;
+    const accL = Math.min(Ls * 0.22, r * 4.5), decL = Math.min(Ls * 0.28, r * 5.5);
+    const vs = new Float32Array(n);
+    for (let i = 0; i < n; i++) {
+      let km = 0, kn = 0; for (let k = Math.max(0, i - kw2); k <= Math.min(n - 1, i + kw2); k++) { km += kap[k]; kn++; }
+      const vk = Math.min(1, Math.pow(km / kn * r * 6 + 0.03, -1 / 3) / Math.pow(0.03, -1 / 3) * 1.9);
+      const q = Q[i];
+      const e0 = flyIn ? 1 : 0.3 + 0.7 * smooth01(0, accL, q.s), e1 = flyOut ? 1 : 0.35 + 0.65 * smooth01(0, decL, Ls - q.s);
+      vs[i] = Math.max(0.15, vk * Math.min(e0, e1));
+    }
+    const flyL0 = Math.min(Ls * 0.22, r * (2 + 2 * rnd())), flyL1 = Math.min(Ls * 0.3, r * (2.5 + 3 * rnd()));
+    for (let i = 0; i < n; i++) {
+      const q = Q[i];
+      q.v = vs[i];
+      q.fw = 1; q.fi = 1;
+      // (fieltro: al vuelo apenas adelgaza; se aclara. Boli, lápiz, pincel: la punta se afila)
+      const felt = P.proc && !P.pen, brush = P.blend === 'over', wmin0 = felt ? 0.82 : brush ? 0.65 : 0.4, wmin1 = felt ? 0.78 : brush ? 0.6 : 0.3;
+      if (flyIn) { const t = smooth01(0, flyL0, q.s); q.fw *= wmin0 + (1 - wmin0) * t; q.fi *= (P.pen ? 0.25 : 0.55) + (P.pen ? 0.75 : 0.45) * t; }
+      if (flyOut) { const t = smooth01(0, flyL1, Ls - q.s); q.fw *= wmin1 + (1 - wmin1) * t; q.fi *= (felt ? 0.6 : 0.5) + (felt ? 0.4 : 0.5) * t; }
+    }
+  }
   // presión: entrada, salida, ondulación lenta, dirección (el pincel engorda al bajar)
   const pSeed = seed + 13;
   const inL = Math.min(P.inL * r, Ls * 0.32), outL = Math.min(P.outL * r, Ls * 0.42);
@@ -186,7 +226,8 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
     const ext = P.tOut + (1 - P.tOut) * smooth01(0, outL, Ls - q.s);
     const pr = 1 + P.press * R.noise1(q.s / (r * 7 + 1), pSeed) + P.press * 0.4 * R.noise1(q.s / (r * 2.2 + 1), pSeed + 3);
     const dir = 1 + P.down * (q.ty > 0 ? q.ty : q.ty * 0.55);
-    q.h = Math.max(P.minR, r * q.w * Math.min(ent, ext) * pr * dir);
+    const vw = 1 + (P.vW || 0) * ((1 - q.v) - 0.4);
+    q.h = Math.max(P.minR, r * q.w * Math.min(ent, ext) * pr * dir * vw * q.fw);
   }
   // pigmento a lo largo del trazo: presión (aprieta al bajar, en las curvas y al frenar; afloja en las subidas
   // rápidas) y carga (el pincel empieza cargado y se va quedando seco)
@@ -201,13 +242,13 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
   for (let i = 0; i < n; i++) {
     const q = Q[i];
     let sl = 0, sn = 0; for (let k = Math.max(0, i - kw); k <= Math.min(n - 1, i + kw); k++) { sl += slowA[k]; sn++; }
-    const slow = sl / sn;
+    const slow = 0.35 * (sl / sn) + (P.vInk == null ? 0.9 : P.vInk) * (1 - q.v - 0.3);
     const down = q.ty > 0 ? q.ty : 0, up = q.ty < 0 ? -q.ty : 0;
     let tone = 1 + P.tone * (0.5 * down - 0.45 * up + 0.8 * slow + 0.45 * R.noise1(q.s / (r * 4 + 1), pSeed + 9));
     if (P.pool) tone *= 1 + P.pool * (1 - smooth01(0, r * 2.2, q.s)) * 1.2;
     tone = Math.max(0.45, Math.min(1.9, tone));
     const load = 1 + (P.load || 0) * (0.45 - q.s / Ls) * (opts.loadMul == null ? 1 : opts.loadMul);
-    q.pig = tone * Math.max(0.3, load);
+    q.pig = tone * Math.max(0.3, load) * q.fi;
   }
   // textura: cinta escogida, mapa a lo largo (inicio real, final real, medio sin costuras)
   const proc = P.proc || null;                       // 'marker': rotulador procedural (sin cinta)
@@ -221,6 +262,8 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
   const blurRad = cpp > 2.2 ? Math.min(6, Math.round(cpp / 2.2)) : 0;
   const tex = proc ? null : stripBlur(S, blurRad);
   const hEnd0 = Q[0].h, hEnd1 = Q[n - 1].h;
+  // (solo algunos extremos se quedan quietos un momento y cargan tinta; los que salen al vuelo, nunca)
+  const endK0 = flyIn0 ? 0 : rnd() < 0.45 ? 1 : 0.15, endK1 = flyOut0 ? 0 : rnd() < 0.5 ? 1 : 0.15;
   const mSeed = (seed * 7 + 3) | 0;
   // rotulador: vetas a lo largo (la fibra de la punta), deriva lenta; el borde se come un poco el papel
   const marker = (s, v, px, py) => {
@@ -229,7 +272,7 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
     else if (s > Ls) { ve = Math.hypot(v, (s - Ls) / hEnd1); cap = 1; }
     // carga en los extremos: donde el rotulador se para, la tinta se extiende y oscurece
     const de = Math.min(s, Ls - s), hh = s < Ls / 2 ? hEnd0 : hEnd1;
-    let bleed = P.pool ? (1 - smooth01(0, hh * 1.6, Math.max(0, de))) * P.pool * Math.min(1, Ls / (hh * 8)) : 0;
+    let bleed = P.pool ? (1 - smooth01(0, hh * 1.6, Math.max(0, de))) * P.pool * Math.min(1, Ls / (hh * 8)) * (s < Ls / 2 ? endK0 : endK1) : 0;
     // grumo: la punta se ha quedado un momento quieta al empezar y suelta un punto de tinta
     if (opts.blob && s < Ls / 2) bleed += (1 - smooth01(0, hh * 1.3, Math.max(0, s))) * 0.9;
     // borde: casi limpio (el fieltro y la bola no tiemblan); solo el diente del papel lo muerde un poco

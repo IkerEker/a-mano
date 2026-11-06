@@ -373,7 +373,7 @@ function metrics(styleKey, mode) {
   const st = styleOf(styleKey);
   if (mode === 'cursiva' && st.script === 'own') {
     const xh = st.xhS * CAP;
-    return { cap: CAP, xh, asc: Math.max(CAP * 1.05, xh * 2.05), desc: xh * 1.0, space: 0.26 * (0.8 + 0.2 * (st.scriptW || 0.8)) };
+    return { cap: CAP, xh, asc: Math.max(CAP * 1.05, xh * 2.05), desc: xh * 1.0, space: 0.2 * (0.8 + 0.2 * (st.scriptW || 0.8)) };
   }
   if (mode === 'cursiva' || st.print) {
     const pf = mode !== 'cursiva';
@@ -428,9 +428,11 @@ function joinCursive(letters, emTol) {
     let ai = -1, best = -Infinity;
     // (la raya de la t no cuenta como salida: es corta y casi horizontal)
     const isBar = s => { const a = s.pts[0], e = s.pts[s.pts.length - 1]; return s.pts.length < 40 && Math.abs(e[1] - a[1]) < 0.03 && plen(s.pts) < 0.3; };
-    A.strokes.forEach((s, k) => { if (s.closed || s.fill || s.mark || isBar(s)) return; const e = s.pts[s.pts.length - 1]; const sc = e[0] + e[1] * 0.2; if (sc > best) { best = sc; ai = k; } });
+    // (los puntos de la i y la j no son salidas)
+    const isDot = s => plen(s.pts) < 0.06;
+    A.strokes.forEach((s, k) => { if (s.closed || s.fill || s.mark || isBar(s) || isDot(s)) return; const e = s.pts[s.pts.length - 1]; const sc = e[0] + e[1] * 0.2; if (sc > best) { best = sc; ai = k; } });
     let bi = -1, bestb = Infinity;
-    L.strokes.forEach((s, k) => { if (s.closed || s.fill || s.mark) return; const e = s.pts[0]; const sc = e[0] - e[1] * 0.2; if (sc < bestb) { bestb = sc; bi = k; } });
+    L.strokes.forEach((s, k) => { if (s.closed || s.fill || s.mark || plen(s.pts) < 0.06) return; const e = s.pts[0]; const sc = e[0] - e[1] * 0.2; if (sc < bestb) { bestb = sc; bi = k; } });
     if (ai < 0 || bi < 0) continue;
     const sa = A.strokes[ai], sb = L.strokes[bi];
     const e = sa.pts[sa.pts.length - 1], b0 = sb.pts[0];

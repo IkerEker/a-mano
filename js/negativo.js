@@ -200,7 +200,7 @@ function styleFor(tool, preset) {
   if (tool === 'pincel' && preset !== 'humedo') fill = ['pincel', 'seco'];
   // (relleno: sin carga en los extremos ni puntas afiladas, si no cada vuelta deja un punto o un hueco)
   const fp = INK.preset(fill[0], fill[1]), lp = fp;
-  const soft = q => Object.assign({}, q, { endDry: q.proc && !q.pen ? 0.85 : 0, wet: (q.wet || 0) * 0.3, pool: (q.pool || 0) * 0.2, tIn: Math.max(q.tIn, 0.9), tOut: Math.max(q.tOut, 0.85), up: 0, dry: (q.dry || 0) * (tool === 'pincel' ? 1.1 : 0.5), skipCaps: !q.proc && tool !== 'pincel', tone: (q.tone || 0) * (q.blend === 'over' ? 0.35 : 1), load: (q.load || 0) * (q.blend === 'over' ? 0.4 : 1), down: 0 });
+  const soft = q => Object.assign({}, q, { fly: 0, vW: (q.vW || 0) * 0.5, endDry: q.proc && !q.pen ? 0.85 : 0, wet: (q.wet || 0) * 0.3, pool: (q.pool || 0) * 0.2, tIn: Math.max(q.tIn, 0.9), tOut: Math.max(q.tOut, 0.85), up: 0, dry: (q.dry || 0) * (tool === 'pincel' ? 1.1 : 0.5), skipCaps: !q.proc && tool !== 'pincel', tone: (q.tone || 0) * (q.blend === 'over' ? 0.35 : 1), load: (q.load || 0) * (q.blend === 'over' ? 0.4 : 1), down: 0 });
   const F = soft(fp);
   // cera: las pasadas se montan (veladura): donde se insiste, más oscuro; con el grano a la vista
   if (S.glaze) Object.assign(F, { blend: 'multiply', grain: Math.max(F.grain || 0, 0.35), tone: 0.45 });
