@@ -1,8 +1,8 @@
-A MANO 2.15 · plugin para Photoshop (2024 o posterior)
+A MANO 2.16 · plugin para Photoshop (2024 o posterior)
 =====================================================
 
 INSTALAR
-- Doble clic en A_mano_v2.15.0.ccx -> Creative Cloud avisa de que no viene del
+- Doble clic en A_mano_v2.16.0.ccx -> Creative Cloud avisa de que no viene del
   Marketplace -> "Instalar". Sustituye a las versiones anteriores. Es independiente de Cartelator.
 - En Photoshop: Plugins > A mano.
 
@@ -39,14 +39,14 @@ GENERAR, de arriba abajo
 4. LETRA: infantil, adulta, nerviosa o elegante, cada una en versión A o B;
    MAYÚSCULAS, minúsculas o cursiva. Las letras salen de escritura real (los
    carteles y abecedarios de referencia), cada estilo de la suya:
-   · Infantil A: abecedario de niño; minúsculas gordas y separadas; cursiva redonda y derecha.
-   · Infantil B: de chaval aplicado, recta y estrecha; cursiva de colegio.
-   · Adulta A: mayúsculas estrechas y apretadas (MENU); cursiva inclinada de cuerpo pequeño.
-   · Adulta B: alta, suelta y estrecha; cursiva casi derecha y alta.
-   · Nerviosa A: mayúsculas muy altas y desiguales (Tonya); cursiva tumbada y estirada, a toda prisa.
-   · Nerviosa B: desigual y saltona (mysterious); cursiva temblona.
-   · Elegante A: la de siempre, fina y tranquila.
-   · Elegante B: de cartel de museo, redonda y bailona (Matisse); cursiva derecha y abierta.
+   · Infantil A: de niño: grande, redonda, a trozos, cada letra de un tamaño.
+   · Infantil B: redondita y ancha, de cuaderno, astas cortas, muy regular.
+   · Adulta A: segura: algo inclinada y compacta; cursiva inclinada de cuerpo pequeño.
+   · Adulta B: alta y estrecha, de astas y colas muy largas; cursiva a ratos desligada.
+   · Nerviosa A: picuda: fina, apretada, inclinada, arcos en pico; cursiva tumbada a toda prisa.
+   · Nerviosa B: a lo loco: hacia atrás, desigual y saltona; cursiva angulosa hacia atrás.
+   · Elegante A: la más «correcta», fina y tranquila.
+   · Elegante B: de cartel, redonda y bailona; cursiva de invitación, menuda, muy espaciada.
 - LEGIBILIDAD: de garabato a muy legible.
 - "Escribir en la forma": crea un grupo "✍ A mano · ..." con lo escrito y la forma
   (invisible). Para cambiarlo, selecciona el grupo, deforma la forma o cambia

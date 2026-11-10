@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.15)
+## 2. Cómo se usa (2.16)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -429,6 +429,20 @@ Qué se construyó:
 - Menos variación por letra y por trazo (giro, cizalla, desplazamiento de cada trazo), el hueco mínimo del pintado
   casa con el del estilo (las palabras no crecen al pintarlas) y el boli casi no hace ganchos.
 
+### 2.16 — que cambiar de letra merezca la pena
+Pedido: «siguen siendo muy parecidas (las minúsculas de infantiles y nerviosas, casi idénticas; las mayúsculas de
+Infantil B, Adultas y Nerviosas, casi iguales). Guíate por los nombres: un niño, más entrecortado y redondeado; una
+nerviosa, letras más juntas, más finas, picudas. Una puede ser la más correcta. Y la cursiva está mal hecha».
+- Cada estilo tiene ahora rasgos de construcción propios (no solo anchura): `asc`/`desc` (astas y colas largas o
+  cortas), `peak`/`peakS` (arcos y óvalos en pico, lados rectos), `alt` (a, g, y de otra forma), `refW` (anchura
+  de las letras de muestra), `piece` (trazos sueltos que no casan, de niño), inclinación a la derecha o hacia atrás,
+  altura de x de 0,46 a 0,86, espaciado y grosor muy distintos. Tabla en `STYLES` (comentada).
+- Cursiva: (1) fallo de fondo arreglado: al ligar tres letras seguidas la segunda se quedaba sin trazo y la
+  tercera no se unía (`_carry`); (2) enlace alto: tras o, b, v, w, r la letra siguiente entra por arriba, sin bajar
+  a la línea; (3) al empezar palabra, las redondas (a, c, d, g, o, q) no traen rabito desde abajo; (4) la r es
+  palo + hombro (antes se leía «v»); (5) `joinP`: algunas manos levantan el boli a media palabra (Adulta B);
+  (6) Elegante B tiene cursiva propia de invitación (cuerpo menudo, astas largas, enlaces largos).
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -488,7 +502,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.15.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.16.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)

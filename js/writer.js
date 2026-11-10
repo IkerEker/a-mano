@@ -222,7 +222,7 @@ function plan(lay, p, seed) {
       if (s.fill) return { pts: pts.map(([x, y]) => [x + g(rs) * 0.006, y + g(rs) * 0.006]).map(tf), closed: true, fill: true, joinable: false, mark: !!s.mark };
       // trazo: pequeño desplazamiento y giro propio (las piezas de la letra no encajan perfecto)
       let mx = 0, my = 0; for (const q of pts) { mx += q[0]; my += q[1]; } mx /= pts.length; my /= pts.length;
-      const jx = g(rs) * (0.003 + 0.015 * c), jy = g(rs) * (0.003 + 0.015 * c), jr = g(rs) * (0.008 + 0.035 * c);
+      const pcs = persona.piece || 1, jx = g(rs) * (0.003 + 0.015 * c) * pcs, jy = g(rs) * (0.003 + 0.015 * c) * pcs, jr = g(rs) * (0.008 + 0.035 * c);
       const cj = Math.cos(jr), sj = Math.sin(jr);
       pts = pts.map(([x, y]) => [mx + cj * (x - mx) - sj * (y - my) + jx, my + sj * (x - mx) + cj * (y - my) + jy]);
       // poco legible: la mano simplifica
@@ -269,7 +269,7 @@ function plan(lay, p, seed) {
     const ri = R.mulberry32((seed + li * 7907 + 71) >>> 0);
     const body = strokes.map((st, k) => ({ k, L: st.fill || st.mark ? 0 : plen(st.pts) })).sort((a, b) => b.L - a.L);
     if (body.length && body[0].L > 0.12 * em) {
-      if (ri() < 0.05) {
+      if (ri() < 0.05 && !(isScript && L.g.script)) {
         // el palo (el trazo largo) casi siempre; a veces otro
         const pick = body[ri() < 0.7 ? 0 : Math.min(body.length - 1, 1)];
         if (pick.L > 0.12 * em) strokes[pick.k].retrace = true;
@@ -330,7 +330,7 @@ function plan(lay, p, seed) {
   if (isScript) {
     const byWord = new Map();
     for (const l of cursiveLetters) { if (!byWord.has(l.word)) byWord.set(l.word, []); byWord.get(l.word).push(l); }
-    for (const [, ls] of byWord) FN.joinCursive(ls, 0.09 * (1 + c));
+    for (const [wk, ls] of byWord) FN.joinCursive(ls, 0.09 * (1 + c), { joinP: persona.joinP, track: persona.trackS, rnd: R.mulberry32((seed + wk * 7717 + 41) >>> 0) });
   }
   // ---- subrayados: una raya a mano bajo la palabra (sigue las bases de sus letras, se pasa un poco)
   const wordsInfo = lay.words || [];
