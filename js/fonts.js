@@ -50,7 +50,19 @@ STYLES.bloque = { label: 'Bloque', hint: '', wide: 1.0, slant: 0.02, slantVar: 0
 // compatibilidad con ajustes guardados de la 2.0
 const ALIAS = { infantil: 'infantil_a', adulta: 'adulta_a', rabiosa: 'nerviosa_a', nerviosa: 'nerviosa_a', elegante: 'elegante_a' };
 const PERSONAS = new Proxy(STYLES, { get: (t, k) => t[k] || t[ALIAS[k]] || undefined });
-function styleOf(k) { return STYLES[k] || STYLES[ALIAS[k]] || STYLES.adulta_a; }
+// 'neg:estilo': la letra de bloque de los negativos, con la forma del estilo que la acompaña (sus letras, su
+// inclinación, sus picos) pero quieta y con aire: se pinta alrededor
+const negCache = {};
+function styleOf(k) {
+  if (typeof k === 'string' && k.indexOf('neg:') === 0) {
+    if (!negCache[k]) {
+      const b = styleOf(k.slice(4));
+      negCache[k] = Object.assign({}, b, { print: null, alt: null, hVar: Math.min(b.hVar, 0.06), wVar: Math.min(b.wVar, 0.05), slant: Math.max(-0.12, Math.min(0.14, b.slant)), slantVar: Math.min(b.slantVar, 0.03), wob: Math.min(b.wob, 0.008), os: 0, osVar: 0.008, stem: 0, cb: Math.min(b.cb, 0.04), open: 0, track: 0.1, minGap: 0.07, weight: 1, bounce: Math.min(b.bounce, 0.8), sizeVar: Math.min(b.sizeVar, 0.6), flick: 0, piece: 1, xh: Math.max(b.xh, 0.72), asc: 1, desc: 1, wide: Math.max(b.wide, 0.82), refW: Math.max(b.refW || 1, 0.88), peak: (b.peak || 0) * 0.6 });
+    }
+    return negCache[k];
+  }
+  return STYLES[k] || STYLES[ALIAS[k]] || STYLES.adulta_a;
+}
 
 // letras propias de cada estilo (sustituyen al esqueleto). 'lower:x' = usar la minúscula x a tamaño de mayúscula
 const OVR = {

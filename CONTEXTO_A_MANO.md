@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.17)
+## 2. Cómo se usa (2.18)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -455,6 +455,21 @@ regulares ni sintéticas». Se revisó cada estilo con un texto que tiene todas 
 - Letras de muestra retiradas por ilegibles en texto corrido (b, m, h, n, a de Infantil A; l de Infantil B; B de
   Infantil A; V de Adulta A; O con raya de Nerviosa A; V y S de Nerviosa B; E y C con cola de Elegante B).
 
+### 2.18 — negativos menos falsos, encaje estable, R limpia
+Pedido (capturas en arco con lápiz y pincel): «quita esas cosas de las R; al cambiar de técnica las letras cambian
+muchísimo de colocación y tamaño (en pincel lo hace perfecto); el rotulador gastado es demasiado temblón; los
+negativos siguen viéndose superfalsos: mejóralos, incluso su tipografía, que se parezca a la que les acompaña».
+- R de Tonya (con un ojal dentro) retirada; también su D, que se leía Q.
+- El encaje ya no depende de la técnica: `inkPad` del maquetado es fijo (0,04 × grosor), no el ancho de la
+  herramienta. Mismo texto y misma forma → mismas líneas y tamaños con cualquier técnica.
+- Rotulador gastado: `tremor` 0,75 → 0,3.
+- Negativos: (1) la letra de bloque es la del estilo elegido (`neg:<estilo>` en `fonts.styleOf`: sus letras de
+  muestra, su inclinación y sus picos, pero quieta y con aire; adiós al estilo `bloque` único); (2) menos de cómic:
+  las cuñas de grosor de cada palo son suaves (0,68–1,18 en vez de 0,55–1,55), menos remates abiertos y en sesgo;
+  (3) el canto de las letras ya no es un corte a cuchilla: cada trazo del relleno aplica la máscara desplazada un
+  poco (`Mfill.jit`, `ink.applyMask`), así unos se quedan cortos y otros se meten un pelo: el borde lo hacen los
+  finales de los trazos.
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -514,7 +529,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.17.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.18.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)

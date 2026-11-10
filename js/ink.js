@@ -58,7 +58,7 @@ const TOOLS = {
     label: 'Rotulador', presets: {
       fino: { label: 'Fino', proc: 'marker', load: 0.15, w: 0.022, dens: 0.93, tIn: 0.95, tOut: 0.92, inL: 1, outL: 1.2, press: 0.04, wet: 0.1, pool: 0.4, tremor: 0.75, lift: 0.1, tone: 0.12, grain: 0.06, fuse: true },
       gordo: { label: 'Gordo', useFont: true, proc: 'marker', load: 0.18, w: 0.055, dens: 0.9, tIn: 0.97, tOut: 0.95, inL: 0.8, outL: 1, press: 0.03, wet: 0.1, pool: 0.35, tremor: 0.7, lift: 0.08, tone: 0.1, grain: 0.07, fuse: true },
-      gastado: { label: 'Gastado', proc: 'marker', w: 0.05, dens: 0.95, tIn: 0.95, tOut: 0.9, inL: 0.8, outL: 1, press: 0.05, wet: 0.15, pool: 0.15, dry: 0.75, tremor: 0.75, lift: 0.1, tone: 0.15, load: 0.3, grain: 0.12, fuse: true }
+      gastado: { label: 'Gastado', proc: 'marker', w: 0.05, dens: 0.95, tIn: 0.95, tOut: 0.9, inL: 0.8, outL: 1, press: 0.05, wet: 0.15, pool: 0.15, dry: 0.75, tremor: 0.3, lift: 0.1, tone: 0.15, load: 0.3, grain: 0.12, fuse: true }
     }
   },
   pincel: {
@@ -459,7 +459,7 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
   // borde húmedo: la tinta se acumula en el borde de la mancha
   if (P.wet > 0.05) wetEdge(buf, bw, bh, Math.max(1, Math.round(r * 0.45)), P.wet);
   // máscara (negativos): donde vale 0 no se pinta (las letras quedan libres)
-  if (opts.mask) applyMask(buf, bx0, by0, bw, bh, opts.mask);
+  if (opts.mask) applyMask(buf, bx0, by0, bw, bh, opts.mask, seed);
   RD.compositePigment(canvas, buf, bx0, by0, bw, bh, rgb, opts.blend || P.blend, opts.alphaMul == null ? 1 : opts.alphaMul);
 }
 // mask: { x0, y0, w, h, s (px de máscara por px de documento), d: Float32Array (0..1) }
@@ -470,11 +470,15 @@ function maskAt(M, X, Y) {
   const a = M.d[y0 * M.w + x0], b = M.d[y0 * M.w + x1], c = M.d[y1 * M.w + x0], d = M.d[y1 * M.w + x1];
   return (a + (b - a) * fx) * (1 - fy) + (c + (d - c) * fx) * fy;
 }
-function applyMask(buf, bx0, by0, bw, bh, M) {
+function applyMask(buf, bx0, by0, bw, bh, M, seed) {
+  // M.jit (px): cada trazo se para en un sitio algo distinto junto al borde (unos se quedan cortos, otros se meten
+  // un pelo): el canto lo hacen los finales de los trazos, no un corte a cuchilla
+  let jx = 0, jy = 0;
+  if (M.jit) { const r = R.mulberry32(((seed || 1) * 2654435761) >>> 0), a = r() * 6.283, d = M.jit * Math.sqrt(r()); jx = Math.cos(a) * d; jy = Math.sin(a) * d; }
   for (let y = 0; y < bh; y++) for (let x = 0; x < bw; x++) {
     const k = y * bw + x;
     if (buf[k] <= 0) continue;
-    buf[k] *= maskAt(M, bx0 + x + 0.5, by0 + y + 0.5);
+    buf[k] *= maskAt(M, bx0 + x + 0.5 + jx, by0 + y + 0.5 + jy);
   }
 }
 

@@ -253,15 +253,16 @@ function stampBlocks(G, strokes, seed) {
     const Lt = S[n - 1] || 1;
     // grosor a lo largo: una punta más ancha que otra, y a veces se abre en los extremos
     // (cambios de grosor exagerados pero en rampa, nunca en bultos: una punta fina y la otra gorda, o se abre)
-    let wa = 0.55 + 1.0 * rnd(), wb = 0.55 + 1.0 * rnd();
-    if (Math.abs(wa - wb) < 0.4) { if (wa < wb) { wa = Math.max(0.5, wa - 0.25); wb += 0.2; } else { wb = Math.max(0.5, wb - 0.25); wa += 0.2; } }
-    const fl = rnd() < 0.6 ? 0.25 + 0.45 * rnd() : 0, mid = rnd() < 0.3 ? -(0.1 + 0.2 * rnd()) : 0;   // se abre / se estrecha al medio
+    // (2.18: menos de cómic: la letra es la del estilo, en gordo; el grosor cambia, pero sin cuñas exageradas)
+    let wa = 0.68 + 0.5 * rnd(), wb = 0.68 + 0.5 * rnd();
+    if (Math.abs(wa - wb) < 0.18) { if (wa < wb) { wa -= 0.1; wb += 0.1; } else { wb -= 0.1; wa += 0.1; } }
+    const fl = rnd() < 0.35 ? 0.1 + 0.2 * rnd() : 0, mid = rnd() < 0.3 ? -(0.1 + 0.2 * rnd()) : 0;   // se abre / se estrecha al medio
     const width = f => (wa + (wb - wa) * f) * (1 + fl * (Math.pow(1 - f, 4) + Math.pow(f, 4)) + mid * Math.sin(f * Math.PI));
     // temblor de cada canto: lento (sin lóbulos)
     const edgeN = (f, sg) => 0.11 * R.noise1(f * Lt / (r * 5 + 1), sd + (sg > 0 ? 3 : 7)) + 0.02 * R.noise1(f * Lt / (r * 1.5 + 1), sd + (sg > 0 ? 11 : 13));
     const dir = i => { const a = P[i], b = P[i + 1], L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1; return [(b[0] - a[0]) / L, (b[1] - a[1]) / L]; };
     // remates en sesgo: cuánto adelanta un canto respecto al otro en cada punta
-    const skew0 = (rnd() - 0.5) * 1.6 * r, skew1 = (rnd() - 0.5) * 1.6 * r;
+    const skew0 = (rnd() - 0.5) * 1.0 * r, skew1 = (rnd() - 0.5) * 1.0 * r;
     const side = sg => {
       const out = [];
       for (let i = 0; i < n; i++) {
@@ -350,6 +351,7 @@ function plan(o) {
   // máscaras: relleno (dentro de la caja, fuera de las letras) y perfiles (solo fuera de las letras)
   const dIn = Math.max(0.5, rL * 0.15);
   const Mfill = { x0: G.x0, y0: G.y0, w: G.w, h: G.h, s: G.s, d: new Float32Array(D.length), out: 0 };
+  Mfill.jit = Math.max(1, rF * 0.55);
   const Mline = { x0: G.x0, y0: G.y0, w: G.w, h: G.h, s: G.s, d: new Float32Array(D.length), out: 1 };
   for (let i = 0; i < D.length; i++) {
     const aw = Math.max(0.6, 1.6 / G.s);
