@@ -335,7 +335,17 @@ function arcParam(p) {
   const n = p.length / 2, acc = new Float64Array(n);
   for (let i = 1; i < n; i++) acc[i] = acc[i - 1] + Math.hypot(p[2 * i] - p[2 * i - 2], p[2 * i + 1] - p[2 * i - 1]);
   const L = acc[n - 1] || 1;
+  // fuera de [0, 1] se prolonga en línea recta por la tangente del extremo (antes se pegaba al borde y las
+  // letras que se salían un poco quedaban aplastadas contra él, como cortadas)
+  const ext = (s) => {
+    const a = s < 0 ? 0 : n - 1, b = s < 0 ? Math.min(n - 1, 1) : Math.max(0, n - 2);
+    let k = b; while (k > 0 && k < n - 1 && Math.hypot(p[2 * k] - p[2 * a], p[2 * k + 1] - p[2 * a + 1]) < L * 0.02) k += s < 0 ? 1 : -1;
+    const d = Math.hypot(p[2 * a] - p[2 * k], p[2 * a + 1] - p[2 * k + 1]) || 1;
+    const over = (s < 0 ? -s : s - 1) * L;
+    return [p[2 * a] + (p[2 * a] - p[2 * k]) / d * over, p[2 * a + 1] + (p[2 * a + 1] - p[2 * k + 1]) / d * over];
+  };
   return s => {
+    if (n > 1 && (s < 0 || s > 1)) return ext(s);
     const target = Math.max(0, Math.min(1, s)) * L;
     let lo = 0, hi = n - 1;
     while (hi - lo > 1) { const m = (lo + hi) >> 1; if (acc[m] < target) lo = m; else hi = m; }

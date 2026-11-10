@@ -85,17 +85,28 @@ function splitAtPeaks(pts, r, lim, sharp) {
     i = best + 1;
   }
   if (!cuts.length) return [pts];
+  // cada lado sigue un poco más allá del pico (se montan: el pico queda lleno, nunca cortado) y sin adelgazar
+  // en el corte (los extremos del corte no se afilan ni salen «al vuelo»: cont0/cont1)
   const out = [];
+  const over = r * 0.55;
+  const extend = (seg, atEnd) => {
+    const m = seg.length; if (m < 3) return seg;
+    const e = atEnd ? seg[m - 1] : seg[0], b = atEnd ? seg[Math.max(0, m - 4)] : seg[Math.min(m - 1, 3)];
+    const dx = e.x - b.x, dy = e.y - b.y, l = Math.hypot(dx, dy) || 1;
+    const q = { x: e.x + dx / l * over, y: e.y + dy / l * over, w: e.w };
+    return atEnd ? seg.concat([q]) : [q].concat(seg);
+  };
   let a = 0;
-  for (const c of cuts) {
-    const seg = pts.slice(a, c + 1).map(q => Object.assign({}, q));
-    if (sharp !== false) sharpen(seg, r, false, true);
+  cuts.push(n - 1);
+  for (let k = 0; k < cuts.length; k++) {
+    const c = cuts[k];
+    let seg = pts.slice(a, c + 1).map(q => Object.assign({}, q));
+    if (k > 0) seg = extend(seg, false);
+    if (k < cuts.length - 1) seg = extend(seg, true);
+    if (sharp !== false) { if (k > 0) sharpen(seg, r, true, false); if (k < cuts.length - 1) sharpen(seg, r, false, true); }
+    seg.cont0 = k > 0; seg.cont1 = k < cuts.length - 1;
     out.push(seg); a = c;
   }
-  const last = pts.slice(a).map(q => Object.assign({}, q));
-  if (sharp !== false) sharpen(last, r, true, false);
-  out.push(last);
-  if (sharp !== false) for (let k = 1; k < out.length - 1; k++) sharpen(out[k], r, true, false);
   return out;
 }
 // afila un extremo: el grosor baja hacia la punta (start: el inicio, end: el final)
@@ -108,7 +119,7 @@ function sharpen(pc, r, start, end) {
       if (k !== from) acc += Math.hypot(pc[k].x - pc[k - step].x, pc[k].y - pc[k - step].y);
       if (acc > D) break;
       const t = acc / D;
-      pc[k].w = Math.min(pc[k].w == null ? 1 : pc[k].w, 0.45 + 0.55 * t * t * (3 - 2 * t));
+      pc[k].w = Math.min(pc[k].w == null ? 1 : pc[k].w, 0.72 + 0.28 * t * t * (3 - 2 * t));
     }
   };
   if (start) go(0, 1);
@@ -128,8 +139,8 @@ function taperEnds(pc, r, flick, rs) {
       pc[k].w = Math.min(pc[k].w == null ? 1 : pc[k].w, min + (1 - min) * Math.sqrt(t));
     }
   };
-  if (rs() < 0.75) go(n - 1, -1, 0.3);
-  if (rs() < 0.3) go(0, 1, 0.5);
+  if (!pc.cont1 && rs() < 0.75) go(n - 1, -1, 0.3);
+  if (!pc.cont0 && rs() < 0.3) go(0, 1, 0.5);
 }
 
 // ------------------------------------------------------------------ plan: trazos en px del documento
@@ -176,11 +187,11 @@ function plan(lay, p, seed) {
     const r = R.mulberry32(seed + li * 104729 + 17);
     const W = wordT.get(L.word), WC = wordC.get(L.word);
     const em = L.size;
-    const rot = g(r) * (0.012 + 0.11 * c) * (0.6 + 0.4 * persona.bounce);
+    const rot = g(r) * (0.01 + 0.07 * c) * (0.6 + 0.4 * persona.bounce);
     const drift = auto ? 0 : 1;
     const sc = Math.exp(g(r) * (0.02 + 0.09 * cp) * persona.sizeVar * (auto ? 0.4 : 1) + drift * R.noise1(li * 0.09, seed + 661) * (0.025 + 0.035 * c));
     const ax = Math.exp(g(r) * (0.02 + 0.07 * c));
-    const shear = g(r) * (0.025 + 0.1 * c) + drift * R.noise1(li * 0.13, seed + 551) * (0.025 + 0.05 * c);
+    const shear = g(r) * (0.02 + 0.06 * c) + drift * R.noise1(li * 0.13, seed + 551) * (0.025 + 0.05 * c);
     const ldy = g(r) * (0.008 + 0.05 * cp) * persona.bounce * (auto ? 0.4 : 1);
     const ldx = g(r) * (0.005 + 0.035 * cp);
     const warpA = 0.006 + 0.045 * c, warpL = 0.33;
@@ -211,7 +222,7 @@ function plan(lay, p, seed) {
       if (s.fill) return { pts: pts.map(([x, y]) => [x + g(rs) * 0.006, y + g(rs) * 0.006]).map(tf), closed: true, fill: true, joinable: false, mark: !!s.mark };
       // trazo: pequeño desplazamiento y giro propio (las piezas de la letra no encajan perfecto)
       let mx = 0, my = 0; for (const q of pts) { mx += q[0]; my += q[1]; } mx /= pts.length; my /= pts.length;
-      const jx = g(rs) * (0.004 + 0.028 * c), jy = g(rs) * (0.004 + 0.028 * c), jr = g(rs) * (0.012 + 0.07 * c);
+      const jx = g(rs) * (0.003 + 0.015 * c), jy = g(rs) * (0.003 + 0.015 * c), jr = g(rs) * (0.008 + 0.035 * c);
       const cj = Math.cos(jr), sj = Math.sin(jr);
       pts = pts.map(([x, y]) => [mx + cj * (x - mx) - sj * (y - my) + jx, my + sj * (x - mx) + cj * (y - my) + jy]);
       // poco legible: la mano simplifica
@@ -221,15 +232,15 @@ function plan(lay, p, seed) {
         // en em: abre un poco el óvalo o se pasa de largo al cerrarlo
         const open = (0.015 + 0.09 * c) * (0.4 + persona.open) * (rs() < 0.6 ? 1 : -0.5);
         pts = trimEnds(pts, 0, -open);
-      } else if (pts.length > 3) {
+      } else if (pts.length > 3 && !(isScript && L.g.script)) {
         const e0 = Math.max(-0.05, Math.min(0.04, g(rs) * (0.008 + 0.03 * c))), e1 = Math.max(-0.06, Math.min(0.05, g(rs) * (0.01 + 0.035 * c) + (rs() < P.lift ? -0.025 : 0)));
         pts = trimEnds(pts, e0, e1);
       }
       // ---- entradas y salidas de la mano (sutiles): la mano llega al papel desde donde estaba (un ganchito en la
       // dirección de llegada) y al soltar ya va hacia el trazo siguiente (una salida que se afila)
       let tipIn = 0, tipOut = 0;
-      if (!s.closed && !s.mark && !persona.geo && pts.length > 3 && plen(pts) > 0.12) {
-        const pr = p.prisa || 0, kH = persona.hook == null ? 1 : persona.hook;
+      if (!s.closed && !s.mark && !(isScript && L.g.script) && pts.length > 3 && plen(pts) > 0.12) {
+        const pr = p.prisa || 0, kH = (persona.hook == null ? 1 : persona.hook) * (P.pen ? 0.25 : 1);   // (el boli apenas hace ganchos)
         const nxt = L.g.strokes[si + 1], prv = L.g.strokes[si - 1];
         const unit = (x, y) => { const l = Math.hypot(x, y) || 1; return [x / l, y / l]; };
         if (rs() < (0.07 + 0.2 * c + 0.12 * pr) * kH) {
@@ -288,7 +299,7 @@ function plan(lay, p, seed) {
         if (!isFinite(ext[k][0]) || !isFinite(ext[k - 1][1])) { shift[k] = shift[k - 1]; continue; }
         const sz = ls[k].size;
         const narrow = (ext[k][1] - ext[k][0] < 0.14 * sz) || (ext[k - 1][1] - ext[k - 1][0] < 0.14 * sz);
-        const minG = (0.055 + 2 * inkW + (narrow ? 0.025 : 0)) * sz;
+        const minG = (Math.min(0.055, (persona.minGap || 0.04) + 0.012) + 2 * inkW + (narrow ? 0.02 : 0)) * sz;
         const maxG = (0.15 + 2 * inkW + Math.max(0, p.track || 0) + 0.05 * c) * sz;
         const gap = (ext[k][0] + shift[k - 1]) - (ext[k - 1][1] + shift[k - 1]);
         shift[k] = shift[k - 1] + (gap < minG ? minG - gap : gap > maxG ? maxG - gap : 0);
@@ -450,7 +461,7 @@ function plan(lay, p, seed) {
         const blob = !!P.proc && pass === 0 && !s.fill && rs() < 0.04;
         pieces.forEach((pc, pi) => {
           if (pc.length < 2) return;
-          out.push({ under: !!s.under, blob: blob && pi === 0, pts: pc, r, fill: !!s.fill, seed: (seed + li * 7 + si * 131 + pass * 1777 + pi * 53) >>> 0, P, box: { left: x0 - m, top: y0 - m, right: x1 + m, bottom: y1 + m }, alpha: pass > 0 ? 0.9 : 1, ink: fuse && extra > 0 ? 1 + 0.32 * Math.min(3, extra) : 1, letter: li, word: L.word == null ? 0 : L.word });
+          out.push({ under: !!s.under, blob: blob && pi === 0, pts: pc, cont0: !!pc.cont0, cont1: !!pc.cont1, r, fill: !!s.fill, seed: (seed + li * 7 + si * 131 + pass * 1777 + pi * 53) >>> 0, P, box: { left: x0 - m, top: y0 - m, right: x1 + m, bottom: y1 + m }, alpha: pass > 0 ? 0.9 : 1, ink: fuse && extra > 0 ? 1 + 0.32 * Math.min(3, extra) : 1, letter: li, word: L.word == null ? 0 : L.word });
         });
       }
     });
@@ -475,7 +486,7 @@ function paint(canvas, strokes, p) {
     const b = s.box;
     if (b.right < canvas.x0 || b.left > canvas.x0 + canvas.w || b.bottom < canvas.y0 || b.top > canvas.y0 + canvas.h) continue;
     const rgb = p.colorVar ? RD.letterColor(rgb0, s.letter || 0, p.colorVar, p.colorSeed || 0) : rgb0;
-    const o = { inkMul: (0.88 + 0.24 * ink) * (s.ink || 1), dryMul: 0.45 + 1.1 * ink, alphaMul: s.alpha, blob: !!s.blob, mask: s.mask || null };
+    const o = { inkMul: (0.88 + 0.24 * ink) * (s.ink || 1), dryMul: 0.45 + 1.1 * ink, alphaMul: s.alpha, blob: !!s.blob, mask: s.mask || null, contIn: !!s.cont0, contOut: !!s.cont1 };
     if (s.fill) INK.paintFill(canvas, s.pts.map(q => [q.x, q.y]), s.P, s.r, rgb, s.seed, o);
     else INK.paintStroke(canvas, s.pts, s.P, s.r, rgb, s.seed, o);
     n++;

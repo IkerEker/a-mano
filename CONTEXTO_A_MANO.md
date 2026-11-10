@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.14)
+## 2. Cómo se usa (2.15)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -382,6 +382,53 @@ Fuentes: designrush.com (por qué las letras manuscritas digitales parecen falsa
 bolígrafo), forensicfield.blog (características individuales de la escritura), Lacquaniti et al. 1983 (ley de los
 dos tercios), Berio/Leymarie/Plamondon IGS 2017 (sigma-lognormal), ojp.gov (fatiga y escritura).
 
+### 2.15 — las 8 letras, rehechas a partir de escritura real
+Pedido (tras probar la 2.14): «Nerviosa A corta las letras», «Nerviosa B exagera mucho, sus A son extrañas»,
+«Infantil B con boli sale como rotulador gordo con triángulos rayados y en MAYÚSCULAS mezcla minúsculas (hABÍA,
+ceRRADO)», «el boli fino no es un boli», «la cursiva tiene que funcionar muchísimo mejor en todas», «rehaz todas las
+tipografías: 8 diferenciadas, ni letras locas, ni cortadas, ni claramente digitales». Después mandó una imagen de
+referencia por estilo («solo la tipografía, no la técnica; las autogeneradas, no el calcar») y pidió analizarlas una
+a una y usarlas todas.
+Cómo se analiza una letra (lo que se miró en cada muestra): proporción (ancho/alto de la O, la N, la H), altura de
+x respecto a la mayúscula, astas y colas, inclinación y cuánto cambia, ritmo y espacio entre letras, regularidad de
+tamaños y de la línea base, construcción (cuántos trazos, si cierra los óvalos, travesaños altos o bajos), forma de
+los vértices (pico o curva), y en cursiva: conexiones, bucles, anchura y rapidez.
+Reparto (referencias en `referencias/tipos/`):
+| Estilo | MAYÚSCULAS | minúsculas | cursiva |
+|---|---|---|---|
+| Infantil A | abecedario de niño | «Let it be unpolished» | propia, redonda y derecha (Comme des Garçons) |
+| Infantil B | «hello. this is a reminder» | ídem + esqueleto con sus proporciones | Hershey Script derecha (de colegio) |
+| Adulta A | «MENU» (pincel estrecho) | esqueleto con sus proporciones | propia inclinada, cuerpo pequeño (Menu) |
+| Adulta B | esqueleto alto y estrecho (Tryin') | ídem | propia casi derecha, estrecha y alta |
+| Nerviosa A | «Tonya Harding's» | esqueleto estrecho | propia muy tumbada, baja y estirada (Vlaminck) |
+| Nerviosa B | «I want to be mysterious» | esqueleto | propia tumbada y temblona |
+| Elegante A | la de siempre (Elfin) | Elfin | Allure (no se toca: «me gustaba la de antes») |
+| Elegante B | Matisse/Calder… | Matisse | Allure derecha, ancha y abierta |
+Qué se construyó:
+- `tools/glyphref.py` + `tools/glyphspec.json` → `js/refglyphs.js`: de cada muestra se sacan las letras (piezas
+  de tinta numeradas con `annotate`, o cajas), se esqueletizan (skimage), se siguen los trazos (en los cruces, lo más
+  recto), se podan los pelos, se buscan los vértices en el trazo sin suavizar (así la A, la M, la N siguen en pico)
+  y se suaviza cada tramo por separado (fuera la escalera de píxeles), se simplifica (RDP) y se pasa al mini
+  lenguaje de `skeleton.js`. Las mayúsculas pierden las motas sueltas. `skip` en la ficha quita las letras que
+  salían rotas o ambiguas (una I que parecía i, una M que era m, una E sin brazo central, una A en Λ…): esas
+  salen del esqueleto genérico. Hoja de control: `SHEET=... python3 tools/glyphref.py build`.
+  (Los cortes de palabras en cursiva están en la ficha pero no se usan: las letras salían a trozos. `CURSIVA=1`.)
+- `fonts.js`: cada estilo tiene `ref`; las letras de referencia se normalizan (mayúsculas sobre la base y altura 1
+  conservando algo de su desigualdad; minúsculas con altura de x 1 y astas ~1,55) y se deforman muy poco (son ya
+  de mano). Lo que falta sale del esqueleto con la anchura media de las letras de la muestra (`autoWide`).
+  Fuera las letras «locas»: sin `OVR` rab/wild/geo, sin trazos dobles, sin piezas rellenas ni grosor propio (`absW`:
+  era lo que hacía del boli un rotulador gordo con triángulos en Infantil B, y lo que metía minúsculas).
+- Cursiva: cada letra empieza donde acaba la anterior (salida → entrada); el avance ya no lo empuja el asta
+  inclinada (antes «Nad ie», «cerrad o»); entre mayúscula y minúscula, un hueco pequeño medido a la altura de x;
+  en las fuentes ligadas (Allure, Script) la letra que sale abajo a la izquierda (la d) acerca la siguiente sin
+  montarse. En cursiva no se recortan los extremos ni se ponen ganchos en las letras ligadas.
+- «Corta las letras»: era el mapa de la forma (`geom.arcParam`): lo que se salía un poco del borde se pegaba a él
+  y la letra quedaba aplastada, como cortada. Ahora se prolonga en línea recta. Además, en los picos (A, M, N) cada
+  lado se monta un poco sobre el otro y no se afila ni sale «al vuelo» en el corte (`cont0/cont1` → `ink.contIn/
+  contOut`); el afilado del pico es más suave.
+- Menos variación por letra y por trazo (giro, cizalla, desplazamiento de cada trazo), el hueco mínimo del pintado
+  casa con el del estilo (las palabras no crecen al pintarlas) y el boli casi no hace ganchos.
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -394,7 +441,8 @@ dos tercios), Berio/Leymarie/Plamondon IGS 2017 (sigma-lognormal), ojp.gov (fati
 | `autofit.js` | (2.2) **Autoencajar letra a letra**: perfil de la forma por columnas (envolvente o silueta); se prueban 1…12 líneas (cortes exactos por programación dinámica, respetando los saltos del usuario); cada letra se relaja hacia el hueco vertical que le dejan la línea de arriba, la de abajo y el borde (puede meterse un tercio en la franja vecina, nunca ocupar dos); la línea llena su ancho ensanchando o estrechando las letras (×0,8–1,32) y si sobra se centra; al final nada se monta (si no cabe, la letra encoge entera). Gana el número de líneas que más área llena sin letras diminutas ni aplastadas. Los signos cuentan como letras de altura de mayúscula. |
 | `layout.js` | (cualquier salto de línea cuenta; `o.auto` → `autofit.js`) Texto → palabras con nivel (tamaño, pasadas, grosor) → cortes de línea por programación dinámica buscando la proporción de la forma → bloque dentro de la envolvente (estira hasta ×1,3) o líneas que caben en la silueta (búsqueda binaria del tamaño, prueba varias alturas de arranque). Reserva el grosor de la herramienta (`inkPad`). |
 | `skeleton.js` | **Letras dibujadas a mano trazo a trazo** en un mini lenguaje (`M/L/S/F/Z`): mayúsculas, minúsculas, números, signos, alternativas (a y g de dos pisos) y marcas (tildes, diéresis, virgulilla, cedilla). |
-| `fonts.js` | 8 estilos (`STYLES`: `adulta_a` … `elegante_b`) que transforman el esqueleto: anchura, inclinación, alturas desiguales, deformación, temblor, curvas angulosas o geométricas, travesaños que se pasan, palos que sobresalen, óvalos que no cierran, trazos dobles, letras propias (`OVR`: kid, geo, tonya, fine). 3 variantes por letra. Cursiva con `fontdata.js` (Hershey Script y EMS Allure). `templates(ch)` da la letra neutra para el calco. |
+| `fonts.js` | 8 estilos (`STYLES`: `adulta_a` … `elegante_b`). Desde 2.15 cada uno usa sus letras de escritura real (`refglyphs.js`, con `ref`) y el esqueleto con sus proporciones para lo que falta: anchura, inclinación, alturas desiguales, travesaños, palos, óvalos que no cierran. 3 variantes por letra (o las de la muestra). Cursiva propia (`CURS`, encadenada salida → entrada) o con `fontdata.js` (Hershey Script y EMS Allure). `templates(ch)` da la letra neutra para el calco. |
+| `refglyphs.js` | (generado, 2.15) letras sacadas de las muestras de `referencias/tipos/` con `tools/glyphref.py` y la ficha `tools/glyphspec.json`. |
 | `calco.js` | **Calco guiado** (CALCAR): plantilla del carácter → encaje afín al esqueleto real de la letra (puntos cercanos en los dos sentidos, con rigidez) → ajuste fino por punto → grosor de la propia letra. Si no cubre bien la letra (calidad < 0,9), se usa el esqueleto antiguo. |
 | `writer.js` | GENERAR: variación por línea/palabra/letra/trazo según la legibilidad, corrección de huecos tras la variación, **repasado nuevo** (pasadas casi encima con desviación lenta menor que el grosor, a veces parciales; fundido en pincel y rotulador), rellenos (`paintFill`), grosor del estilo, escala vertical por letra (autoencajar), temblor, plan y pintado por franjas. |
 | `render.js` | Desde 2.1 el lienzo es **de pigmento**: guarda cómo se ve sobre blanco (transmitancia por canal) y la cobertura; las tintas se acumulan como veladuras (`compositePigment`, modo multiplicar) o tapan (guache/óleo); `finalize` lo pasa a RGBA. |
@@ -440,7 +488,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.14.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.15.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)
@@ -468,8 +516,11 @@ python3 tests/node/sheet.py DIR hoja.png 2 800   # hoja de contactos
 
 1. La 2.1 ya se probó en Photoshop real (capturas del usuario). Falta ver la 2.2 allí.
 2. Letra hueca de bloque (referencia Good Room) como estilo o versión aparte: no está.
-3. Cursivas: siguen saliendo de fuentes de plóter (Hershey/Allure), ahora más rápidas y estrechas. Lo mejor sería
-   que el usuario escriba su alfabeto en cursiva y pasarlo al mini lenguaje de `skeleton.js` (con entradas y salidas).
+3. Cursivas: seis estilos usan la cursiva propia (`CURS`) con proporciones sacadas de las muestras; Infantil B y las
+   elegantes, Script/Allure. Las letras sueltas de las muestras de cursiva (Menu, Comme, Vlaminck) salen a trozos al
+   cortarlas de la palabra; si se quiere usarlas, hay que mejorar el corte (`CURSIVA=1` en glyphref).
+3b. Letras de referencia que se quitaron (`skip` en `tools/glyphspec.json`): casi todas las de Tryin' (Adulta B) y
+   varias de Tonya, mysterious y Matisse salían rotas. Con fotos más limpias de esas letras se pueden recuperar.
 4. CALCAR: el calco guiado acepta ~92 % de las letras de prueba; las decorativas (cursiva de Chorus) caen al
    esqueleto. La variación de CALCAR (planVariation) puede subir o bajar letras sueltas de más con legibilidad baja.
 5. Goteo de la brocha (The New Pop), papel rasgado (AVONAT) y las manchas de TRAZOS: aún no.

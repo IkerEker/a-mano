@@ -196,7 +196,7 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
     }
     var flyIn0, flyOut0;
     const shortS = Ls < r * 7;      // puntos y tildes: nunca al vuelo (se quedarían en nada)
-    const flyIn = !shortS && rnd() < (P.fly || 0) * 0.6 * (opts.flyMul == null ? 1 : opts.flyMul), flyOut = !shortS && rnd() < (P.fly || 0) * (opts.flyMul == null ? 1 : opts.flyMul);
+    const flyIn = !shortS && !opts.contIn && rnd() < (P.fly || 0) * 0.6 * (opts.flyMul == null ? 1 : opts.flyMul), flyOut = !shortS && !opts.contOut && rnd() < (P.fly || 0) * (opts.flyMul == null ? 1 : opts.flyMul);
     flyIn0 = flyIn; flyOut0 = flyOut;
     const accL = Math.min(Ls * 0.22, r * 4.5), decL = Math.min(Ls * 0.28, r * 5.5);
     const vs = new Float32Array(n);
@@ -204,7 +204,7 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
       let km = 0, kn = 0; for (let k = Math.max(0, i - kw2); k <= Math.min(n - 1, i + kw2); k++) { km += kap[k]; kn++; }
       const vk = Math.min(1, Math.pow(km / kn * r * 6 + 0.03, -1 / 3) / Math.pow(0.03, -1 / 3) * 1.9);
       const q = Q[i];
-      const e0 = flyIn ? 1 : 0.3 + 0.7 * smooth01(0, accL, q.s), e1 = flyOut ? 1 : 0.35 + 0.65 * smooth01(0, decL, Ls - q.s);
+      const e0 = flyIn || opts.contIn ? 1 : 0.3 + 0.7 * smooth01(0, accL, q.s), e1 = flyOut || opts.contOut ? 1 : 0.35 + 0.65 * smooth01(0, decL, Ls - q.s);
       vs[i] = Math.max(0.15, vk * Math.min(e0, e1));
     }
     const flyL0 = Math.min(Ls * 0.22, r * (2 + 2 * rnd())), flyL1 = Math.min(Ls * 0.3, r * (2.5 + 3 * rnd()));
@@ -222,8 +222,8 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
   const pSeed = seed + 13;
   const inL = Math.min(P.inL * r, Ls * 0.32), outL = Math.min(P.outL * r, Ls * 0.42);
   for (const q of Q) {
-    const ent = P.tIn + (1 - P.tIn) * smooth01(0, inL, q.s);
-    const ext = P.tOut + (1 - P.tOut) * smooth01(0, outL, Ls - q.s);
+    const ent = opts.contIn ? 1 : P.tIn + (1 - P.tIn) * smooth01(0, inL, q.s);
+    const ext = opts.contOut ? 1 : P.tOut + (1 - P.tOut) * smooth01(0, outL, Ls - q.s);
     const pr = 1 + P.press * R.noise1(q.s / (r * 7 + 1), pSeed) + P.press * 0.4 * R.noise1(q.s / (r * 2.2 + 1), pSeed + 3);
     const dir = 1 + P.down * (q.ty > 0 ? q.ty : q.ty * 0.55);
     const vw = 1 + (P.vW || 0) * ((1 - q.v) - 0.4);
