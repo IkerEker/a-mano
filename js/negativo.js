@@ -361,7 +361,7 @@ function plan(o) {
   // letras vecinas (de otras palabras) que se meten en la caja: el relleno las rodea, no las tapa
   if (o.avoidStrokes && o.avoidStrokes.length) {
     const A = { x0: G.x0, y0: G.y0, w: G.w, h: G.h, s: G.s, d: new Float32Array(G.w * G.h) };
-    stampCapsules(A, o.avoidStrokes.map(st => ({ pts: st.pts, r: st.r + rF * 0.9 + em * 0.015 })));
+    stampCapsules(A, o.avoidStrokes.map(st => ({ pts: st.pts, r: st.r + rF * 1.5 + em * 0.02 })));
     for (let i = 0; i < A.d.length; i++) { const k = 1 - A.d[i]; Mfill.d[i] *= k; Mline.d[i] *= k; }
   }
   const fAt = (F, x, y) => { const ix = Math.max(0, Math.min(G.w - 1, Math.round((x - G.x0) * G.s - 0.5))), iy = Math.max(0, Math.min(G.h - 1, Math.round((y - G.y0) * G.s - 0.5))); return F[iy * G.w + ix]; };
@@ -780,7 +780,15 @@ function planWords(lay, out, p, seed, wordExt) {
         if (ex0 >= x1 + pmin) opts.push(['X1', ex0, (X1 - ex0) * (Y1 - Y0)]);
         if (ey1 <= y0 - pmin) opts.push(['Y0', ey1, (ey1 - Y0) * (X1 - X0)]);
         if (ey0 >= y1 + pmin) opts.push(['Y1', ey0, (Y1 - ey0) * (X1 - X0)]);
-        if (!opts.length) continue;             // (no se puede sin tocar las propias: la máscara rodea esas letras)
+        if (!opts.length) {
+          // la vecina está pegada: la caja se queda a medio camino entre las letras propias y ella (nunca la pisa)
+          const cxo = (E.x0 + E.x1) / 2, cyo = (E.y0 + E.y1) / 2, vov = Math.min(ey1, y1) - Math.max(ey0, y0) > 0, hov = Math.min(ex1, x1) - Math.max(ex0, x0) > 0;
+          if (vov && cxo > x1 && E.x0 > x1) X1 = Math.min(X1, Math.max(x1 + sz * 0.02, (x1 + E.x0) / 2));
+          else if (vov && cxo < x0 && E.x1 < x0) X0 = Math.max(X0, Math.min(x0 - sz * 0.02, (x0 + E.x1) / 2));
+          else if (hov && cyo > y1 && E.y0 > y1) Y1 = Math.min(Y1, Math.max(y1 + sz * 0.02, (y1 + E.y0) / 2));
+          else if (hov && cyo < y0 && E.y1 < y0) Y0 = Math.max(Y0, Math.min(y0 - sz * 0.02, (y0 + E.y1) / 2));
+          continue;
+        }
         opts.sort((a, b) => a[2] - b[2]);
         const [side, v] = opts[0];
         if (side === 'X0') X0 = v; else if (side === 'X1') X1 = v; else if (side === 'Y0') Y0 = v; else Y1 = v;

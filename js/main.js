@@ -95,8 +95,8 @@ function genParams() {
     width: Math.pow(2, st.grosor / 50), repasado: st.repasado / 50, tinta: st.tinta / 100,
     contrast: st.contraste / 50, leading: st.inter / 100, align: st.align, stretch: 1 + st.llenar / 100,
     xFill: st.llenar / 150, margin: st.margen / 100, track: st.tight / 50 * 0.07,
-    // (el encaje no depende de la técnica: la misma forma y el mismo texto ocupan lo mismo con lápiz que con pincel)
-    inkPad: 0.04 * Math.pow(2, st.grosor / 50)
+    // (el grosor de la técnica pide su aire entre letras; el reparto en líneas no depende de él: layout.canon)
+    inkPad: INK.preset(st.tool, st.preset).w * FN.styleOf(st.persona + '_' + st.version).weight * Math.pow(2, st.grosor / 50)
   };
 }
 function handParams() {

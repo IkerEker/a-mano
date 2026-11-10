@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.18)
+## 2. Cómo se usa (2.19)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -470,6 +470,18 @@ negativos siguen viéndose superfalsos: mejóralos, incluso su tipografía, que 
   poco (`Mfill.jit`, `ink.applyMask`), así unos se quedan cortos y otros se meten un pelo: el borde lo hacen los
   finales de los trazos.
 
+### 2.19 — el texto no se recoloca; cajas de negativo que no pisan; R limpias; cursiva Infantil B
+- «Cuando cambio de estilo o de tipo el texto se recoloca por completo»: el reparto en líneas (envolventes) se
+  decide con una letra neutra fija (`__plantilla`, minúsculas, `inkPad` 0,04 → `o.canon` en `layout.js`) y se
+  impone a la letra real (`bestBlock(..., fixed)`). Cambiar estilo, modo o técnica ya no cambia qué palabra va en
+  qué línea; solo el dibujo y algo la escala. (El `inkPad` real vuelve a depender de la técnica: con trazo gordo
+  hace falta aire. En siluetas y en autoencajar el reparto sigue dependiendo de la letra.)
+- Caja de negativo: si una palabra vecina está pegada, la caja se queda a medio camino (antes no se recortaba y la
+  pisaba); la máscara de letras vecinas es más ancha (cubre el desplazamiento por trazo de la 2.18).
+- R de las muestras de Infantil A y B retiradas (traían un ojal o un trazo dentro).
+- Cursiva de Infantil B: ya no es Hershey Script; es la propia, gorda, redonda, baja y derecha (cuerpo 0,74, astas
+  cortas). La de Infantil A, más alta y desigual.
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -529,7 +541,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.18.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.19.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)

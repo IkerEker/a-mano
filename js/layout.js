@@ -117,7 +117,7 @@ function lineBoxes(words, ranges, space, leading) {
 }
 
 // mejor reparto para una proporción ancho/alto (aspect) del hueco
-function bestBlock(words, aspect, space, leading) {
+function bestBlock(words, aspect, space, leading, fixed) {
   const n = words.length;
   if (!n) return null;
   const forced = words.filter(w => w.brk).length + 1;
@@ -126,7 +126,8 @@ function bestBlock(words, aspect, space, leading) {
   const maxLines = Math.min(n, 14);
   for (let L = forced; L <= maxLines; L++) {
     const target = Math.max(total / L, Math.max(...words.map(w => w.w)));
-    const ranges = breakLines(words, target, space);
+    const ranges = fixed || breakLines(words, target, space);
+    if (fixed && L > forced) break;
     const boxes = lineBoxes(words, ranges, space, leading);
     const W = Math.max(...boxes.map(b => b.w));
     const H = boxes.reduce((s, b) => s + b.asc + b.desc, 0);
@@ -176,14 +177,22 @@ function layoutInShape(text, levels, shape, o) {
   const space = met.space * (o.spaceMul || 1) + 2 * (o.inkPad || 0);
   const leading = o.leading || 1;
   if (o.auto) return require('./autofit.js').autoFit(words, shape, space, o);
-  if (shape.kind === 'env') return inEnvelope(words, shape, space, leading, o);
+  if (shape.kind === 'env') {
+    const oc = Object.assign({}, o, { persona: '__plantilla', mode: 'minus', inkPad: 0.04 });
+    const metC = FN.metrics('__plantilla', 'minus');
+    return inEnvelope(words, shape, space, leading, Object.assign({}, o, { canon: { words: measure(tokens, levels || [], oc), space: metC.space * (o.spaceMul || 1) + 0.08 } }));
+  }
   return inSilhouette(words, shape, space, leading, o, met);
 }
 
 function inEnvelope(words, shape, space, leading, o) {
   const m = o.margin == null ? 0.05 : o.margin;
   const Wp = shape.W * (1 - 2 * m), Hp = shape.H * (1 - 2 * m);
-  const block = bestBlock(words, Wp / Hp, space, leading);
+  // el reparto en líneas se decide con una letra neutra (siempre la misma): al cambiar de estilo, de mayúsculas a
+  // cursiva o de técnica, el texto no se recoloca; solo cambia el dibujo de las letras
+  let fixed = null;
+  if (o.canon) { const cb = bestBlock(o.canon.words, Wp / Hp, o.canon.space, leading); if (cb) fixed = cb.boxes.map(bx => [bx.a, bx.b]); }
+  const block = bestBlock(words, Wp / Hp, space, leading, fixed);
   // (en cursiva las letras van ligadas: no se separan para llenar la línea)
   const letters = placeBlock(words, block, space, o.align || 'center', o.mode === 'cursiva' ? 0 : o.xFill == null ? 0.2 : o.xFill);
   // el bloque llena el hueco; se permite estirar un poco (el trazo no se deforma: solo el camino)
