@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.16)
+## 2. Cómo se usa (2.17)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -443,6 +443,18 @@ nerviosa, letras más juntas, más finas, picudas. Una puede ser la más correct
   palo + hombro (antes se leía «v»); (5) `joinP`: algunas manos levantan el boli a media palabra (Adulta B);
   (6) Elegante B tiene cursiva propia de invitación (cuerpo menudo, astas largas, enlaces largos).
 
+### 2.17 — ronda de revisión: cursivas y legibilidad
+Pedido: «dedícale un buen rato a mejorarlo todo, sobre todo las cursivas; más diferencia; legibles pero no iguales,
+regulares ni sintéticas». Se revisó cada estilo con un texto que tiene todas las letras y los enlaces difíciles
+(«el veloz murciélago hindú comía feliz cardillo y kiwi / zarza jaque exige whisky ñu / bobo vive wow obra ojo»).
+- Cursiva: la de colegio (Infantil A) conserva todos los bucles; las manos adultas los pierden (`noLoopA`: l, b, h,
+  k, f suben y bajan por el mismo palo; `noLoopD`: g, j, y acaban en gancho y no ligan con la siguiente); hombros
+  de m, n, h, r redondos (antes hacían un codo al volver a subir); espacio entre palabras proporcional al cuerpo.
+- Letra de molde inclinada: los huecos entre letras se miden a lo largo de la inclinación (`body0`), así la Nerviosa
+  A queda apretada de verdad; los picos solo enderezan arcos (n, m, h, r), no aplastan los óvalos (b, o, p).
+- Letras de muestra retiradas por ilegibles en texto corrido (b, m, h, n, a de Infantil A; l de Infantil B; B de
+  Infantil A; V de Adulta A; O con raya de Nerviosa A; V y S de Nerviosa B; E y C con cola de Elegante B).
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -502,7 +514,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.16.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.17.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)

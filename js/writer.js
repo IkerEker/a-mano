@@ -293,7 +293,7 @@ function plan(lay, p, seed) {
     for (const l of cursiveLetters) { if (!byW.has(l.word)) byW.set(l.word, []); byW.get(l.word).push(l); }
     for (const [, ls] of byW) {
       if (ls.length < 2) continue;
-      const ext = ls.map(l => { let a = Infinity, b = -Infinity; for (const s of l.strokes) if (!s.mark || l.strokes.every(t => t.mark)) for (const q of s.pts) { if (q[0] < a) a = q[0]; if (q[0] > b) b = q[0]; } return [a, b]; });
+      const ext = ls.map(l => { let a = Infinity, b = -Infinity; for (const s of l.strokes) if (!s.mark || l.strokes.every(t => t.mark)) for (const q of s.pts) { const x0 = q[0] + (q[1] - l.L.base) * (persona.slant || 0); if (x0 < a) a = x0; if (x0 > b) b = x0; } return [a, b]; });
       const shift = new Array(ls.length).fill(0);
       for (let k = 1; k < ls.length; k++) {
         if (!isFinite(ext[k][0]) || !isFinite(ext[k - 1][1])) { shift[k] = shift[k - 1]; continue; }
