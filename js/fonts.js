@@ -24,16 +24,16 @@ const NVAR = 5;
 const STYLES = {
   // Adulta A: mayúsculas de pincel estrechas y apretadas, travesaños altos (MENU); cursiva inclinada de cuerpo
   // pequeño y astas largas, de pluma rápida (Menu: Inspiration...)
-  adulta_a: { label: 'Adulta A', hint: 'suelta: inclinada, de astas altas', ref: 'adulta_a', wide: 0.78, slant: 0.1, slantVar: 0.03, hVar: 0.08, wVar: 0.05, wob: 0.01, wobF: 0, angular: 0, geo: 0, os: 0.02, osVar: 0.025, stem: 0.02, cb: 0.04, cbShift: 0.04, open: 0.2, xh: 0.6, track: 0.05, minGap: 0.03, weight: 1.0, bounce: 1.0, sizeVar: 0.6, double: 0, ovr: null, refW: 0.92, asc: 1.2, desc: 1.25, alt: null, ascS: 1.0, noLoopA: 1, script: 'own', xhS: 0.4, slantS: 0.36, trackS: 0, scriptW: 0.95, scriptSmooth: 0.03, flick: 0.4 },
+  adulta_a: { label: 'Adulta A', hint: 'suelta: inclinada, de astas altas', ref: 'adulta_a', wide: 0.78, slant: 0.1, slantVar: 0.03, hVar: 0.08, wVar: 0.05, wob: 0.01, wobF: 0, angular: 0, geo: 0, os: 0.02, osVar: 0.025, stem: 0.02, cb: 0.04, cbShift: 0.04, open: 0.2, xh: 0.6, track: 0.05, minGap: 0.045, weight: 1.0, bounce: 1.0, sizeVar: 0.6, double: 0, ovr: null, refW: 0.92, asc: 1.2, desc: 1.25, alt: null, ascS: 1.0, noLoopA: 1, slantCap: 0.14, script: 'own', xhS: 0.4, slantS: 0.36, trackS: 0, scriptW: 0.95, scriptSmooth: 0.03, flick: 0.4 },
   // Adulta B: alta, estrecha y suelta, palos largos que se pasan (Tryin' to make the best of the hometown blues);
   // cursiva casi derecha, estrecha y alta
   adulta_b: { label: 'Adulta B', hint: 'alta y estrecha, de astas largas', ref: null, wide: 0.52, slant: 0.0, slantVar: 0.04, hVar: 0.08, wVar: 0.09, wob: 0.012, wobF: 0, angular: 0, geo: 0, os: 0.03, osVar: 0.05, stem: 0.05, cb: 0.08, cbShift: 0.02, open: 0.3, xh: 0.46, track: 0.075, minGap: 0.045, weight: 0.9, bounce: 1.0, sizeVar: 1.2, double: 0, ovr: null, refW: 0.6, asc: 1.5, desc: 1.6, ascS: 1.25, joinP: 0.65, noLoopA: 1, noLoopD: 1, script: 'own', xhS: 0.34, slantS: 0.04, trackS: 0.0, scriptW: 0.7, scriptSmooth: 0.03, flick: 0.4 },
   // Infantil A: el abecedario de un niño (tamaños desiguales, redonda, abierta) y minúsculas gordas separadas
   // (Let it be unpolished...); cursiva redonda, derecha y grande (Comme des Garçons)
-  infantil_a: { label: 'Infantil A', hint: 'de niño: grande, redonda, a trozos', ref: 'infantil_a', wide: 1.08, slant: 0, slantVar: 0.1, hVar: 0.16, wVar: 0.1, wob: 0.02, wobF: 0, angular: 0, geo: 0, os: 0.02, osVar: 0.04, stem: 0.03, cb: 0.08, cbShift: 0, open: 0.3, xh: 0.8, track: 0.13, minGap: 0.06, weight: 1.3, bounce: 1.7, sizeVar: 1.3, double: 0, ovr: null, refW: 1.05, asc: 0.85, desc: 0.8, piece: 2.6, peak: 0, ascS: 0.95, joinP: 0.8, slantVarS: 0.09, script: 'own', xhS: 0.6, slantS: 0.02, trackS: 0.02, scriptW: 1.05, scriptSmooth: 0.05, flick: 0.3 },
+  infantil_a: { label: 'Infantil A', hint: 'de niño: grande, redonda, a trozos', ref: 'infantil_a', wide: 1.08, slant: 0, slantVar: 0.1, hVar: 0.11, wVar: 0.1, wob: 0.02, wobF: 0, angular: 0, geo: 0, os: 0.02, osVar: 0.04, stem: 0.03, cb: 0.08, cbShift: 0, open: 0.3, xh: 0.8, track: 0.13, minGap: 0.06, weight: 1.3, bounce: 1.7, sizeVar: 1.3, double: 0, ovr: null, refW: 1.05, asc: 1.05, desc: 0.8, piece: 2.6, peak: 0, ascS: 0.95, joinP: 0.8, slantVarS: 0.09, script: 'own', xhS: 0.6, slantS: 0.02, trackS: 0.02, scriptW: 1.05, scriptSmooth: 0.05, flick: 0.3 },
   // Infantil B: la de un chaval aplicado: mayúsculas rectas y estrechas, bien puestas (hello. this is a reminder);
   // cursiva de colegio, redonda y derecha
-  infantil_b: { label: 'Infantil B', hint: 'a su aire: picuda, desigual, mezcla mayúsculas', ref: 'infantil_b', wide: 0.72, slant: 0.16, slantVar: 0.1, hVar: 0.2, wVar: 0.12, wob: 0.01, wobF: 0, angular: 0, geo: 0, os: 0.01, osVar: 0.02, stem: 0.01, cb: 0.04, cbShift: 0, open: 0.2, xh: 0.6, track: 0.05, minGap: 0.03, weight: 0.8, bounce: 1.8, sizeVar: 1.5, double: 0, ovr: null, refW: 1.12, asc: 1.45, desc: 1.3, piece: 1.4, slantVarS: 0.02, scriptW: 1.38, ascS: 0.68, peak: 0.7, capMix: 'rdt', script: 'own', xhS: 0.74, slantS: -0.03, trackS: 0.02, flick: 0.2 },
+  infantil_b: { label: 'Infantil B', hint: 'a su aire: picuda, desigual, mezcla mayúsculas', ref: 'infantil_b', wide: 0.72, slant: 0.16, slantVar: 0.1, hVar: 0.2, wVar: 0.12, wob: 0.01, wobF: 0, angular: 0, geo: 0, os: 0.01, osVar: 0.02, stem: 0.01, cb: 0.04, cbShift: 0, open: 0.2, xh: 0.6, track: 0.05, minGap: 0.03, weight: 0.8, bounce: 1.8, sizeVar: 1.5, double: 0, ovr: null, refW: 1.12, asc: 1.45, desc: 1.3, piece: 1.4, slantVarS: 0.02, scriptW: 1.38, ascS: 0.68, peak: 0.35, capMix: 'rdt', slantCap: 0, hVarCap: 0.06, script: 'own', xhS: 0.74, slantS: -0.03, trackS: 0.02, flick: 0.2 },
   // Nerviosa A: mayúsculas muy altas y estrechas, de alturas desiguales, palos rectos (Tonya Harding's); cursiva
   // tumbada, baja y estirada, escrita a toda prisa (Anthropology of world mapping)
   nerviosa_a: { label: 'Nerviosa A', hint: 'picuda: fina, apretada, a tirones', ref: 'nerviosa_a', wide: 0.5, slant: 0.22, slantVar: 0.07, hVar: 0.18, wVar: 0.1, wob: 0.008, wobF: 0, angular: 0, geo: 0, os: 0.07, osVar: 0.05, stem: 0.08, cb: 0.1, cbShift: -0.04, open: 0.25, xh: 0.64, track: 0.0, minGap: 0.008, weight: 0.62, bounce: 1.0, sizeVar: 1.0, double: 0, flick: 0.8, ovr: null, refW: 0.66, asc: 1.15, desc: 1.2, peak: 1, peakS: 0.6, script: 'own', xhS: 0.3, slantS: 0.8, slantVarS: 0.06, trackS: 0.01, scriptW: 1.4, scriptSmooth: 0.06 },
@@ -324,7 +324,9 @@ function printGlyph(styleKey, ch, v, altIdx, cursive, capS) {
   const g = () => R.gauss(rnd);
   let strokes = def.strokes ? def.strokes.map(s => ({ pts: s.pts.map(q => q.slice()), closed: s.closed, fill: s.fill })) : parsePath(def.d);
   // sin punto si lleva tilde (í, ï)
-  if (marks.length && (base === 'i' || base === 'j')) strokes = strokes.filter(s => !(s.pts.length === 2 && Math.hypot(s.pts[1][0] - s.pts[0][0], s.pts[1][1] - s.pts[0][1]) < 0.05) && !(s.fill && s.pts[0][1] > 1.2));
+  if (marks.length && (base === 'i' || base === 'j')) strokes = strokes.filter(s => !(s.pts.length === 2 && s.pts[0][1] > 1.2 && s.pts[1][1] > 1.2) && !(s.fill && s.pts[0][1] > 1.2));
+  // (el punto de la i y la j: es una marca, no una salida para ligar)
+  if (cursive) for (const s of strokes) if (s.pts.length === 2 && s.pts[0][1] > 1.25 && s.pts[1][1] > 1.25) s.dot = true;
   // ---- variación estructural (propia de la variante)
   const H = def.lower && !def.asCap ? 1 : 1;
   const wob = st.wob * (def.ref ? 0.35 : cursive ? 0.3 : 1), seedW = (rnd() * 1e6) | 0;
@@ -355,7 +357,7 @@ function printGlyph(styleKey, ch, v, altIdx, cursive, capS) {
     }
     // picuda: los arcos y los óvalos hacen pico arriba y abajo (la mano da la vuelta en seco)
     const pk = cursive ? st.peakS : st.peak;
-    if (pk && !s.fill) {
+    if (pk && !s.fill && (cursive || def.ref || 'nmur'.indexOf(base) >= 0 || !def.lower)) {
       const kill = new Set();
       for (let k = 1; k < n - 1; k++) if (!P[k][2] && (P[k][1] - P[k - 1][1]) * (P[k + 1][1] - P[k][1]) < 0 && rnd() < pk) {
         P[k][2] = true;
@@ -366,7 +368,7 @@ function printGlyph(styleKey, ch, v, altIdx, cursive, capS) {
     }
     // cursiva: cada vez el lazo sale distinto (más gordo o casi cerrado, más alto o más bajo, la cola más larga o
     // más corta) y la letra entra y sale a otra altura: como al escribir de verdad, ninguna igual a la anterior
-    if (cursive && !s.mark) {
+    if (cursive && !s.mark && !s.dot) {
       let ax = 0, an = 0, dx_ = 0, dn = 0;
       for (const q of P) { if (q[1] > 1.2) { ax += q[0]; an++; } else if (q[1] < -0.15) { dx_ += q[0]; dn++; } }
       if (an) { ax /= an; for (const q of P) if (q[1] > 1.2) { q[0] = ax + (q[0] - ax) * cv.loopA; q[1] = 1.2 + (q[1] - 1.2) * cv.hA; } }
@@ -400,8 +402,9 @@ function printGlyph(styleKey, ch, v, altIdx, cursive, capS) {
   // ---- a em
   // (cursiva: altura de x, anchura e inclinación de la cursiva del estilo; menos desigualdad)
   const unit = cursive ? CAP * st.xhS : def.lower && !def.asCap ? CAP * st.xh : CAP * (def.capScale || 1);
-  const hS = Math.exp(g() * st.hVar * (cursive ? 0.45 : 1)), wS = Math.exp(g() * st.wVar * (cursive ? 0.5 : 1)) * (cursive ? (st.scriptW || 0.8) : def.ref ? (st.refW || 1) : st.wide);
-  const slant = (cursive || capS ? st.slantS : st.slant) + g() * (cursive ? (st.slantVarS != null ? st.slantVarS : st.slantVar * 0.5) : st.slantVar);
+  const hS = Math.exp(g() * (!cursive && !def.lower && st.hVarCap != null ? st.hVarCap : st.hVar) * (cursive ? 0.45 : 1)), wS = Math.exp(g() * st.wVar * (cursive ? 0.5 : 1)) * (cursive ? (st.scriptW || 0.8) : def.ref ? (st.refW || 1) : st.wide);
+  const capL = !cursive && !def.lower;
+  const slant = (cursive || capS ? st.slantS : capL && st.slantCap != null ? st.slantCap : st.slant) + g() * (cursive ? (st.slantVarS != null ? st.slantVarS : st.slantVar * 0.5) : st.slantVar);
   const step = 0.012 / unit;
   const out = [];
   for (const s of strokes) {
@@ -410,7 +413,7 @@ function printGlyph(styleKey, ch, v, altIdx, cursive, capS) {
     // temblor fino (la mano, al trazar)
     if (st.wobF) { let acc = 0; pts = pts.map((q, k) => { if (k) acc += Math.hypot(q[0] - pts[k - 1][0], q[1] - pts[k - 1][1]); return [q[0] + st.wobF * R.noise1(acc * 9, seedW + 5), q[1] + st.wobF * R.noise1(acc * 9 + 40, seedW + 6)]; }); }
     pts = pts.map(([x, y]) => { const Y = y * unit * hS; return [x * unit * wS + Y * slant, -Y]; });
-    const o = { pts, closed: s.closed, fill: !!s.fill, mark: !!s.mark };
+    const o = { pts, closed: s.closed, fill: !!s.fill, mark: !!s.mark || !!s.dot };
     out.push(o);
     // trazo doble suelto (nerviosa)
     if (st.double && !cursive && !s.fill && !s.mark && rnd() < st.double && pts.length > 3) {
@@ -558,7 +561,7 @@ function setWord(styleKey, mode, word, trackExtra, inkW, seedW) {
     if (out.length && isScript && g.strokes.length) {
       const pv = out[out.length - 1];
       const ex = pv.g.script && /[a-zñáéíóúü]/i.test(pv.g.ch) ? exitPt(pv.g) : null, en = g.script && /[a-zñáéíóúü]/i.test(g.ch) ? entryPt(g) : null;
-      if (ex && en && pv.g.own && g.own) x = ex[1] > 0.08 ? pv.x + pv.g.adv + 0.02 + track : pv.x + ex[0] - en[0] + 0.004 + track + ('lbhkft'.indexOf(g.ch) >= 0 && 'adgqu'.indexOf(pv.g.ch) >= 0 ? 0.07 * st.xhS / 0.4 : 0);   // (a + l pegadas se leen «d»)   // (cola sin bucle: no liga)
+      if (ex && en && pv.g.own && g.own) x = ex[1] > 0.08 ? pv.x + pv.g.adv + 0.02 + track : pv.x + ex[0] - en[0] + 0.004 + track + ('lbhkft'.indexOf(g.ch) >= 0 && (st.noLoopA || 'adgqu'.indexOf(pv.g.ch) >= 0) ? (st.noLoopA ? 0.09 : 0.07) * st.xhS / 0.4 : 0);   // (a + l pegadas se leen «d»)   // (cola sin bucle: no liga)
       // (fuentes ligadas: si la letra sale abajo y muy a la izquierda de su avance, como la d, la siguiente se acerca)
       else if (ex && en && ex[1] > -0.1) x = pv.x + Math.max(pv.g.adv * 0.6, band(pv.g, true) - band(g, false) + 0.03, Math.min(pv.g.adv + track, ex[0] + 0.07 + track - Math.min(en[0], 0.04)));
       else {

@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.22)
+## 2. Cómo se usa (2.23)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -514,6 +514,18 @@ ser trazos limpios siguiendo el movimiento de la mano».
   («al» pegadas se leían «d»).
 - Trazos limpios: en cursiva la deformación de la letra baja al 30 % y el pulso es más lento y menor (×0,45).
 
+### 2.23 — repaso letra a letra de los 8 estilos (pangrama en los 3 modos)
+Se revisó cada estilo con «el veloz murciélago hindú comía feliz cardillo y kiwi zarza jaque exige whisky ñu bobo
+allí» en mayúsculas, minúsculas y cursiva, y se corrigió lo que no se leía:
+- Cursiva: el punto de la i y la j se tomaba como salida y el enlace salía del punto («hindú» → «hi ndú», «exige» →
+  «exi ge»); ahora es una marca (`s.dot`). En manos sin bucles, más aire antes de l, b, h, k, f, t.
+- Punto de la i y la j de molde: más alto y más visible (la i se confundía con la l).
+- Picos (`peak`) en letra de molde: solo en n, m, u, r y mayúsculas (la «a» y la «e» picudas no se leían).
+- Letras de muestra retiradas: E de Infantil A (parecía F), E de Nerviosa A, H de Nerviosa B, h y g de Adulta A,
+  f de Elegante B (parecía una cruz).
+- Infantil B: mayúsculas derechas y parejas (`slantCap`, `hVarCap`), minúsculas inclinadas y desiguales.
+- Adulta A: más aire entre minúsculas (`minGap`), mayúsculas algo inclinadas.
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -573,7 +585,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.22.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.23.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)
