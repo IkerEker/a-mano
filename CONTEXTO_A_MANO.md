@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.20)
+## 2. Cómo se usa (2.21)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -491,6 +491,18 @@ negativos siguen viéndose superfalsos: mejóralos, incluso su tipografía, que 
   funden como variantes): t en cruz, g de bastón, o estrecha, n, m, s, h.
 - De esas muestras se descartaron las letras que no se leían en texto corrido (a que parecía o, u ligada, h, N).
 
+### 2.21 — cursiva: lazos y enlaces naturales y distintos cada vez
+- La «e» de `adultaa_future` (con una raya que la cruzaba y puntos en los extremos) retirada.
+- Letras redondas (a, d, g, q, c, o): la entrada sube por fuera y pasa por arriba del óvalo (antes lo cruzaba por
+  dentro y «ad» se leía «ael»).
+- Cada letra cursiva sale distinta (`cv` en `printGlyph`, `loopVar` por estilo): lazo más gordo o casi cerrado, asta
+  más alta o baja, cola más larga o corta, entrada y salida a otra altura; 5 variantes por letra (`NVAR` 5) y la
+  tensión de cada enlace cambia (`joinCursive`).
+- Fallo arreglado: la imperfección «trazo en dos golpes» partía a veces una letra ligada y el enlace salía de
+  media asta («la» se leía «ta»); ya no se aplica a letras ligadas. Los enlaces se suavizan (sin escalón).
+- Manos sin bucles: al empezar palabra, l, b, h, k, f bajan directamente (antes el rabito de entrada hacía que «la»
+  se leyera «ta»).
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -550,7 +562,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.20.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.21.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)

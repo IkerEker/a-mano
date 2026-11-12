@@ -12,7 +12,7 @@ const RG = require('./refglyphs.js');
 const R = require('./rng.js');
 
 const CAP = 0.7;
-const NVAR = 3;
+const NVAR = 5;
 
 // ------------------------------------------------------------------ estilos (4 personalidades × 2 versiones)
 // wide: anchura; slant (+ slantVar por letra): inclinación; hVar/wVar: tamaños desiguales entre letras;
@@ -328,6 +328,8 @@ function printGlyph(styleKey, ch, v, altIdx, cursive, capS) {
   // ---- variación estructural (propia de la variante)
   const H = def.lower && !def.asCap ? 1 : 1;
   const wob = st.wob * (def.ref ? 0.35 : 1), seedW = (rnd() * 1e6) | 0;
+  const lv_ = st.loopVar == null ? 1 : st.loopVar;
+  const cv = cursive ? { loopA: Math.max(0.55, 1 + g() * 0.35 * lv_), hA: 1.02 + Math.abs(g()) * 0.1 * lv_, loopD: Math.max(0.3, 1 + g() * 0.35 * lv_), hD: 1 + g() * 0.12 * lv_, in: g() * 0.05 * lv_, out: g() * 0.07 * lv_, outX: g() * 0.04 * lv_ } : null;
   for (const s of strokes) {
     const P = s.pts;
     const n = P.length;
@@ -361,6 +363,18 @@ function printGlyph(styleKey, ch, v, altIdx, cursive, capS) {
         if (!def.ref && !cursive && n > 4 && n <= 6) { if (k - 1 > 0 && !P[k - 1][2]) kill.add(k - 1); if (k + 1 < n - 1 && !P[k + 1][2]) kill.add(k + 1); }
       }
       if (kill.size) { const Q = P.filter((q, k) => !kill.has(k)); P.length = 0; for (const q of Q) P.push(q); }
+    }
+    // cursiva: cada vez el lazo sale distinto (más gordo o casi cerrado, más alto o más bajo, la cola más larga o
+    // más corta) y la letra entra y sale a otra altura: como al escribir de verdad, ninguna igual a la anterior
+    if (cursive && !s.mark) {
+      let ax = 0, an = 0, dx_ = 0, dn = 0;
+      for (const q of P) { if (q[1] > 1.2) { ax += q[0]; an++; } else if (q[1] < -0.15) { dx_ += q[0]; dn++; } }
+      if (an) { ax /= an; for (const q of P) if (q[1] > 1.2) { q[0] = ax + (q[0] - ax) * cv.loopA; q[1] = 1.2 + (q[1] - 1.2) * cv.hA; } }
+      if (dn) { dx_ /= dn; for (const q of P) if (q[1] < -0.15) { q[0] = dx_ + (q[0] - dx_) * cv.loopD; q[1] = -0.15 + (q[1] + 0.15) * cv.hD; } }
+      if (s === strokes[0] && n > 4) {
+        P[0][1] += cv.in; P[n - 1][1] += cv.out; P[n - 1][0] += cv.outX;
+        if (n > 5) { P[n - 2][1] += cv.out * 0.5; }
+      }
     }
     // astas y colas más largas o más cortas
     if (def.lower && !def.asCap) { const ka = cursive ? (st.ascS || 1) : (st.asc || 1), kd = cursive ? (st.ascS || 1) : (st.desc || 1); for (const q of P) { if (q[1] > 1.12) q[1] = 1.12 + (q[1] - 1.12) * ka; else if (q[1] < 0) q[1] *= kd; } }
@@ -604,9 +618,9 @@ function joinCursive(letters, emTol, o) {
   for (let i = 0; i < letters.length; i++) {
     const L = letters[i], A = letters[i - 1];
     // al empezar palabra (o tras una mayúscula), las letras redondas no traen rabito desde abajo
-    if (own(L) && L.joinable && (!A || !A.joinable) && 'acdgoq'.indexOf((L.L.g.ch.normalize ? L.L.g.ch.normalize('NFD') : L.L.g.ch)[0]) >= 0) {
+    if (own(L) && L.joinable && (!A || !A.joinable) && ('acdgoq' + (o.noLoopA ? 'lbhkf' : '')).indexOf((L.L.g.ch.normalize ? L.L.g.ch.normalize('NFD') : L.L.g.ch)[0]) >= 0) {
       const bi = entryOf(L);
-      if (bi >= 0) { const k = riseLen(L.strokes[bi].pts, null); if (k > 2) L.strokes[bi].pts = L.strokes[bi].pts.slice(Math.max(0, k - 2)); }
+      if (bi >= 0) { const k = riseLen(L.strokes[bi].pts, null), round = 'acdgoq'.indexOf((L.L.g.ch.normalize ? L.L.g.ch.normalize('NFD') : L.L.g.ch)[0]) >= 0; const P_ = L.strokes[bi].pts; if (round) { if (k > 2) L.strokes[bi].pts = P_.slice(Math.max(0, k - 2)); } else { let ti = 0; for (let j = 1; j < P_.length * 0.7; j++) if (P_[j][1] < P_[ti][1]) ti = j; if (ti > 2 && ti < P_.length - 3) L.strokes[bi].pts = P_.slice(ti); } }
     }
   }
   for (let i = 1; i < letters.length; i++) {
@@ -634,13 +648,16 @@ function joinCursive(letters, emTol, o) {
     const b0 = sb.pts[0], d = Math.hypot(b0[0] - e[0], b0[1] - e[1]);
     const ta = tangent(sa.pts, true), tb = tangent(sb.pts, false);
     const bridge = [];
-    const n = Math.max(2, Math.ceil(d / 0.01)), k = d * 0.6;
+    const n = Math.max(2, Math.ceil(d / 0.01)), k = d * (o.rnd ? 0.4 + 0.5 * o.rnd() : 0.6);
     for (let j = 1; j < n; j++) {
       const t = j / n, t2 = t * t, t3 = t2 * t;
       const h1 = 2 * t3 - 3 * t2 + 1, h2 = -2 * t3 + 3 * t2, h3 = t3 - 2 * t2 + t, h4 = t3 - t2;
       bridge.push([h1 * e[0] + h2 * b0[0] + h3 * ta[0] * k + h4 * tb[0] * k, h1 * e[1] + h2 * b0[1] + h3 * ta[1] * k + h4 * tb[1] * k]);
     }
-    sa.pts = sa.pts.concat(bridge, sb.pts);
+    // el enlace se funde con las dos letras (sin escalón ni codo donde se juntan)
+    { const i0 = Math.max(0, sa.pts.length - 9), all = sa.pts.concat(bridge, sb.pts), i1 = Math.min(all.length, sa.pts.length + bridge.length + 9);
+      const mid = smoothPts(all.slice(i0, i1), Math.max(0.012, d * 0.22));
+      sa.pts = all.slice(0, i0).concat(mid, all.slice(i1)); }
     sa.joined = true;
     L._carry = sa;
     L.strokes.splice(bi, 1);

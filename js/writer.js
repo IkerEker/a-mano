@@ -273,7 +273,7 @@ function plan(lay, p, seed) {
         // el palo (el trazo largo) casi siempre; a veces otro
         const pick = body[ri() < 0.7 ? 0 : Math.min(body.length - 1, 1)];
         if (pick.L > 0.12 * em) strokes[pick.k].retrace = true;
-      } else if (ri() < 0.03 && P.proc && body[0].L > 0.45 * em && !strokes[body[0].k].closed) {
+      } else if (ri() < 0.03 && P.proc && !(isScript && L.g.script) && body[0].L > 0.45 * em && !strokes[body[0].k].closed) {
         const st0 = strokes[body[0].k], pts = st0.pts, n = pts.length;
         const cut = Math.max(2, Math.min(n - 3, Math.round(n * (0.35 + 0.3 * ri()))));
         const back = Math.max(1, Math.round(n * 0.04));
@@ -330,7 +330,7 @@ function plan(lay, p, seed) {
   if (isScript) {
     const byWord = new Map();
     for (const l of cursiveLetters) { if (!byWord.has(l.word)) byWord.set(l.word, []); byWord.get(l.word).push(l); }
-    for (const [wk, ls] of byWord) FN.joinCursive(ls, 0.09 * (1 + c), { joinP: persona.joinP, track: persona.trackS, rnd: R.mulberry32((seed + wk * 7717 + 41) >>> 0) });
+    for (const [wk, ls] of byWord) FN.joinCursive(ls, 0.09 * (1 + c), { joinP: persona.joinP, track: persona.trackS, noLoopA: persona.noLoopA, rnd: R.mulberry32((seed + wk * 7717 + 41) >>> 0) });
   }
   // ---- subrayados: una raya a mano bajo la palabra (sigue las bases de sus letras, se pasa un poco)
   const wordsInfo = lay.words || [];
