@@ -61,7 +61,11 @@ pause\r
 ''' % (ID, ID)
 
 def main():
-    if os.path.isdir(OUT): shutil.rmtree(OUT)
+    # (se limpia lo empaquetado antes; el vídeo de muestra se queda)
+    if os.path.isdir(OUT):
+        for f in os.listdir(OUT):
+            full = os.path.join(OUT, f)
+            if f.startswith('A_mano_AE_v'): shutil.rmtree(full) if os.path.isdir(full) else os.remove(full)
     top = os.path.join(OUT, 'A_mano_AE_v' + VERSION)
     ext = os.path.join(top, ID)
     os.makedirs(os.path.join(ext, 'CSXS'))
