@@ -1,8 +1,8 @@
-A MANO 2.23 · plugin para Photoshop (2024 o posterior)
+A MANO 2.24 · plugin para Photoshop (2024 o posterior)
 =====================================================
 
 INSTALAR
-- Doble clic en A_mano_v2.23.0.ccx -> Creative Cloud avisa de que no viene del
+- Doble clic en A_mano_v2.24.0.ccx -> Creative Cloud avisa de que no viene del
   Marketplace -> "Instalar". Sustituye a las versiones anteriores. Es independiente de Cartelator.
 - En Photoshop: Plugins > A mano.
 
@@ -39,14 +39,14 @@ GENERAR, de arriba abajo
 4. LETRA: infantil, adulta, nerviosa o elegante, cada una en versión A o B;
    MAYÚSCULAS, minúsculas o cursiva. Las letras salen de escritura real (los
    carteles y abecedarios de referencia), cada estilo de la suya:
-   · Infantil A: de niño: grande, redonda, a trozos, cada letra de un tamaño.
-   · Infantil B: a su aire: picuda, inclinada, desigual, mezcla alguna mayúscula (The Principle is simple).
-   · Adulta A: suelta, de rotulador: inclinada, astas altas (good things take time / The future is yours).
-   · Adulta B: alta y estrecha, de astas y colas muy largas; cursiva a ratos desligada.
-   · Nerviosa A: picuda: fina, apretada, inclinada, arcos en pico; cursiva tumbada a toda prisa.
-   · Nerviosa B: a lo loco: hacia atrás, desigual y saltona; cursiva angulosa hacia atrás.
+   · Infantil A: de niño: grande y redonda, letras de palo y bola hechas a trozos; cursiva de colegio con lazos.
+   · Infantil B: a su aire: picuda e inclinada, eles de lazo; cursiva redondita, echada atrás, con redondeles en las íes.
+   · Adulta A: de rotulador: gruesa, redondeada, de un solo trazo con salidas; cursiva inclinada sin lazos.
+   · Adulta B: alta, estrecha y fina, de astas larguísimas y punto alto; cursiva menuda que levanta el boli.
+   · Nerviosa A: picuda y fina, muy inclinada, rayas que se escapan; cursiva tumbada, a toda prisa.
+   · Nerviosa B: a lo loco: hacia atrás, desigual y saltona; cursiva angulosa.
    · Elegante A: la más «correcta», fina y tranquila.
-   · Elegante B: de cartel, redonda y bailona; cursiva de invitación, menuda, muy espaciada.
+   · Elegante B: de cartel: redonda y regular, con «a» de imprenta; cursiva de invitación, menuda, con rasgos largos.
 - LEGIBILIDAD: de garabato a muy legible.
 - "Escribir en la forma": crea un grupo "✍ A mano · ..." con lo escrito y la forma
   (invisible). Para cambiarlo, selecciona el grupo, deforma la forma o cambia

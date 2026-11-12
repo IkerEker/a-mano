@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.23)
+## 2. Cómo se usa (2.24)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -526,6 +526,26 @@ allí» en mayúsculas, minúsculas y cursiva, y se corrigió lo que no se leía
 - Infantil B: mayúsculas derechas y parejas (`slantCap`, `hVarCap`), minúsculas inclinadas y desiguales.
 - Adulta A: más aire entre minúsculas (`minGap`), mayúsculas algo inclinadas.
 
+### 2.24 — cada mano construye las letras a su manera
+Pedido: «corrígelo todo, más diferentes, más realistas». El problema de fondo: tras descartar las letras de muestra
+ilegibles, casi todo salía del mismo esqueleto genérico estirado o inclinado. Ahora cada estilo tiene:
+- **Formas propias** (`SK.FORMS` en `skeleton.js`, `forms` en cada estilo; van después de las letras de muestra y
+  antes del esqueleto genérico): `capsKid`/`lowKid` (palo y bola, trazos sueltos), `capsBrush`/`lowLoop` (de un solo
+  trazo, con salida), `capsTall`/`lowTall` (M y W de lados rectos, J con sombrero, Z con raya, f con cola),
+  `capsFast`/`lowFast` (travesaños que cruzan y se pasan, t de raya que se escapa), `lowPrinciple` (l de lazo, p y f
+  de «The Principle is simple»), `lowTail` (a con salida: sin ella, estrecha, se leía «o»), `lowDesign`.
+- **Punto de la i** (`dot`/`dotS`: punto, redondel `o`, raya `dash`, tilde suelta `tick`; `dotH`, `dotDx`), tildes
+  largas (`accK`), raya de la t escapada en cursiva (`tbar`).
+- **Esquinas redondeadas** (`round`), **grosor propio de la cursiva** (`weightS`), **mayúsculas con su espaciado**
+  (`trackCap`), **líneas que suben o bajan** (`rise`), **lazos más gordos** (`loopW`), **rasgos de entrada y salida**
+  en la cursiva de invitación (`lead`).
+- Arreglos: los huecos entre letras se miden sin las colas (la y de Elegante A ya no se separa: «whisk y»); el punto
+  de la i no se recorta nunca; el travesaño de la H no puede caer al suelo; en cursiva hacia atrás, aire antes de
+  las astas («el»); Nerviosa A cursiva menos tumbada (0,6); fuera la mezcla de mayúsculas de Infantil B; espacio
+  entre palabras proporcional al cuerpo de la letra.
+- Pruebas: `one.js`/`sheet.py` (pangrama, 8 estilos × 3 modos, con rotulador para ver los grosores) y `alpha.js`
+  (abecedario) en el borrador de la sesión; conviene pasarlos a `tests/node/` si se sigue con las letras.
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -585,7 +605,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.23.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.24.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)

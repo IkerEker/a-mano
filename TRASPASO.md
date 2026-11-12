@@ -1,11 +1,11 @@
-# A mano · traspaso para seguir en un chat nuevo (12 nov 2026, versión 2.23.0)
+# A mano · traspaso para seguir en un chat nuevo (12 nov 2026, versión 2.24.0)
 
 Pega este archivo al empezar el chat nuevo. Todo lo demás está en el repositorio.
 
 ## Qué es
 «A mano»: plugin UXP para Photoshop (2024+) que escribe texto a mano dentro de una forma (pestaña GENERAR) o pinta a
 mano encima de capas de texto (CALCAR). Repositorio: **github.com/IkerEker/a-mano** (rama principal, último commit
-`2.23`). En el entorno de trabajo: `/home/claude/a-mano`.
+`2.24`). En el entorno de trabajo: `/home/claude/a-mano`.
 
 ## Cómo trabajar (reglas del usuario)
 - Todo en español (respuestas, interfaz, comentarios, commits).
@@ -28,7 +28,7 @@ mano encima de capas de texto (CALCAR). Repositorio: **github.com/IkerEker/a-man
   `referencias/tipos/` (`annotate` numera las piezas; `build` genera; `skip` descarta las ilegibles).
 - Pruebas: `tests/sim/harness.js` (Photoshop simulado), `tests/node/preview.js` (render sin Photoshop).
 
-## Estado de las 8 letras (2.23)
+## Estado de las 8 letras (2.24: ver sección 2.24 de CONTEXTO, formas propias por estilo)
 | Estilo | Carácter | De dónde salen las letras |
 |---|---|---|
 | Infantil A | de niño: grande, redonda, a trozos | abecedario de niño; «Let it be»; cursiva de colegio con bucles |

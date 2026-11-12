@@ -148,6 +148,8 @@ function taperEnds(pc, r, flick, rs) {
 function plan(lay, p, seed) {
   const P = INK.preset(p.tool, p.preset);
   const persona = FN.styleOf(p.persona);
+  // (la cursiva de algunas manos tiene su propio grosor: gorda la redondita, fina la de invitación)
+  const wK = p.mode === 'cursiva' && persona.weightS ? persona.weightS : persona.weight;
   const auto = !!lay.auto;
   // en «autoencajar» las letras ya están encajadas al milímetro: la variación es más contenida
   const c = chaosOf(p) * (auto ? 0.55 : 1);
@@ -178,7 +180,7 @@ function plan(lay, p, seed) {
   // a lo largo del texto, la inclinación y el tamaño derivan despacio (no letra a letra)
   const lineX0 = new Map(), lineSlope = new Map();
   for (const L of letters) { const x = L.x; if (!lineX0.has(L.line) || x < lineX0.get(L.line)) lineX0.set(L.line, x); }
-  for (const [ln] of lineX0) { const rl = R.mulberry32(seed + ln * 4241 + 9); lineSlope.set(ln, auto ? 0 : g(rl) * (0.006 + 0.016 * c) + (p.prisa || 0) * -0.006); }
+  for (const [ln] of lineX0) { const rl = R.mulberry32(seed + ln * 4241 + 9); lineSlope.set(ln, auto ? 0 : g(rl) * (0.006 + 0.016 * c) + (p.prisa || 0) * -0.006 + (persona.rise || 0)); }
   // autoencajar: tamaños y posiciones ya están medidos al milímetro; lo que mueve o agranda letras casi no actúa
   const cp = auto ? c * 0.25 : c;
   // ---- letras -> trazos (en el espacio de maquetación)
@@ -232,7 +234,7 @@ function plan(lay, p, seed) {
         // en em: abre un poco el óvalo o se pasa de largo al cerrarlo
         const open = (0.015 + 0.09 * c) * (0.4 + persona.open) * (rs() < 0.6 ? 1 : -0.5);
         pts = trimEnds(pts, 0, -open);
-      } else if (pts.length > 3 && !(isScript && L.g.script)) {
+      } else if (pts.length > 3 && !s.mark && !(isScript && L.g.script)) {
         const e0 = Math.max(-0.05, Math.min(0.04, g(rs) * (0.008 + 0.03 * c))), e1 = Math.max(-0.06, Math.min(0.05, g(rs) * (0.01 + 0.035 * c) + (rs() < P.lift ? -0.025 : 0)));
         pts = trimEnds(pts, e0, e1);
       }
@@ -288,12 +290,14 @@ function plan(lay, p, seed) {
   });
   // ---- huecos reales dentro de cada palabra (ya con la variación): ni se tocan ni parecen espacios
   if (!isScript && !auto) {
-    const inkW = Math.max(P.w * (p.width == null ? 1 : p.width) * persona.weight, (persona.absW || 0) * (p.width == null ? 1 : p.width));
+    const inkW = Math.max(P.w * (p.width == null ? 1 : p.width) * wK, (persona.absW || 0) * (p.width == null ? 1 : p.width));
     const byW = new Map();
     for (const l of cursiveLetters) { if (!byW.has(l.word)) byW.set(l.word, []); byW.get(l.word).push(l); }
     for (const [, ls] of byW) {
       if (ls.length < 2) continue;
-      const ext = ls.map(l => { let a = Infinity, b = -Infinity; for (const s of l.strokes) if (!s.mark || l.strokes.every(t => t.mark)) for (const q of s.pts) { const x0 = q[0] + (q[1] - l.L.base) * (persona.slant || 0); if (x0 < a) a = x0; if (x0 > b) b = x0; } return [a, b]; });
+      const sl = p.mode === 'mayus' && persona.slantCap != null ? persona.slantCap : persona.slant || 0;
+      // (sin las colas: lo que baja de la línea no cuenta para el hueco)
+      const ext = ls.map(l => { const run = band => { let a = Infinity, b = -Infinity; for (const s of l.strokes) if (!s.mark || l.strokes.every(t => t.mark)) for (const q of s.pts) { if (band && q[1] > l.L.base + 0.07 * l.size) continue; const x0 = q[0] + (q[1] - l.L.base) * sl; if (x0 < a) a = x0; if (x0 > b) b = x0; } return [a, b]; }; const r = run(true); return isFinite(r[0]) ? r : run(false); });
       const shift = new Array(ls.length).fill(0);
       for (let k = 1; k < ls.length; k++) {
         if (!isFinite(ext[k][0]) || !isFinite(ext[k - 1][1])) { shift[k] = shift[k - 1]; continue; }
@@ -330,7 +334,7 @@ function plan(lay, p, seed) {
   if (isScript) {
     const byWord = new Map();
     for (const l of cursiveLetters) { if (!byWord.has(l.word)) byWord.set(l.word, []); byWord.get(l.word).push(l); }
-    for (const [wk, ls] of byWord) FN.joinCursive(ls, 0.09 * (1 + c), { joinP: persona.joinP, track: persona.trackS, noLoopA: persona.noLoopA, rnd: R.mulberry32((seed + wk * 7717 + 41) >>> 0) });
+    for (const [wk, ls] of byWord) FN.joinCursive(ls, 0.09 * (1 + c), { joinP: persona.joinP, track: persona.trackS, noLoopA: persona.noLoopA, lead: persona.lead, rnd: R.mulberry32((seed + wk * 7717 + 41) >>> 0) });
   }
   // ---- subrayados: una raya a mano bajo la palabra (sigue las bases de sus letras, se pasa un poco)
   const wordsInfo = lay.words || [];
@@ -395,7 +399,7 @@ function plan(lay, p, seed) {
     let passes = 1 + Math.round((lv.passes - 1) * passMul);
     if (P.extraPass && !l.under) passes += P.extraPass;
     // grosor: el de la herramienta (por el del estilo); las letras de piezas tienen grosor propio
-    const wEm = Math.max(P.w * widthMul * persona.weight, (persona.absW || 0) * widthMul);
+    const wEm = Math.max(P.w * widthMul * wK, (persona.absW || 0) * widthMul);
     const hw = wEm * (lv.w || 1) * Math.sqrt(L.size); // medio ancho en unidades de maqueta
     l.strokes.forEach((s, si) => {
       if (!s.pts || s.pts.length < 2) return;
