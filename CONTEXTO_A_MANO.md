@@ -689,3 +689,24 @@ Pendiente / dudas:
 3. Los puntos y tildes se escriben con su letra, no al acabar la palabra.
 4. Cada «Escribir» guarda una secuencia nueva (5–12 MB); «Vaciar fotogramas sin usar» borra las viejas.
 5. Ideas siguientes: línea viva (3–4 variaciones en bucle), usar una máscara o capa de forma girada como forma.
+
+### AE 0.2.0 — el tempo de una mano y la punta que apoya
+Probada la 0.1.0 en After Effects real: carga y pinta («no está nada mal, lo principal lo has conseguido»).
+Pedido: «la forma en la que se escribe no parece hecha a mano: hay partes que van muy rápido y partes muy lento;
+las letras van más o menos todas al mismo ritmo» y «las letras se van formando desde una línea con un corte recto:
+el inicio tiene que parecerse a un punto, texturizado, donde se apoya la herramienta».
+Lo que se sabe de la escritura (cinemática): se escribe a golpes con velocidad en campana, unos 5 por segundo
+(los más rápidos duran ~0,1 s); **isocronía**: la velocidad se ajusta al tamaño y la duración casi no cambia;
+**homotecia**: las proporciones de tiempo entre letras se mantienen; las pausas de ejecución entre letras rondan
+los 100–150 ms y la mano sigue moviéndose en el aire.
+- `anim.timeline` ya no mide distancia: **cuenta golpes**. `beats` corta cada trazo donde la mano cambia de
+  sentido en vertical o dobla una esquina; cada golpe dura τ·(largo/típico)^0,3 (entre 0,4 y 2,4 τ) con perfil en
+  campana que no llega a pararse (`bell`). Pausas en golpes: mismo gesto 0; levantar dentro de la letra ~0,4;
+  otra letra ~0,55; otra palabra ~1,05 (más un poco según lo lejos, con raíz). Las pasadas de repaso van a 0,42
+  y el garabato de un negativo a 0,3 (constantes en `BEAT`). Sin importancias, cada letra tarda casi lo mismo.
+- `anim.arrival`: la punta es un disco del ancho del trazo que avanza por el centro; cada píxel aparece cuando el
+  disco lo toca (frente redondo; el trazo nace como un punto que crece). Un grano fijo al papel descoloca el
+  frente (más con herramientas secas o con grano) y, en tintas transparentes, la zona de apoyo va un pelo más
+  cargada. Ya no hay trozos sueltos por delante de la punta. El borrado usa la misma llegada.
+Fuentes: Pagliarini et al. 2017 (Scientific Reports, isocronía y homotecia), Teulings (espectro ~5 Hz, golpes de
+0,1 s), Plamondon (teoría cinemática, campana asimétrica), Frontiers Psychol. 2022 (pausas de ejecución).

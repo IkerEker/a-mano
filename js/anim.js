@@ -30,45 +30,89 @@ function resample(pts, step) {
   return { X: Float32Array.from(X), Y: Float32Array.from(Y), S: Float32Array.from(S), len: s };
 }
 
-// Cada trazo: cuánto tarda (la mano frena en las curvas cerradas —ley de los dos tercios—, arranca y frena en
-// cada trazo) y cuánto se para antes (levantar, ir por el aire hasta el siguiente, cambiar de palabra).
-// El relleno de un negativo es un garabato rápido.
+// EL TEMPO. Lo que se sabe de la escritura a mano (cinemática):
+//  · se escribe a golpes: cada golpe (un tramo entre dos frenadas: una subida, una bajada, una vuelta) tiene un
+//    perfil de velocidad en campana y dura más o menos lo mismo, unas 5 por segundo;
+//  · isocronía: un golpe más largo se hace más deprisa, así que tarda casi lo mismo que uno corto (por eso una
+//    letra grande y una pequeña llevan el mismo compás);
+//  · homotecia: las proporciones de tiempo entre letras se mantienen al escribir más rápido o más lento;
+//  · levantar el boli dentro de una palabra cuesta más o menos un golpe; entre palabras, algo más.
+// Así que aquí el tiempo NO sale de la distancia recorrida: sale de contar golpes. La unidad es un golpe (τ = 1).
+const BEAT = { exp: 0.3, base: 0.5, pass: 0.42, mask: 0.3, under: 0.8 };
+
+// corta el recorrido en golpes: donde la mano cambia de sentido en vertical o dobla una esquina
+function beats(q, minLen) {
+  const n = q.S.length, cuts = [0];
+  if (n < 3) return [0, n - 1];
+  const step = q.len / Math.max(1, n - 1), w = Math.max(1, Math.round(minLen * 0.35 / Math.max(1e-6, step)));
+  let lastS = 0, prevSign = 0;
+  for (let i = w; i < n - w; i++) {
+    const ax = q.X[i] - q.X[i - w], ay = q.Y[i] - q.Y[i - w], bx = q.X[i + w] - q.X[i], by = q.Y[i + w] - q.Y[i];
+    const al = Math.hypot(ax, ay), bl = Math.hypot(bx, by);
+    if (al < 1e-6 || bl < 1e-6) continue;
+    const turn = Math.acos(Math.max(-1, Math.min(1, (ax * bx + ay * by) / (al * bl))));
+    const sa = Math.abs(ay) > 0.25 * al ? Math.sign(ay) : 0, sb = Math.abs(by) > 0.25 * bl ? Math.sign(by) : 0;
+    if (sa) prevSign = sa;
+    const flip = sb && prevSign && sb !== prevSign;
+    if ((flip || turn > 1.15) && q.S[i] - lastS >= minLen && q.len - q.S[i] >= minLen) {
+      // el corte va en el punto de más giro de la zona
+      cuts.push(i); lastS = q.S[i]; if (sb) prevSign = sb;
+    }
+  }
+  cuts.push(n - 1);
+  return cuts;
+}
+// campana: fracción de recorrido hecha a la fracción u del tiempo del golpe (no llega a pararse en los empalmes)
+function bell(u, b) { return (b * u + (1 - b) * (1 - Math.cos(Math.PI * u)) / Math.PI) / (b + 2 * (1 - b) / Math.PI); }
+function bellInv(f, b) {
+  let lo = 0, hi = 1;
+  for (let k = 0; k < 18; k++) { const m = (lo + hi) / 2; if (bell(m, b) < f) lo = m; else hi = m; }
+  return (lo + hi) / 2;
+}
+
 function timeline(strokes) {
-  const lens = [];
+  const hs = [];
   const items = strokes.map(s => {
     const q = resample(s.pts, Math.max(1, Math.min(4, s.r * 0.5)));
-    if (!s.mask && !s.under && q.len > 0) lens.push(q.len);
+    if (!s.mask && !s.under && q.len > 0) { let a = Infinity, b = -Infinity; for (let i = 0; i < q.Y.length; i++) { if (q.Y[i] < a) a = q.Y[i]; if (q.Y[i] > b) b = q.Y[i]; } hs.push(Math.max(b - a, q.len * 0.3)); }
     return { s, q };
   });
-  lens.sort((a, b) => a - b);
-  const ell = Math.max(8, lens.length ? lens[lens.length >> 1] : 40);   // tamaño típico de un trazo de letra
+  hs.sort((a, b) => a - b);
+  const ell0 = Math.max(6, hs.length ? hs[hs.length >> 1] : 40);   // alto típico de un trazo de letra
+  // golpes de cada trazo y su tamaño típico
+  const bl = [];
+  for (const it of items) {
+    it.cuts = beats(it.q, ell0 * 0.3);
+    if (!it.s.mask && !it.s.under) for (let k = 1; k < it.cuts.length; k++) bl.push(it.q.S[it.cuts[k]] - it.q.S[it.cuts[k - 1]]);
+  }
+  bl.sort((a, b) => a - b);
+  const ell = Math.max(4, bl.length ? bl[bl.length >> 1] : ell0);
   let t = 0, prev = null, drawT = 0, drawL = 0;
   for (const it of items) {
     const { q, s } = it, n = q.S.length;
-    const fast = s.mask ? 3.6 : 1;
-    // pausa
+    const k0 = s.mask ? BEAT.mask : (s.pass ? BEAT.pass : 1) * (s.under ? BEAT.under : 1);
+    // pausa (en golpes): seguir el mismo gesto, levantar dentro de la letra, pasar a otra letra, a otra palabra
     let pause = 0;
     if (prev) {
       const pq = prev.q, d = Math.hypot(q.X[0] - pq.X[pq.X.length - 1], q.Y[0] - pq.Y[pq.Y.length - 1]);
-      if (s.mask && prev.s.mask) pause = 0.04 * ell + d / 5;
-      else pause = (d < s.r * 1.2 ? 0.05 : 0.28) * ell + d / 2.6 + ((prev.s.word || 0) !== (s.word || 0) ? 0.55 * ell : 0);
+      const air = Math.sqrt(Math.min(9, d / ell0));
+      if (s.mask && prev.s.mask) pause = 0.1 + 0.08 * air;
+      else if ((prev.s.word || 0) !== (s.word || 0) || !!s.mask !== !!prev.s.mask) pause = 1.05 + 0.3 * air;
+      else if (d < Math.max(s.r, prev.s.r) * 1.3) pause = 0;
+      else if (prev.s.letter === s.letter && !s.pass === !prev.s.pass) pause = 0.4 + 0.25 * air;
+      else pause = 0.55 + 0.28 * air;
+      if (s.pass || s.mask) pause *= 0.7;
     }
     t += pause;
     it.t0 = t;
     const T = new Float32Array(n);
-    const win = Math.max(1, Math.round(ell * 0.12 / Math.max(1e-6, q.len / Math.max(1, n - 1))));
-    for (let i = 1; i < n; i++) {
-      const a = Math.max(0, i - win), b = Math.min(n - 1, i + win), m = i;
-      const ux = q.X[m] - q.X[a], uy = q.Y[m] - q.Y[a], vx = q.X[b] - q.X[m], vy = q.Y[b] - q.Y[m];
-      const ul = Math.hypot(ux, uy), vl = Math.hypot(vx, vy);
-      let kap = 0;
-      if (ul > 1e-6 && vl > 1e-6) kap = Math.acos(Math.max(-1, Math.min(1, (ux * vx + uy * vy) / (ul * vl)))) / Math.max(1e-6, (ul + vl) / 2);
-      let v = Math.min(1, Math.pow(Math.max(1e-6, kap * ell * 0.5), -1 / 3));
-      v = Math.max(0.38, v);
-      // arranca y frena
-      const u = q.S[i] / Math.max(1e-6, q.len), edge = Math.min(u / 0.14, (1 - u) / 0.18, 1);
-      v *= 0.5 + 0.5 * Math.max(0, edge);
-      T[i] = T[i - 1] + (q.S[i] - q.S[i - 1]) / (v * fast);
+    let tb = 0;
+    for (let k = 1; k < it.cuts.length; k++) {
+      const i0 = it.cuts[k - 1], i1 = it.cuts[k], L = q.S[i1] - q.S[i0];
+      if (L <= 0) { for (let i = i0; i <= i1; i++) T[i] = tb; continue; }
+      const dur = k0 * Math.max(0.4, Math.min(2.4, Math.pow(L / ell, BEAT.exp)));
+      for (let i = i0 + 1; i <= i1; i++) T[i] = tb + dur * bellInv((q.S[i] - q.S[i0]) / L, BEAT.base);
+      tb += dur;
     }
     it.T = T;
     it.dur = T[n - 1] || 0;
@@ -139,11 +183,20 @@ function eraseAtLen(it, L) {
   return d > 1e-9 ? it.e0 + (timeAtLen(it, L) - it.t0) / d * (it.e1 - it.e0) : it.e0;
 }
 
-// para cada píxel del recuadro: a qué punto del recorrido (longitud) pertenece = el del centro de trazo más cercano
-function nearestLen(it, rx, ry, rw, rh, R) {
-  const q = it.q, n = q.S.length;
-  const D = new Float32Array(rw * rh).fill(1e12), U = new Float32Array(rw * rh).fill(q.len);
-  const R2 = R * R;
+// LA PUNTA. Para cada píxel del recuadro: en qué punto del recorrido lo toca la punta de la herramienta.
+// La punta es un disco del ancho del trazo que avanza por el centro: toca antes lo que tiene delante en el eje y
+// algo después lo de los lados, así que el frente es redondo (no un corte recto). Un grano fijo al papel
+// descoloca ese frente: el borde de la punta queda irregular, con la textura de la herramienta.
+function hash2(x, y) { let h = (x * 374761393 + y * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177 | 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967295; }
+function vnoise(x, y) {
+  const xi = Math.floor(x), yi = Math.floor(y), fx = x - xi, fy = y - yi, sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
+  const a = hash2(xi, yi), b = hash2(xi + 1, yi), c = hash2(xi, yi + 1), d = hash2(xi + 1, yi + 1);
+  return (a + (b - a) * sx) * (1 - sy) + (c + (d - c) * sx) * sy;
+}
+function arrival(it, rx, ry, rw, rh, rr, R, rough) {
+  const q = it.q, n = q.S.length, N = rw * rh;
+  const D = new Float32Array(N).fill(1e12), A = new Float32Array(N).fill(1e12), Un = new Float32Array(N).fill(q.len);
+  const R2 = R * R, r2 = rr * rr;
   for (let i = 0; i < n; i++) {
     const cx = q.X[i] - rx, cy = q.Y[i] - ry, s = q.S[i];
     const x0 = Math.max(0, Math.floor(cx - R)), x1 = Math.min(rw - 1, Math.ceil(cx + R));
@@ -152,11 +205,23 @@ function nearestLen(it, rx, ry, rw, rh, R) {
       const dy = y + 0.5 - cy, row = y * rw;
       for (let x = x0; x <= x1; x++) {
         const dx = x + 0.5 - cx, d = dx * dx + dy * dy;
-        if (d < R2 && d < D[row + x]) { D[row + x] = d; U[row + x] = s; }
+        if (d >= R2) continue;
+        const j = row + x;
+        if (d < D[j]) { D[j] = d; Un[j] = s; }
+        if (d < r2) { const a = s + rr - Math.sqrt(r2 - d); if (a < A[j]) A[j] = a; }
       }
     }
   }
-  return { U, D };
+  const sc = 1 / Math.max(1.5, rr * 0.55);
+  for (let y = 0; y < rh; y++) {
+    for (let x = 0; x < rw; x++) {
+      const j = y * rw + x;
+      if (A[j] > 1e11) A[j] = Un[j] + rr;          // tinta que se sale del ancho del trazo: llega con el borde de la punta
+      const gx = rx + x, gy = ry + y;
+      A[j] += rr * rough * ((vnoise(gx * sc, gy * sc) - 0.5) * 1.1 + (hash2(gx, gy) - 0.5) * 0.5);
+    }
+  }
+  return { A, D };
 }
 
 // lienzo de pigmento -> RGBA de un recuadro (sin cerrar el lienzo: se sigue pintando encima)
@@ -207,10 +272,14 @@ function build(strokes0, p, o) {
       WR.paint(cv, [s], p);
       const after = finalizeRect(cv, rx, ry, rw, rh, new Uint8ClampedArray(rw * rh * 4));
       const need = Emax || (k <= nw && k / nw < it.t1);
-      const NL = need ? nearestLen(it, x0 + rx, y0 + ry, rw, rh, Math.max(4, s.r * (s.mask ? 3 : 2.5) + 3)) : null, U = NL && NL.U, core = s.r * s.r;
+      const rr = s.r * 1.12 + 0.75, PP = s.P || {}, mult = PP.blend !== 'over';
+      const rough = Math.min(0.85, 0.3 + 0.5 * (PP.grain || 0) + 0.35 * (PP.dry || 0));
+      const NL = need ? arrival(it, x0 + rx, y0 + ry, rw, rh, rr, Math.max(4, s.r * (s.mask ? 3 : 2.5) + 3), rough) : null, U = NL && NL.A, core = s.r * s.r;
+      const full = it.q.len + rr;
       // fotogramas a mitad de este trazo: lo de antes + el trazo hasta donde va la punta
       while (k <= nw && k / nw < it.t1) {
-        const L = lenAt(it, k / nw);
+        // (la punta llega hasta el final del trazo, remate incluido, justo cuando el trazo acaba)
+        const L0 = lenAt(it, k / nw), L = L0 * full / Math.max(1e-6, it.q.len), fresh = mult && !s.mask ? 0.22 : 0, zone = rr * 1.7;
         Gb.set(F);
         for (let y = 0; y < rh; y++) {
           for (let x = 0; x < rw; x++) {
@@ -218,7 +287,13 @@ function build(strokes0, p, o) {
             const m = (L - U[j]) / 1.6 + 0.5;
             if (m <= 0) continue;
             const a = j * 4, d = ((ry + y) * w + rx + x) * 4;
-            if (m >= 1) { Gb[d] = after[a]; Gb[d + 1] = after[a + 1]; Gb[d + 2] = after[a + 2]; Gb[d + 3] = after[a + 3]; continue; }
+            if (m >= 1) {
+              Gb[d] = after[a]; Gb[d + 1] = after[a + 1]; Gb[d + 2] = after[a + 2];
+              // donde se apoya la punta la tinta está recién puesta: un pelo más cargada
+              const near = fresh ? 1 - (L - U[j]) / zone : 0;
+              Gb[d + 3] = near > 0 ? Math.min(255, after[a + 3] * (1 + fresh * near)) : after[a + 3];
+              continue;
+            }
             const a0 = Gb[d + 3] * (1 - m), a1 = after[a + 3] * m, at = a0 + a1;
             if (at <= 0) continue;
             Gb[d] = (Gb[d] * a0 + after[a] * a1) / at; Gb[d + 1] = (Gb[d + 1] * a0 + after[a + 1] * a1) / at; Gb[d + 2] = (Gb[d + 2] * a0 + after[a + 2] * a1) / at;
@@ -235,7 +310,7 @@ function build(strokes0, p, o) {
           for (let x = 0; x < rw; x++) {
             const a = a0 + x * 4, d = d0 + x * 4;
             if (NL.D[y * rw + x] < core || after[a + 3] !== F[d + 3] || after[a] !== F[d] || after[a + 1] !== F[d + 1] || after[a + 2] !== F[d + 2]) {
-              const te = eraseAtLen(it, U[y * rw + x]), e = (ry + y) * w + rx + x;
+              const te = eraseAtLen(it, Math.max(0, Math.min(it.q.len, U[y * rw + x] * it.q.len / full))), e = (ry + y) * w + rx + x;
               if (te > Emax[e]) Emax[e] = te;
             }
           }
