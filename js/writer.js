@@ -430,7 +430,8 @@ function plan(lay, p, seed) {
           if (Math.abs(b[1] - a[1]) > 1.6 * Math.abs(b[0] - a[0]) && b[1] > a[1] && rs() < P.up) pts = pts.slice().reverse();
         }
         // al documento, con un pulso lento (no un temblorcillo: la mano ondula, no vibra)
-        const tremA = emPx * (0.0008 + 0.004 * (p.pulso == null ? 0.4 : p.pulso)) * P.tremor, tremL = emPx * 0.32;
+        const scr = isScript && L.g.script;
+        const tremA = emPx * (0.0008 + 0.004 * (p.pulso == null ? 0.4 : p.pulso)) * P.tremor * (scr ? 0.45 : 1), tremL = emPx * (scr ? 0.7 : 0.32);
         const dpts = pts.map(q => map(q[0], q[1]));
         let acc = 0;
         let fin = dpts.map((q, k) => {

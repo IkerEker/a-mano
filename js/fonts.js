@@ -27,7 +27,7 @@ const STYLES = {
   adulta_a: { label: 'Adulta A', hint: 'suelta: inclinada, de astas altas', ref: 'adulta_a', wide: 0.78, slant: 0.1, slantVar: 0.03, hVar: 0.08, wVar: 0.05, wob: 0.01, wobF: 0, angular: 0, geo: 0, os: 0.02, osVar: 0.025, stem: 0.02, cb: 0.04, cbShift: 0.04, open: 0.2, xh: 0.6, track: 0.05, minGap: 0.03, weight: 1.0, bounce: 1.0, sizeVar: 0.6, double: 0, ovr: null, refW: 0.92, asc: 1.2, desc: 1.25, alt: null, ascS: 1.0, noLoopA: 1, script: 'own', xhS: 0.4, slantS: 0.36, trackS: 0, scriptW: 0.95, scriptSmooth: 0.03, flick: 0.4 },
   // Adulta B: alta, estrecha y suelta, palos largos que se pasan (Tryin' to make the best of the hometown blues);
   // cursiva casi derecha, estrecha y alta
-  adulta_b: { label: 'Adulta B', hint: 'alta y estrecha, de astas largas', ref: null, wide: 0.52, slant: 0.0, slantVar: 0.04, hVar: 0.08, wVar: 0.09, wob: 0.012, wobF: 0, angular: 0, geo: 0, os: 0.03, osVar: 0.05, stem: 0.05, cb: 0.08, cbShift: 0.02, open: 0.3, xh: 0.46, track: 0.075, minGap: 0.045, weight: 0.9, bounce: 1.0, sizeVar: 1.2, double: 0, ovr: null, refW: 0.6, asc: 1.5, desc: 1.6, ascS: 1.25, joinP: 0.65, noLoopA: 1, noLoopD: 1, script: 'own', xhS: 0.34, slantS: 0.04, trackS: 0.015, scriptW: 0.7, scriptSmooth: 0.03, flick: 0.4 },
+  adulta_b: { label: 'Adulta B', hint: 'alta y estrecha, de astas largas', ref: null, wide: 0.52, slant: 0.0, slantVar: 0.04, hVar: 0.08, wVar: 0.09, wob: 0.012, wobF: 0, angular: 0, geo: 0, os: 0.03, osVar: 0.05, stem: 0.05, cb: 0.08, cbShift: 0.02, open: 0.3, xh: 0.46, track: 0.075, minGap: 0.045, weight: 0.9, bounce: 1.0, sizeVar: 1.2, double: 0, ovr: null, refW: 0.6, asc: 1.5, desc: 1.6, ascS: 1.25, joinP: 0.65, noLoopA: 1, noLoopD: 1, script: 'own', xhS: 0.34, slantS: 0.04, trackS: 0.0, scriptW: 0.7, scriptSmooth: 0.03, flick: 0.4 },
   // Infantil A: el abecedario de un niño (tamaños desiguales, redonda, abierta) y minúsculas gordas separadas
   // (Let it be unpolished...); cursiva redonda, derecha y grande (Comme des Garçons)
   infantil_a: { label: 'Infantil A', hint: 'de niño: grande, redonda, a trozos', ref: 'infantil_a', wide: 1.08, slant: 0, slantVar: 0.1, hVar: 0.16, wVar: 0.1, wob: 0.02, wobF: 0, angular: 0, geo: 0, os: 0.02, osVar: 0.04, stem: 0.03, cb: 0.08, cbShift: 0, open: 0.3, xh: 0.8, track: 0.13, minGap: 0.06, weight: 1.3, bounce: 1.7, sizeVar: 1.3, double: 0, ovr: null, refW: 1.05, asc: 0.85, desc: 0.8, piece: 2.6, peak: 0, ascS: 0.95, joinP: 0.8, slantVarS: 0.09, script: 'own', xhS: 0.6, slantS: 0.02, trackS: 0.02, scriptW: 1.05, scriptSmooth: 0.05, flick: 0.3 },
@@ -36,14 +36,14 @@ const STYLES = {
   infantil_b: { label: 'Infantil B', hint: 'a su aire: picuda, desigual, mezcla mayúsculas', ref: 'infantil_b', wide: 0.72, slant: 0.16, slantVar: 0.1, hVar: 0.2, wVar: 0.12, wob: 0.01, wobF: 0, angular: 0, geo: 0, os: 0.01, osVar: 0.02, stem: 0.01, cb: 0.04, cbShift: 0, open: 0.2, xh: 0.6, track: 0.05, minGap: 0.03, weight: 0.8, bounce: 1.8, sizeVar: 1.5, double: 0, ovr: null, refW: 1.12, asc: 1.45, desc: 1.3, piece: 1.4, slantVarS: 0.02, scriptW: 1.38, ascS: 0.68, peak: 0.7, capMix: 'rdt', script: 'own', xhS: 0.74, slantS: -0.03, trackS: 0.02, flick: 0.2 },
   // Nerviosa A: mayúsculas muy altas y estrechas, de alturas desiguales, palos rectos (Tonya Harding's); cursiva
   // tumbada, baja y estirada, escrita a toda prisa (Anthropology of world mapping)
-  nerviosa_a: { label: 'Nerviosa A', hint: 'picuda: fina, apretada, a tirones', ref: 'nerviosa_a', wide: 0.5, slant: 0.22, slantVar: 0.07, hVar: 0.18, wVar: 0.1, wob: 0.008, wobF: 0, angular: 0, geo: 0, os: 0.07, osVar: 0.05, stem: 0.08, cb: 0.1, cbShift: -0.04, open: 0.25, xh: 0.64, track: 0.0, minGap: 0.008, weight: 0.62, bounce: 1.0, sizeVar: 1.0, double: 0, flick: 0.8, ovr: null, refW: 0.66, asc: 1.15, desc: 1.2, peak: 1, peakS: 0.6, script: 'own', xhS: 0.27, slantS: 1.0, slantVarS: 0.06, trackS: 0.03, scriptW: 1.7, scriptSmooth: 0.06 },
+  nerviosa_a: { label: 'Nerviosa A', hint: 'picuda: fina, apretada, a tirones', ref: 'nerviosa_a', wide: 0.5, slant: 0.22, slantVar: 0.07, hVar: 0.18, wVar: 0.1, wob: 0.008, wobF: 0, angular: 0, geo: 0, os: 0.07, osVar: 0.05, stem: 0.08, cb: 0.1, cbShift: -0.04, open: 0.25, xh: 0.64, track: 0.0, minGap: 0.008, weight: 0.62, bounce: 1.0, sizeVar: 1.0, double: 0, flick: 0.8, ovr: null, refW: 0.66, asc: 1.15, desc: 1.2, peak: 1, peakS: 0.6, script: 'own', xhS: 0.3, slantS: 0.8, slantVarS: 0.06, trackS: 0.01, scriptW: 1.4, scriptSmooth: 0.06 },
   // Nerviosa B: mayúsculas finas y desiguales, que no paran quietas (I want to be mysterious); cursiva tumbada y
   // más alta, temblona
   nerviosa_b: { label: 'Nerviosa B', hint: 'a lo loco: hacia atrás, desigual y saltona', ref: 'nerviosa_b', wide: 0.9, slant: -0.2, slantVar: 0.1, hVar: 0.17, wVar: 0.16, wob: 0.02, wobF: 0, angular: 0, geo: 0, os: 0.05, osVar: 0.05, stem: 0.06, cb: 0.12, cbShift: -0.02, open: 0.3, xh: 0.72, track: 0.09, minGap: 0.03, weight: 0.75, bounce: 2.0, sizeVar: 1.6, double: 0, flick: 0.6, ovr: null, refW: 1.0, asc: 0.95, desc: 1.0, peak: 0.55, peakS: 1, joinP: 0.75, noLoopA: 1, script: 'own', xhS: 0.5, slantS: -0.18, slantVarS: 0.1, trackS: 0.0, scriptW: 0.85, scriptSmooth: 0.035 },
   elegante_a: { label: 'Elegante A', hint: 'la de siempre: fina y tranquila', print: 'elfin', wide: 1, slant: 0.08, slantVar: 0.015, hVar: 0.02, wVar: 0.02, wob: 0.004, wobF: 0, angular: 0, geo: 0, os: 0, osVar: 0, stem: 0, cb: 0, cbShift: 0, open: 0, xh: 0.62, track: 0.03, minGap: 0.05, weight: 0.85, bounce: 0.5, sizeVar: 0.5, double: 0, ovr: null, script: 'allure', xhS: 0.48, slantS: 0.12, trackS: 0 },
   // Elegante B: mayúsculas de cartel de museo, redondas y bailonas, cada letra a su altura (Matisse, Calder...);
   // cursiva derecha y abierta
-  elegante_b: { label: 'Elegante B', hint: 'de cartel: redonda y bailona', ref: 'elegante_b', refW: 0.86, wide: 0.92, slant: 0, slantVar: 0.05, hVar: 0.09, wVar: 0.07, wob: 0.008, wobF: 0, angular: 0, geo: 0, os: 0.01, osVar: 0.02, stem: 0.01, cb: 0.05, cbShift: 0, open: 0.1, xh: 0.78, track: 0.04, minGap: 0.04, weight: 1.05, bounce: 1.2, sizeVar: 1.1, double: 0, ovr: null, asc: 0.8, desc: 0.8, ascS: 1.35, slantVarS: 0.02, script: 'own', xhS: 0.3, slantS: 0.42, trackS: 0.16, scriptW: 1.25, flick: 0.2 }
+  elegante_b: { label: 'Elegante B', hint: 'de cartel: redonda y bailona', ref: 'elegante_b', refW: 0.86, wide: 0.92, slant: 0, slantVar: 0.05, hVar: 0.09, wVar: 0.07, wob: 0.008, wobF: 0, angular: 0, geo: 0, os: 0.01, osVar: 0.02, stem: 0.01, cb: 0.05, cbShift: 0, open: 0.1, xh: 0.78, track: 0.04, minGap: 0.04, weight: 1.05, bounce: 1.2, sizeVar: 1.1, double: 0, ovr: null, asc: 0.8, desc: 0.8, ascS: 1.35, slantVarS: 0.02, script: 'own', xhS: 0.3, slantS: 0.42, trackS: 0.07, scriptW: 1.15, flick: 0.2 }
 };
 // letra de bloque para las palabras en NEGATIVO (gruesa y recta: se pinta alrededor); no sale en el panel
 STYLES.bloque = { label: 'Bloque', hint: '', wide: 1.0, slant: 0.02, slantVar: 0.012, hVar: 0.035, wVar: 0.03, wob: 0.006, wobF: 0, angular: 0, geo: 0, os: 0, osVar: 0.008, stem: 0, cb: 0.02, cbShift: 0, open: 0, xh: 0.74, track: 0.1, minGap: 0.07, weight: 1, bounce: 0.5, sizeVar: 0.4, double: 0, flick: 0, ovr: null, script: 'script', xhS: 0.6, slantS: 0.05, trackS: 0.02 };
@@ -327,7 +327,7 @@ function printGlyph(styleKey, ch, v, altIdx, cursive, capS) {
   if (marks.length && (base === 'i' || base === 'j')) strokes = strokes.filter(s => !(s.pts.length === 2 && Math.hypot(s.pts[1][0] - s.pts[0][0], s.pts[1][1] - s.pts[0][1]) < 0.05) && !(s.fill && s.pts[0][1] > 1.2));
   // ---- variación estructural (propia de la variante)
   const H = def.lower && !def.asCap ? 1 : 1;
-  const wob = st.wob * (def.ref ? 0.35 : 1), seedW = (rnd() * 1e6) | 0;
+  const wob = st.wob * (def.ref ? 0.35 : cursive ? 0.3 : 1), seedW = (rnd() * 1e6) | 0;
   const lv_ = st.loopVar == null ? 1 : st.loopVar;
   const cv = cursive ? { loopA: Math.max(0.55, 1 + g() * 0.35 * lv_), hA: 1.02 + Math.abs(g()) * 0.1 * lv_, loopD: Math.max(0.3, 1 + g() * 0.35 * lv_), hD: 1 + g() * 0.12 * lv_, in: g() * 0.05 * lv_, out: g() * 0.07 * lv_, outX: g() * 0.04 * lv_ } : null;
   for (const s of strokes) {
@@ -558,7 +558,7 @@ function setWord(styleKey, mode, word, trackExtra, inkW, seedW) {
     if (out.length && isScript && g.strokes.length) {
       const pv = out[out.length - 1];
       const ex = pv.g.script && /[a-zñáéíóúü]/i.test(pv.g.ch) ? exitPt(pv.g) : null, en = g.script && /[a-zñáéíóúü]/i.test(g.ch) ? entryPt(g) : null;
-      if (ex && en && pv.g.own && g.own) x = ex[1] > 0.08 ? pv.x + pv.g.adv + 0.02 + track : pv.x + ex[0] - en[0] + 0.035 + track;   // (cola sin bucle: no liga)
+      if (ex && en && pv.g.own && g.own) x = ex[1] > 0.08 ? pv.x + pv.g.adv + 0.02 + track : pv.x + ex[0] - en[0] + 0.004 + track + ('lbhkft'.indexOf(g.ch) >= 0 && 'adgqu'.indexOf(pv.g.ch) >= 0 ? 0.07 * st.xhS / 0.4 : 0);   // (a + l pegadas se leen «d»)   // (cola sin bucle: no liga)
       // (fuentes ligadas: si la letra sale abajo y muy a la izquierda de su avance, como la d, la siguiente se acerca)
       else if (ex && en && ex[1] > -0.1) x = pv.x + Math.max(pv.g.adv * 0.6, band(pv.g, true) - band(g, false) + 0.03, Math.min(pv.g.adv + track, ex[0] + 0.07 + track - Math.min(en[0], 0.04)));
       else {
@@ -645,19 +645,33 @@ function joinCursive(letters, emTol, o) {
     const b1 = sb.pts[0];
     if (own(A) && e[1] - b1[1] > 0.1 * (L.size || 1)) continue;      // sale por abajo (cola sin bucle): no se liga
     if (Math.hypot(b1[0] - e[0], b1[1] - e[1]) > (tol * 3.5 + (o.track || 0) * 1.6) * (L.size || 1)) continue;
-    const b0 = sb.pts[0], d = Math.hypot(b0[0] - e[0], b0[1] - e[1]);
-    const ta = tangent(sa.pts, true), tb = tangent(sb.pts, false);
+    // ENLACE: un solo gesto limpio. Se quitan la colita de salida de una letra y el rabito de entrada de la otra
+    // (cada una traía su curvita: juntas hacían una ese, un escalón o un tramo plano larguísimo) y se unen los dos
+    // cuerpos con una sola curva que sale en la dirección en que iba la mano y llega en la que va a seguir.
+    const sz = L.size || 1;
+    const cutBack = (pts, len, fromEnd) => {      // índice a `len` de distancia del extremo (a lo largo del trazo)
+      let acc = 0, k = fromEnd ? pts.length - 1 : 0;
+      const stp = fromEnd ? -1 : 1, lim = fromEnd ? Math.floor(pts.length * 0.6) : Math.floor(pts.length * 0.4);
+      while ((fromEnd ? k > lim : k < lim) && acc < len) { acc += Math.hypot(pts[k + stp][0] - pts[k][0], pts[k + stp][1] - pts[k][1]); k += stp; }
+      return k;
+    };
+    const d0 = Math.hypot(sb.pts[0][0] - e[0], sb.pts[0][1] - e[1]);
+    const tail = (0.035 + 0.02 * (o.rnd ? o.rnd() : 0.5)) * sz;
+    const ia = sa.pts.length > 12 ? cutBack(sa.pts, tail, true) : sa.pts.length - 1;
+    const ib = sb.pts.length > 12 ? cutBack(sb.pts, tail, false) : 0;
+    const A0 = sa.pts[ia], B0 = sb.pts[ib];
+    const dirAt = (pts, i) => { const a = pts[Math.max(0, i - 3)], b = pts[Math.min(pts.length - 1, i + 3)], l = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1; return [(b[0] - a[0]) / l, (b[1] - a[1]) / l]; };
+    const ta = dirAt(sa.pts, ia), tb = dirAt(sb.pts, ib);
+    const d = Math.hypot(B0[0] - A0[0], B0[1] - A0[1]);
     const bridge = [];
-    const n = Math.max(2, Math.ceil(d / 0.01)), k = d * (o.rnd ? 0.4 + 0.5 * o.rnd() : 0.6);
+    const n = Math.max(3, Math.ceil(d / (0.01 * sz))), k = d * (o.rnd ? 0.75 + 0.35 * o.rnd() : 0.9);
     for (let j = 1; j < n; j++) {
       const t = j / n, t2 = t * t, t3 = t2 * t;
       const h1 = 2 * t3 - 3 * t2 + 1, h2 = -2 * t3 + 3 * t2, h3 = t3 - 2 * t2 + t, h4 = t3 - t2;
-      bridge.push([h1 * e[0] + h2 * b0[0] + h3 * ta[0] * k + h4 * tb[0] * k, h1 * e[1] + h2 * b0[1] + h3 * ta[1] * k + h4 * tb[1] * k]);
+      bridge.push([h1 * A0[0] + h2 * B0[0] + h3 * ta[0] * k + h4 * tb[0] * k, h1 * A0[1] + h2 * B0[1] + h3 * ta[1] * k + h4 * tb[1] * k]);
     }
-    // el enlace se funde con las dos letras (sin escalón ni codo donde se juntan)
-    { const i0 = Math.max(0, sa.pts.length - 9), all = sa.pts.concat(bridge, sb.pts), i1 = Math.min(all.length, sa.pts.length + bridge.length + 9);
-      const mid = smoothPts(all.slice(i0, i1), Math.max(0.012, d * 0.22));
-      sa.pts = all.slice(0, i0).concat(mid, all.slice(i1)); }
+    void d0;
+    sa.pts = sa.pts.slice(0, ia + 1).concat(bridge, sb.pts.slice(ib));
     sa.joined = true;
     L._carry = sa;
     L.strokes.splice(bi, 1);

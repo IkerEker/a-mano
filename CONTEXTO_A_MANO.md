@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.21)
+## 2. Cómo se usa (2.22)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -503,6 +503,17 @@ negativos siguen viéndose superfalsos: mejóralos, incluso su tipografía, que 
 - Manos sin bucles: al empezar palabra, l, b, h, k, f bajan directamente (antes el rabito de entrada hacía que «la»
   se leyera «ta»).
 
+### 2.22 — enlaces de cursiva de un solo gesto
+Pedido (recortes de enlaces largos, planos y con temblor): «a veces son demasiado largos o tiemblan donde deberían
+ser trazos limpios siguiendo el movimiento de la mano».
+- `joinCursive`: se recortan la colita de salida y el rabito de entrada (0,035–0,055 em) y los dos cuerpos se unen
+  con una sola curva (Hermite con las direcciones reales de la mano en esos puntos). Antes se sumaban tres curvitas
+  (salida + puente + entrada): eses, escalones y tramos planos.
+- Más cortos: la entrada empieza donde acaba la salida (hueco 0,004 en vez de 0,035); `trackS`/`scriptW` bajados en
+  Elegante B, Nerviosa A y Adulta B. Tras a, d, g, q, u, una letra de asta (l, b, h, k, f, t) deja algo más de aire
+  («al» pegadas se leían «d»).
+- Trazos limpios: en cursiva la deformación de la letra baja al 30 % y el pulso es más lento y menor (×0,45).
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -562,7 +573,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.21.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.22.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)
