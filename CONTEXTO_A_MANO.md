@@ -622,3 +622,50 @@ python3 tests/node/sheet.py DIR hoja.png 2 800   # hoja de contactos
    esqueleto. La variación de CALCAR (planVariation) puede subir o bajar letras sueltas de más con legibilidad baja.
 5. Goteo de la brocha (The New Pop), papel rasgado (AVONAT) y las manchas de TRAZOS: aún no.
 6. Si el usuario escribe su propio alfabeto, se puede convertir al mini lenguaje de `skeleton.js`.
+
+---
+
+## 6. A mano AE (After Effects, animado) — 0.1.0, 12 nov 2026
+
+Pedido: «lo mismo pero para After Effects, y las quiero animadas. Al añadirlo me das un clip de unos 3 segundos con
+dos marcadores, uno de entrada y otro de salida: desde el principio del clip hasta el marcador de entrada la letra
+se dibuja; desde el segundo marcador hasta la salida se desdibuja, se borra desde detrás; entre los dos se mantiene.
+Prefiero que quede muchísimo más realista y que no sea tan fácilmente editable.»
+
+Decisiones:
+- **Panel CEP** (HTML + ExtendScript), no UXP: en noviembre de 2026 UXP para After Effects está en beta pública
+  (AE 27 beta); CEP es lo que cargan las versiones publicadas. Sin firmar: se instala copiando la carpeta y
+  activando `PlayerDebugMode` (lo hacen los instaladores). El motor es el mismo; pasar a UXP será cambiar el puente.
+- **Realista, no editable**: nada de capas de forma. El motor de tinta pinta la escritura fotograma a fotograma y
+  el clip es una **secuencia PNG con alfa**. La capa lleva reasignación de tiempo con una expresión que lee sus
+  marcadores: mover «entrada»/«salida» o recortar el clip retima la animación sin regenerar.
+- Solo GENERAR (CALCAR depende de las capas de texto de Photoshop). 5 formas (sin «Selección»); la forma no es
+  una capa: el texto va al centro de la composición o al rectángulo del sólido / capa de forma seleccionados.
+
+Cómo está hecho:
+- `js/anim.js`: `order` (palabra a palabra; el subrayado tras su palabra; la caja de un negativo donde va su
+  palabra), `timeline` (cada trazo dura según su recorrido y su curvatura —ley de los dos tercios—, arranca y
+  frena; pausas al levantar, ir por el aire y cambiar de palabra; el relleno de un negativo va ×3,6 de rápido) y
+  `build` → generador de fotogramas: pinta cada trazo con `WR.paint` en el lienzo de pigmento; un fotograma a
+  mitad de trazo = lo de antes + el trazo nuevo hasta donde llega la punta (cada píxel pertenece al punto más
+  cercano del recorrido). Fotogramas 0…NW escritura; NW+1…NW+NE borrado «por donde empezó» (cada píxel se va
+  cuando pasa el último trazo que lo pintó; las pasadas de repaso se van con la primera y se quitan los tiempos
+  muertos). Con borrado «marcha atrás» no hay fotogramas de borrado: la expresión recorre la escritura al revés.
+- `js/png.js`: PNG en memoria (zlib de node; sin zlib, sin comprimir).
+- `js/aemain.js` + `ae/index.html` + `ae/extra.css`: el panel (mismos controles; sección ANIMACIÓN: clip, se
+  escribe en, se borra en, tipo de borrado; Avanzado: modo de fusión y resolución 100–200 %).
+- `ae/host.jsx` (ExtendScript, ES3): `amano_info`, `amano_place` (importa la secuencia, crea o sustituye la capa,
+  marcadores, expresión, posición, comentario `A mano|{json}` con texto, semilla y ajustes), `amano_used`.
+- `writer.js`: cada trazo del plan lleva ahora `sk` (trazo de la letra) y `pass` (pasada); no cambia el pintado.
+- `tools/build_ae.py` → `dist_ae/A_mano_AE_vX.Y.Z.zip` (carpeta `com.amano.ae`, instaladores Mac/Windows, LEEME).
+  Versión en `ae/VERSION`.
+- Pruebas: `node tests/ae/harness.js` (panel real en Chromium + After Effects simulado `tests/ae/aesim.js`,
+  19 comprobaciones; evalúa también la expresión). Vídeo de muestra: `dist_ae/a_mano_ae_prueba.mp4`.
+
+Pendiente / dudas:
+1. **Sin probar en After Effects real.** Lo más incierto: que el panel cargue (manifiesto CEP, modo depuración),
+   la importación de la secuencia por script y la expresión de la reasignación de tiempo.
+2. «Se borra desde detrás» se ha entendido como «por donde empezó» (opción por defecto); «marcha atrás» es la otra.
+3. Los puntos y tildes se escriben con su letra, no al acabar la palabra.
+4. Cada «Escribir» guarda una secuencia nueva (5–12 MB); «Vaciar fotogramas sin usar» borra las viejas.
+5. Ideas siguientes: línea viva (3–4 variaciones en bucle), usar una máscara o capa de forma girada como forma.

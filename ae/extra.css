@@ -1,0 +1,46 @@
+
+/* ---------------- A mano AE (panel CEP: Chromium, sin los controles de UXP) ---------------- */
+:root {
+  --uxp-host-background-color: #232323;
+  --uxp-host-text-color: #dcdcdc;
+  --uxp-host-text-color-secondary: #9a9a9a;
+  --uxp-host-label-text-color: #a8a8a8;
+  --uxp-host-border-color: #4a4a4a;
+  --uxp-host-link-text-color: #6fb1ff;
+  --uxp-host-widget-hover-background-color: #343434;
+  --uxp-host-font-size: 12px;
+  --uxp-host-font-size-smaller: 11px;
+}
+body { font-family: -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; user-select: none; -webkit-user-select: none; }
+* { box-sizing: border-box; }
+.sub2 { font-weight: normal; font-size: 10px; color: var(--uxp-host-text-color-secondary); margin-left: 4px; }
+textarea, input[type=text], input[type=number] { background-color: #161616; color: var(--uxp-host-text-color); border: 1px solid var(--uxp-host-border-color); border-radius: 4px; font-family: inherit; outline: none; user-select: text; -webkit-user-select: text; }
+textarea:focus, input:focus { border-color: #e0533d; }
+textarea { resize: vertical; }
+.hex { width: 76px; margin-left: 6px; padding: 3px 5px; font-size: 11px; }
+input.swatch { padding: 0; background: none; -webkit-appearance: none; }
+input.swatch::-webkit-color-swatch-wrapper { padding: 0; }
+input.swatch::-webkit-color-swatch { border: none; border-radius: 3px; }
+.sl { margin-top: 8px; }
+.sl .slh { display: flex; flex-direction: row; font-size: 11px; color: var(--uxp-host-label-text-color); }
+.sl .slv { margin-left: auto; color: var(--uxp-host-text-color); }
+.sl input[type=range] { width: 100%; margin: 3px 0 0 0; height: 14px; -webkit-appearance: none; background: transparent; }
+.sl input[type=range]::-webkit-slider-runnable-track { height: 2px; background: #5a5a5a; border-radius: 1px; }
+.sl input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 6px; background: #dcdcdc; margin-top: -5px; cursor: pointer; }
+.sl input[type=range]:hover::-webkit-slider-thumb { background: #e0533d; }
+.nums { align-items: flex-end; }
+.numf { flex: 1 1 0; margin-right: 6px; display: flex; flex-direction: column; }
+.numf:last-child { margin-right: 0; }
+.numf label { font-size: 10px; color: var(--uxp-host-label-text-color); margin-bottom: 2px; }
+.numf input { width: 100%; padding: 3px 4px; font-size: 12px; }
+button { font-family: inherit; font-size: 12px; border-radius: 14px; padding: 6px 12px; cursor: pointer; margin-top: 6px; border: 1px solid transparent; outline: none; }
+button.cta { background-color: #e0533d; color: #ffffff; font-weight: bold; }
+button.cta:hover { background-color: #ea6650; }
+button.sec2 { background-color: transparent; color: var(--uxp-host-text-color); border-color: #777777; }
+button.sec2:hover { background-color: var(--uxp-host-widget-hover-background-color); }
+button[disabled] { opacity: 0.45; cursor: default; }
+.shp { flex: 0 0 17%; width: 17%; margin: 2px 1.5%; }
+.shp svg { width: 34px; height: 22px; }
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-thumb { background: #4a4a4a; border-radius: 4px; }
+::-webkit-scrollbar-track { background: transparent; }

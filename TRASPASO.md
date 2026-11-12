@@ -59,3 +59,7 @@ botón «Escribir en la forma» fijo abajo.
 7. Negativos: el usuario los veía «superfalsos»; se cambió letra y canto (2.18) pero el relleno no; sin veredicto.
 8. Letras de cursiva sacadas directamente de las muestras (Menu, Comme, Vlaminck): no se usan (salían a trozos).
 9. La etiqueta git `v2.13.0` solo existe en local (el push de etiquetas falló); el .ccx está en `versiones/`.
+
+## A mano AE (After Effects) — 0.1.0
+Panel CEP que escribe y borra el texto animado (secuencia PNG + marcadores «entrada»/«salida»). Ver la sección 6
+de `CONTEXTO_A_MANO.md`. `python3 tools/build_ae.py`, `node tests/ae/harness.js` (19/19). Sin probar en After real.

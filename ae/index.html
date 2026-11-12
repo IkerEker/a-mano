@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="tabs">
+    <div class="tab active">A MANO <span class="sub2">animado</span></div>
+    <div class="grow"></div>
+    <div class="advlink" id="btnAdv" title="Opciones avanzadas">Avanzado ›</div>
+  </div>
+
+  <!-- ================================================================ ventana principal -->
+  <div id="viewMain">
+   <div class="scroll" id="mainScroll">
+      <div class="sec"><span class="num">1</span>FORMA <span class="sub">dónde va el texto</span></div>
+      <div class="shapes" id="shapeGrid">
+        <div class="shp" data-v="rect" title="Rectángulo"><svg viewBox="0 0 40 26"><rect x="3" y="5" width="34" height="16" rx="1"/></svg><div>Recto</div></div>
+        <div class="shp" data-v="arco" title="Arco"><svg viewBox="0 0 40 26"><path d="M3 12 Q20 -2 37 12 L33 22 Q20 11 7 22 Z"/></svg><div>Arco</div></div>
+        <div class="shp" data-v="bandera" title="Bandera"><svg viewBox="0 0 40 26"><path d="M3 8 C12 0 20 14 37 6 L37 18 C20 26 12 12 3 20 Z"/></svg><div>Bandera</div></div>
+        <div class="shp" data-v="abanico" title="Abanico"><svg viewBox="0 0 40 26"><path d="M2 14 Q20 -6 38 14 L28 24 Q20 15 12 24 Z"/></svg><div>Abanico</div></div>
+        <div class="shp" data-v="circulo" title="Círculo"><svg viewBox="0 0 40 26"><ellipse cx="20" cy="13" rx="11" ry="11"/></svg><div>Círculo</div></div>
+      </div>
+      <div class="ctx" id="ctxGen">El texto se encaja en el centro de la composición. Si tienes seleccionado un sólido o una capa de forma, se encaja en su rectángulo.</div>
+
+      <div class="sec"><span class="num">2</span>TEXTO</div>
+      <textarea id="txt" placeholder="Escribe aquí el texto (Intro = nueva línea)"></textarea>
+      <div class="seg mt4" id="textModeSeg">
+        <div class="segb" data-v="importancia" title="Tú eliges qué palabras importan más">Por importancia</div><div class="segb" data-v="auto" title="Las letras llenan la forma al máximo, encajadas entre ellas">Autoencajar</div>
+      </div>
+      <div class="hint hidden" id="autoHint">Autoencajar: las letras llenan la forma al máximo, cambian de tamaño y se meten en los huecos de la línea de arriba.</div>
+      <div id="levelBox">
+      <div class="styles-bar" id="importBar">
+        <div class="sbtn s-small" id="stSmall" title="Más pequeña">pequeña</div>
+        <div class="sbtn" id="stNormal">normal</div>
+        <div class="sbtn s-bold" id="stBold" title="Más grande y repasada">importante</div>
+        <div class="sbtn s-hero" id="stHero" title="La que más se lee: grande y muy repasada">¡LA MÁS!</div>
+      </div>
+      <div class="styles-bar mt4" id="markBar">
+        <div class="sbtn s-neg" id="stNeg" title="Repasada a mano, con las pasadas a la vista">negrita</div>
+        <div class="sbtn s-sub" id="stSub" title="Una raya a mano debajo de la palabra">subrayada</div>
+        <div class="sbtn s-negv" id="stNegv" title="La palabra queda en blanco y se pinta alrededor, con la técnica elegida">negativo</div>
+        <div class="sbtn" id="stClean" title="Quita negrita, subrayado y negativo">sin marcas</div>
+      </div>
+      <div class="board" id="board"></div>
+      </div>
+
+      <div class="sec"><span class="num">3</span>ESTILO <span class="sub">con qué se escribe</span></div>
+      <div class="seg" id="toolSeg">
+        <div class="segb" data-v="lapiz">Lápiz</div><div class="segb" data-v="carbon">Carbón</div><div class="segb" data-v="cera">Cera</div><div class="segb" data-v="boli">Boli</div><div class="segb" data-v="rotulador">Rotu</div><div class="segb" data-v="pincel">Pincel</div>
+      </div>
+      <div class="seg mt4" id="presetSeg"></div>
+      <div class="row" id="colorRow">
+        <div class="lbl">Color</div>
+        <input type="color" id="inColor" class="swatch" title="Elegir color">
+        <input type="text" id="inHex" class="hex" maxlength="7" spellcheck="false">
+      </div>
+      <div class="row" id="multiRow">
+        <div class="seg grow" id="colorModeSeg"><div class="segb" data-v="uno">Un color</div><div class="segb" data-v="letras" title="Cada letra con un tono distinto, a partir del color base">Una letra de cada color</div></div>
+      </div>
+      <div id="multiBox" class="hidden">
+        <div class="sl" data-k="colorVar" data-min="0" data-max="100" data-label="Variación de cada letra (tono, saturación, luz)"></div>
+      </div>
+      <div id="negBox" class="hidden">
+        <div class="sl" data-k="tupido" data-min="0" data-max="100" data-label="Tupido del negativo (huecos ↔ cargado)"></div>
+      </div>
+
+      <div class="sec"><span class="num">4</span>LETRA</div>
+      <div class="seg" id="fontSeg">
+        <div class="segb f-inf" data-v="infantil">Infantil</div><div class="segb f-adu" data-v="adulta">Adulta</div><div class="segb f-rab" data-v="nerviosa">Nerviosa</div><div class="segb f-ele" data-v="elegante">Elegante</div>
+      </div>
+      <div class="row mt4">
+        <div class="seg" id="versionSeg"><div class="segb" data-v="a">A</div><div class="segb" data-v="b">B</div></div>
+        <div class="hint inline" id="versionHint"></div>
+      </div>
+      <div class="seg mt4" id="caseSeg">
+        <div class="segb" data-v="mayus">MAYÚSCULAS</div><div class="segb" data-v="minus">minúsculas</div><div class="segb" data-v="cursiva"><i>cursiva</i></div>
+      </div>
+      <div class="sl" data-k="legib" data-min="0" data-max="100" data-label="Legibilidad"></div>
+      <div class="legend"><span>garabato</span><span>muy legible</span></div>
+
+      <div class="sec"><span class="num">5</span>ANIMACIÓN <span class="sub">segundos</span></div>
+      <div class="row nums">
+        <div class="numf"><label>Clip</label><input type="number" id="nDur" min="0.5" max="120" step="0.1"></div>
+        <div class="numf"><label>Se escribe en</label><input type="number" id="nIn" min="0.1" max="60" step="0.1"></div>
+        <div class="numf"><label>Se borra en</label><input type="number" id="nOut" min="0" max="60" step="0.1"></div>
+      </div>
+      <div class="row">
+        <div class="lbl">Borrado</div>
+        <div class="seg grow" id="eraseSeg"><div class="segb" data-v="inicio" title="Se borra por donde empezó a escribirse, en el mismo orden">Por donde empezó</div><div class="segb" data-v="atras" title="Se desescribe: lo último que se escribió es lo primero que se va">Marcha atrás</div></div>
+      </div>
+      <div class="hint">El clip lleva dos marcadores: hasta «entrada» se escribe y desde «salida» se borra. Muévelos (o recorta el clip) y la animación se ajusta sola.</div>
+      <div class="row tiny"><div class="link" id="btnLoad">Cargar los ajustes de la capa seleccionada</div><div class="grow"></div><div class="link" id="btnClean">Vaciar fotogramas sin usar</div></div>
+   </div>
+    <div class="actions">
+      <button class="cta" id="btnGo">Escribir en la composición</button>
+      <div class="row">
+        <button class="sec2 grow" id="btnNew">Otra variación</button>
+      </div>
+    </div>
+    <div class="status" id="status"></div>
+  </div>
+
+  <!-- ================================================================ ventana avanzada -->
+  <div id="viewAdv" class="hidden">
+    <div class="row"><div class="link" id="btnBack">‹ Volver</div><div class="grow"></div><div class="link" id="btnReset">Restablecer</div></div>
+    <div class="sec">TRAZO</div>
+    <div class="sl" data-k="grosor" data-min="-50" data-max="50" data-label="Grosor (fino ↔ grueso)"></div>
+    <div class="sl" data-k="tinta" data-min="0" data-max="100" data-label="Tinta (carga, sequedad, textura)"></div>
+    <div class="sl" data-k="pulso" data-min="0" data-max="100" data-label="Pulso (temblor de la mano)"></div>
+    <div class="sl" data-k="repasado" data-min="0" data-max="100" data-label="Repasado de las palabras importantes"></div>
+    <div class="label">Repasado</div>
+    <div class="seg" id="repasoSeg"><div class="segb" data-v="auto" title="Según la herramienta">Auto</div><div class="segb" data-v="fundido" title="Más pigmento, sin líneas sueltas">Fundido</div><div class="segb" data-v="visible" title="Alguna pasada se separa un poco">Visible</div></div>
+
+    <div class="sec">LETRAS</div>
+    <div class="sl" data-k="locura" data-min="0" data-max="100" data-label="Locura (cuánto varía cada letra y palabra)"></div>
+    <div class="sl" data-k="prisa" data-min="0" data-max="100" data-label="Prisa (inclinación)"></div>
+    <div class="sl" data-k="tight" data-min="-50" data-max="50" data-label="Letras apretadas ↔ sueltas"></div>
+
+    <div class="sec">MAQUETA</div>
+    <div class="sl" data-k="contraste" data-min="0" data-max="100" data-label="Diferencia de tamaño entre importancias"></div>
+    <div class="sl" data-k="inter" data-min="70" data-max="150" data-label="Interlineado"></div>
+    <div class="sl" data-k="llenar" data-min="0" data-max="60" data-label="Llenar la forma (estirar el texto)"></div>
+    <div class="sl" data-k="margen" data-min="0" data-max="25" data-label="Margen dentro de la forma"></div>
+    <div class="label">Alineación</div>
+    <div class="seg" id="alignSeg"><div class="segb" data-v="left">Izquierda</div><div class="segb" data-v="center">Centro</div><div class="segb" data-v="right">Derecha</div><div class="segb" data-v="justify">Llenar líneas</div></div>
+
+    <div class="sec">CAPA</div>
+    <div class="seg" id="blendSeg"><div class="segb" data-v="auto" title="Tintas transparentes (lápiz, boli, rotulador) en Multiplicar si el color es oscuro">Auto</div><div class="segb" data-v="normal">Normal</div><div class="segb" data-v="multiply">Multiplicar</div></div>
+    <div class="sl" data-k="escala" data-min="100" data-max="200" data-label="Resolución de los fotogramas (%)"></div>
+    <div class="hint">Al 200 % la capa se puede ampliar al doble sin perder nitidez (tarda y ocupa cuatro veces más).</div>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>

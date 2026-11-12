@@ -1,0 +1,41 @@
+A MANO AE · versión @VERSION@ (primera prueba)
+Letra escrita a mano, animada, para After Effects.
+
+QUÉ HACE
+Escribes el texto en el panel, eliges forma, técnica y letra (las mismas que en el plugin de Photoshop) y pulsas
+«Escribir en la composición». Aparece un clip de 3 segundos en la línea de tiempo, en el instante en que esté
+el cursor, con dos marcadores:
+  · del principio del clip al marcador «entrada», el texto se escribe (trazo a trazo, al ritmo de una mano);
+  · entre los dos marcadores, se queda quieto;
+  · del marcador «salida» al final del clip, se borra.
+Mueve los marcadores o recorta el clip y la animación se ajusta sola. No hay que volver a generar.
+
+INSTALAR
+Mac:      doble clic en «Instalar (Mac).command» (si macOS no deja: clic derecho > Abrir).
+Windows:  doble clic en «Instalar (Windows).bat».
+Después cierra After Effects del todo, ábrelo y busca Ventana > Extensiones > A mano
+(en algunas versiones el menú se llama «Extensiones (heredadas)»).
+
+A mano (si el instalador no funciona):
+1. Copia la carpeta «com.amano.ae» a
+     Mac:      ~/Library/Application Support/Adobe/CEP/extensions/
+     Windows:  %APPDATA%\Adobe\CEP\extensions\
+2. Permite extensiones sin firmar:
+     Mac (Terminal):  defaults write com.adobe.CSXS.12 PlayerDebugMode 1     (y lo mismo con .11)
+     Windows (regedit): HKEY_CURRENT_USER\Software\Adobe\CSXS.12 > valor de cadena PlayerDebugMode = 1 (y CSXS.11)
+3. Reinicia After Effects.
+
+USO
+· «Escribir en la composición»: con un clip de A mano seleccionado lo rehace en el mismo clip (mismos tiempos,
+  misma posición); sin él, crea un clip nuevo donde esté el cursor de tiempo.
+· «Otra variación»: lo mismo con otra mano (otra semilla).
+· Con un sólido o una capa de forma seleccionados, el texto se encaja en su rectángulo.
+· Borrado «Por donde empezó»: se va en el orden en que se escribió. «Marcha atrás»: se desescribe.
+· «Cargar los ajustes de la capa seleccionada»: recupera texto, letra y técnica de un clip ya hecho.
+· El clip es una secuencia PNG con transparencia. Los fotogramas se guardan junto al proyecto, en la carpeta
+  «A mano AE» (o en Documentos si el proyecto aún no está guardado). «Vaciar fotogramas sin usar» borra las
+  secuencias que el proyecto ya no usa.
+· Avanzado › Resolución: al 200 % el clip se puede ampliar al doble sin perder nitidez.
+
+AVISO
+Primera versión, sin probar todavía en un After Effects de verdad (solo en un simulador).

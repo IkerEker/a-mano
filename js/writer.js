@@ -462,7 +462,7 @@ function plan(lay, p, seed) {
         const blob = !!P.proc && pass === 0 && !s.fill && rs() < 0.04;
         pieces.forEach((pc, pi) => {
           if (pc.length < 2) return;
-          out.push({ under: !!s.under, blob: blob && pi === 0, pts: pc, cont0: !!pc.cont0, cont1: !!pc.cont1, r, fill: !!s.fill, seed: (seed + li * 7 + si * 131 + pass * 1777 + pi * 53) >>> 0, P, box: { left: x0 - m, top: y0 - m, right: x1 + m, bottom: y1 + m }, alpha: pass > 0 ? 0.9 : 1, ink: fuse && extra > 0 ? 1 + 0.32 * Math.min(3, extra) : 1, letter: li, word: L.word == null ? 0 : L.word });
+          out.push({ under: !!s.under, blob: blob && pi === 0, pts: pc, cont0: !!pc.cont0, cont1: !!pc.cont1, r, fill: !!s.fill, seed: (seed + li * 7 + si * 131 + pass * 1777 + pi * 53) >>> 0, P, box: { left: x0 - m, top: y0 - m, right: x1 + m, bottom: y1 + m }, alpha: pass > 0 ? 0.9 : 1, ink: fuse && extra > 0 ? 1 + 0.32 * Math.min(3, extra) : 1, letter: li, word: L.word == null ? 0 : L.word , sk: si, pass });
         });
       }
     });

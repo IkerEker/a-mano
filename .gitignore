@@ -4,3 +4,5 @@ tests/sim/out/
 node_modules/
 __pycache__/
 .DS_Store
+dist_ae/A_mano_AE_v*/
+tests/ae/out/

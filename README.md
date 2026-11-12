@@ -14,3 +14,9 @@
   (`tests/node/preview.js`).
 - `referencias/`: carteles de referencia del usuario (`referencias/tipos/`: una muestra de letra por estilo).
 - `estado_actual.png`: muestra de cómo sale ahora.
+
+## A mano AE (After Effects, animado)
+
+Panel para After Effects con las mismas letras y técnicas: el texto se escribe solo y se borra, en un clip con dos
+marcadores («entrada» y «salida»). Código en `ae/`, `js/anim.js` y `js/aemain.js`; `python3 tools/build_ae.py`
+genera `dist_ae/A_mano_AE_vX.Y.Z.zip`; pruebas con `node tests/ae/harness.js`. Detalles en `CONTEXTO_A_MANO.md`, sección 6.
