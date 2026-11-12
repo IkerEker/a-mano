@@ -365,7 +365,7 @@ def build():
                 paths = glyph_strokes(mk, sw)
                 paths = [orient(p) for p in paths]
                 # mayúsculas y números: fuera las motas sueltas (puntos de la lista, salpicaduras)
-                if mode == 'mayus' and len(paths) > 1:
+                if mode in ('mayus', 'mix') and len(paths) > 1:
                     pl = lambda p: sum(math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]) for i in range(1, len(p)))
                     big = [p for p in paths if pl(p) > hh * 0.2]
                     if big: paths = big

@@ -130,3 +130,14 @@ sp-checkbox { margin-top: 6px; }
 #versionSeg { width: 70px; flex: 0 0 auto; }
 #versionHint { font-size: 10px; }
 #toolSeg .segb { padding: 4px 2px; font-size: 10.5px; }
+
+/* el botón de escribir siempre a la vista: lo de arriba se desplaza, las acciones se quedan abajo */
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; overflow: hidden; padding-bottom: 8px; }
+.tabs { flex: 0 0 auto; }
+#viewMain { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+#viewMain.hidden { display: none; }
+#viewMain .scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; padding-right: 2px; }
+#viewMain .actions { flex: 0 0 auto; margin-top: 6px; padding-top: 4px; border-top: 1px solid var(--uxp-host-border-color); }
+#viewMain .status { flex: 0 0 auto; }
+#viewAdv { flex: 1 1 auto; min-height: 0; overflow-y: auto; }

@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.19)
+## 2. Cómo se usa (2.20)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -482,6 +482,15 @@ negativos siguen viéndose superfalsos: mejóralos, incluso su tipografía, que 
 - Cursiva de Infantil B: ya no es Hershey Script; es la propia, gorda, redonda, baja y derecha (cuerpo 0,74, astas
   cortas). La de Infantil A, más alta y desigual.
 
+### 2.20 — botón siempre visible; nuevas minúsculas de Infantil B y Adulta A
+- Panel: el contenido se desplaza (`#mainScroll`) y las acciones («Escribir en la forma», «Otra variación») quedan
+  fijas abajo; antes, con el panel bajo, el botón se cortaba.
+- Minúsculas de Infantil B: referencia `infantilb_principle.png` (picuda, inclinada, desigual, astas largas; mete
+  alguna mayúscula entre minúsculas: `capMix` + tabla `mix`, una de cada tres variantes de r, d, t).
+- Minúsculas de Adulta A: referencias `adultaa_goodthings.png` (tabla `minus`) y `adultaa_future.png` (`minus2`, se
+  funden como variantes): t en cruz, g de bastón, o estrecha, n, m, s, h.
+- De esas muestras se descartaron las letras que no se leían en texto corrido (a que parecía o, u ligada, h, N).
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -541,7 +550,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.19.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.20.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)

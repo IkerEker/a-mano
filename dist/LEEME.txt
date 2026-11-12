@@ -1,8 +1,8 @@
-A MANO 2.19 · plugin para Photoshop (2024 o posterior)
+A MANO 2.20 · plugin para Photoshop (2024 o posterior)
 =====================================================
 
 INSTALAR
-- Doble clic en A_mano_v2.19.0.ccx -> Creative Cloud avisa de que no viene del
+- Doble clic en A_mano_v2.20.0.ccx -> Creative Cloud avisa de que no viene del
   Marketplace -> "Instalar". Sustituye a las versiones anteriores. Es independiente de Cartelator.
 - En Photoshop: Plugins > A mano.
 
@@ -40,8 +40,8 @@ GENERAR, de arriba abajo
    MAYÚSCULAS, minúsculas o cursiva. Las letras salen de escritura real (los
    carteles y abecedarios de referencia), cada estilo de la suya:
    · Infantil A: de niño: grande, redonda, a trozos, cada letra de un tamaño.
-   · Infantil B: redondita y ancha, de cuaderno, astas cortas, muy regular; cursiva gorda y redonda.
-   · Adulta A: segura: algo inclinada y compacta; cursiva inclinada de cuerpo pequeño.
+   · Infantil B: a su aire: picuda, inclinada, desigual, mezcla alguna mayúscula (The Principle is simple).
+   · Adulta A: suelta, de rotulador: inclinada, astas altas (good things take time / The future is yours).
    · Adulta B: alta y estrecha, de astas y colas muy largas; cursiva a ratos desligada.
    · Nerviosa A: picuda: fina, apretada, inclinada, arcos en pico; cursiva tumbada a toda prisa.
    · Nerviosa B: a lo loco: hacia atrás, desigual y saltona; cursiva angulosa hacia atrás.
