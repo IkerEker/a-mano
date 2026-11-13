@@ -52,7 +52,7 @@ function measure(tokens, levels, o) {
     const pad = (o.inkPad || 0) * (mk0.indexOf('b') >= 0 ? 1.8 : 1) + (mk0.indexOf('n') >= 0 ? 0.05 : 0);
     // (negativo: letra de bloque, gruesa y recta, con aire para el perfil)
     const isNeg = mk0.indexOf('n') >= 0;
-    const sw = FN.setWord(isNeg ? 'neg:' + o.persona : o.persona, isNeg && o.mode === 'cursiva' ? 'mayus' : o.mode, FN.caseText(t.text, isNeg && o.mode === 'cursiva' ? 'mayus' : o.mode), o.track || 0, isNeg ? pad + 0.07 : pad, i + 1);
+    const sw = FN.setWord(isNeg ? 'neg:' + o.persona : o.persona, isNeg && o.mode === 'cursiva' ? 'mayus' : o.mode, FN.caseText(t.text, isNeg && o.mode === 'cursiva' ? 'mayus' : o.mode, isNeg ? null : o.persona), o.track || 0, isNeg ? pad + 0.07 : pad, i + 1);
     const caps = o.mode === 'mayus';
     // las letras de alturas desiguales (infantil, nerviosa) necesitan más aire entre líneas
     const hv = FN.styleOf(o.persona).hVar || 0;

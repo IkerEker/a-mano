@@ -30,7 +30,7 @@ const store = {
 const DEF = {
   tab: 'gen', tool: 'rotulador', preset: 'fino', fill: '', color: '#1d1d1f', persona: 'adulta', version: 'a', mode: 'mayus', textMode: 'importancia', repaso: 'auto', legib: 70,
   grosor: 0, tinta: 55, pulso: 40, repasado: 50, follow: 'auto', locura: 50, prisa: 15, tight: 0,
-  contraste: 50, inter: 100, llenar: 30, margen: 5, align: 'center', kind: 'imagen', colorMode: 'uno', colorVar: 45, tupido: 60,
+  contraste: 50, inter: 100, llenar: 30, margen: 5, align: 'center', kind: 'imagen', colorMode: 'uno', colorVar: 45, tupido: 60, goteo: 45, nube: 50, gsub: 'a',
   text: 'Nadie había cerrado\nla puerta del sótano', levels: [0, 2, 1, 0, 0, -1, 0], marks: []
 };
 const st = Object.assign({}, DEF, store.get('settings2', {}));
@@ -38,6 +38,10 @@ if (st.persona === 'rabiosa') st.persona = 'nerviosa';
 if (st.tool === 'carbon' && st.preset === 'cera') { st.tool = 'cera'; st.preset = 'cera'; }
 if (st.tool === 'negativo') { st.tool = 'lapiz'; st.preset = 'blando'; }
 if (!/^[ab]$/.test(st.version)) st.version = 'a';
+if (!FN.STYLES['graffiti_' + st.gsub]) st.gsub = 'a';
+// estilo de letra en uso: las cuatro manos tienen versión A/B; el graffiti, sus firmas (una sola caja)
+function styleKey() { return st.persona === 'graffiti' ? 'graffiti_' + st.gsub : st.persona + '_' + st.version; }
+function curMode() { return FN.styleOf(styleKey()).gmode || st.mode; }
 let saveTimer = null;
 function save() { clearTimeout(saveTimer); saveTimer = setTimeout(() => store.set('settings2', st), 250); }
 
@@ -88,7 +92,7 @@ const docKey = doc => String((doc && (doc.title || doc.id)) || '');
 function chaos() { return Math.max(0, 1 - st.legib / 100); }
 function genParams() {
   return {
-    persona: st.persona + '_' + st.version, mode: st.mode, tool: st.tool, preset: st.preset, color: st.color,
+    persona: styleKey(), mode: curMode(), goteo: st.goteo / 100, nube: st.nube / 100, tool: st.tool, preset: st.preset, color: st.color,
     colorVar: st.colorMode === 'letras' ? Math.max(0.02, st.colorVar / 100) : 0, tupido: st.tupido / 100,
     auto: st.textMode === 'auto', repaso: st.repaso, marks: st.marks || [],
     legib: st.legib / 100, locura: st.locura / 50, pulso: st.pulso / 100, prisa: st.prisa / 100,
@@ -96,13 +100,13 @@ function genParams() {
     contrast: st.contraste / 50, leading: st.inter / 100, align: st.align, stretch: 1 + st.llenar / 100,
     xFill: st.llenar / 150, margin: st.margen / 100, track: st.tight / 50 * 0.07,
     // (el grosor de la técnica pide su aire entre letras; el reparto en líneas no depende de él: layout.canon)
-    inkPad: INK.preset(st.tool, st.preset).w * (st.mode === 'cursiva' && FN.styleOf(st.persona + '_' + st.version).weightS || FN.styleOf(st.persona + '_' + st.version).weight) * Math.pow(2, st.grosor / 50)
+    inkPad: INK.preset(st.tool, st.preset).w * (curMode() === 'cursiva' && FN.styleOf(styleKey()).weightS || FN.styleOf(styleKey()).weight) * Math.pow(2, st.grosor / 50)
   };
 }
 function handParams() {
   // la legibilidad manda; «locura» la escala (50 = normal)
   const loc = Math.min(1.4, chaos() * 1.8 * (st.locura / 50));
-  return { tupido: st.tupido / 100, colorVar: st.colorMode === 'letras' ? Math.max(0.02, st.colorVar / 100) : 0, tool: st.tool, preset: st.preset, fill: st.fill || '', follow: st.follow, repaso: st.repaso, width: Math.pow(2, st.grosor / 50), locura: loc, pulso: st.pulso / 100, prisa: st.prisa / 100, tight: st.tight / 150, ink: st.tinta / 100 };
+  return { goteo: st.goteo / 100, nube: st.nube / 100, tupido: st.tupido / 100, colorVar: st.colorMode === 'letras' ? Math.max(0.02, st.colorVar / 100) : 0, tool: st.tool, preset: st.preset, fill: st.fill || '', follow: st.follow, repaso: st.repaso, width: Math.pow(2, st.grosor / 50), locura: loc, pulso: st.pulso / 100, prisa: st.prisa / 100, tight: st.tight / 150, ink: st.tinta / 100 };
 }
 
 // ------------------------------------------------------------------ segmentados
@@ -246,7 +250,7 @@ async function refreshCtx() {
     else { ctxC.textContent = 'Selecciona en Capas las capas de texto que quieras pasar a mano (o un grupo que las contenga).'; ctxC.className = 'ctx'; }
   }
 }
-const SAVED_KEYS = ['text', 'levels', 'marks', 'tupido', 'persona', 'version', 'mode', 'textMode', 'tool', 'preset', 'color', 'colorMode', 'colorVar', 'legib'];
+const SAVED_KEYS = ['text', 'levels', 'marks', 'tupido', 'persona', 'version', 'mode', 'textMode', 'tool', 'preset', 'color', 'colorMode', 'colorVar', 'legib', 'gsub', 'goteo', 'nube'];
 function loadSaved(saved) {
   for (const k of SAVED_KEYS) if (saved[k] != null) st[k] = Array.isArray(saved[k]) ? saved[k].slice() : saved[k];
   save(); syncControls();
@@ -461,7 +465,27 @@ function setColor(hex) {
   st.color = hex; save();
   const sw = $('swColor'); if (sw) sw.style.backgroundColor = hex;
 }
-const SLIDERS = { slTupido: 'tupido', slColorVar: 'colorVar', slLegib: 'legib', slGrosor: 'grosor', slTinta: 'tinta', slPulso: 'pulso', slRepasado: 'repasado', slLocura: 'locura', slPrisa: 'prisa', slTight: 'tight', slContraste: 'contraste', slInter: 'inter', slLlenar: 'llenar', slMargen: 'margen' };
+const SLIDERS = { slGoteo: 'goteo', slNube: 'nube', slTupido: 'tupido', slColorVar: 'colorVar', slLegib: 'legib', slGrosor: 'grosor', slTinta: 'tinta', slPulso: 'pulso', slRepasado: 'repasado', slLocura: 'locura', slPrisa: 'prisa', slTight: 'tight', slContraste: 'contraste', slInter: 'inter', slLlenar: 'llenar', slMargen: 'margen' };
+// graffiti: la interfaz cambia. En vez de A/B y de MAYÚSCULAS/minúsculas/cursiva salen sus firmas; el panel se
+// pone de amarillo; y con el spray aparecen el goteo y la nube
+function syncGraf() {
+  const g = st.persona === 'graffiti';
+  show($('versionRow'), !g); show($('caseSeg'), !g); show($('grafSeg'), g); show($('grafHint'), g);
+  show($('sprayBox'), st.tool === 'spray');
+  const el = $('grafSeg');
+  if (el && !el.firstChild) {
+    for (const k of Object.keys(FN.STYLES)) {
+      if (k.indexOf('graffiti_') !== 0) continue;
+      const d = document.createElement('div');
+      d.className = 'segb'; d.setAttribute('data-v', k.slice(9)); d.textContent = FN.STYLES[k].sub || k;
+      el.appendChild(d);
+    }
+  }
+  segSet('grafSeg', st.gsub);
+  const gh = $('grafHint'); if (gh) gh.textContent = g ? (FN.styleOf(styleKey()).hint || '') : '';
+  const b = document.body;
+  if (b && b.classList) { if (g) b.classList.add('graf'); else b.classList.remove('graf'); }
+}
 function syncControls() {
   segSet('toolSeg', st.tool); renderPresets(); segSet('fillSeg', st.fill || ''); segSet('fontSeg', st.persona); segSet('caseSeg', st.mode);
   segSet('versionSeg', st.version); segSet('colorModeSeg', st.colorMode); show($('multiBox'), st.colorMode === 'letras'); segSet('textModeSeg', st.textMode); segSet('repasoSeg', st.repaso); syncText();
@@ -469,13 +493,14 @@ function syncControls() {
   for (const [id, k] of Object.entries(SLIDERS)) { const el = $(id); if (el) el.value = st[k]; }
   const t = $('txt'); if (t && t.value !== st.text) t.value = st.text;
   setColor(st.color);
+  syncGraf();
   renderBoard();
 }
 function syncText() {
   const auto = st.textMode === 'auto';
   show($('importBar'), !auto); show($('autoHint'), auto);
   renderBoard();
-  const vh = $('versionHint'); if (vh) vh.textContent = (FN.styleOf(st.persona + '_' + st.version).hint) || '';
+  const vh = $('versionHint'); if (vh) vh.textContent = (FN.styleOf(styleKey()).hint) || '';
 }
 function showAdv(on) { show($('viewMain'), !on); show($('viewAdv'), on); }
 function bind() {
@@ -487,11 +512,18 @@ function bind() {
     for (const k of ['grosor', 'tinta', 'pulso', 'repasado', 'repaso', 'follow', 'locura', 'prisa', 'tight', 'contraste', 'inter', 'llenar', 'margen', 'align', 'kind']) st[k] = DEF[k];
     save(); syncControls(); status('Ajustes avanzados restablecidos.', 'ok');
   });
-  segBind('toolSeg', v => { st.tool = v; st.preset = Object.keys(INK.TOOLS[v].presets)[0]; save(); segSet('toolSeg', v); renderPresets(); });
+  segBind('toolSeg', v => { st.tool = v; st.preset = Object.keys(INK.TOOLS[v].presets)[0]; save(); segSet('toolSeg', v); renderPresets(); syncGraf(); });
   segBind('presetSeg', v => { st.preset = v; save(); segSet('presetSeg', v); });
   segBind('fillSeg', v => { st.fill = v; save(); segSet('fillSeg', v); syncNeg(); });
   segBind('colorModeSeg', v => { st.colorMode = v; save(); segSet('colorModeSeg', v); show($('multiBox'), v === 'letras'); });
-  segBind('fontSeg', v => { st.persona = v; save(); segSet('fontSeg', v); syncText(); });
+  segBind('fontSeg', v => {
+    const was = st.persona; st.persona = v;
+    // al entrar en graffiti se coge el bote (y al salir se vuelve a lo que se tenía, si no se ha cambiado)
+    if (v === 'graffiti' && was !== 'graffiti') { if (st.tool !== 'spray') { st.toolBefore = st.tool + '|' + st.preset; st.tool = 'spray'; st.preset = 'gordo'; } }
+    else if (v !== 'graffiti' && was === 'graffiti' && st.tool === 'spray' && st.toolBefore) { const tb = String(st.toolBefore).split('|'); if (INK.TOOLS[tb[0]]) { st.tool = tb[0]; st.preset = tb[1]; } st.toolBefore = ''; }
+    save(); segSet('fontSeg', v); segSet('toolSeg', st.tool); renderPresets(); syncGraf(); syncText();
+  });
+  segBind('grafSeg', v => { st.gsub = v; save(); syncGraf(); });
   segBind('versionSeg', v => { st.version = v; save(); segSet('versionSeg', v); syncText(); });
   segBind('textModeSeg', v => { st.textMode = v; save(); segSet('textModeSeg', v); syncText(); });
   segBind('repasoSeg', v => { st.repaso = v; save(); segSet('repasoSeg', v); });

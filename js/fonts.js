@@ -47,8 +47,17 @@ const STYLES = {
 };
 // letra de bloque para las palabras en NEGATIVO (gruesa y recta: se pinta alrededor); no sale en el panel
 STYLES.bloque = { label: 'Bloque', hint: '', wide: 1.0, slant: 0.02, slantVar: 0.012, hVar: 0.035, wVar: 0.03, wob: 0.006, wobF: 0, angular: 0, geo: 0, os: 0, osVar: 0.008, stem: 0, cb: 0.02, cbShift: 0, open: 0, xh: 0.74, track: 0.1, minGap: 0.07, weight: 1, bounce: 0.5, sizeVar: 0.4, double: 0, flick: 0, ovr: null, script: 'script', xhS: 0.6, slantS: 0.05, trackS: 0.02 };
+
+// GRAFFITI: una sola caja (ni mayúsculas ni minúsculas: «la minúscula se trata como mayúscula»); las letras se tocan
+// o se montan un poco en vez de dejar huecos; anchuras parecidas; el trazo manda. Cada sub-tipografía es una manera
+// de firmar. gmode: el modo interno que usa; overlap: hueco mínimo entre letras (puede ser negativo: se montan)
+const GRAF = { wide: 0.8, slant: 0.1, slantVar: 0.04, hVar: 0.08, wVar: 0.06, wob: 0.012, wobF: 0, angular: 0, geo: 0, os: 0.04, osVar: 0.04, stem: 0.05, cb: 0.05, cbShift: 0, open: 0.2, xh: 0.74, track: 0, minGap: 0, weight: 1, bounce: 1.2, sizeVar: 1, double: 0, ovr: null, flick: 0, hook: 0, gmode: 'mayus', script: 'own', xhS: 0.56, slantS: 0.3, trackS: 0, scriptW: 1 };
+STYLES.graffiti_a = Object.assign({}, GRAF, { label: 'Graffiti · Tag', sub: 'Tag', hint: 'firma alta, estrecha e inclinada; las letras se tocan', forms: ['capsTag'], wide: 0.62, slant: 0.24, slantVar: 0.03, hVar: 0.07, round: 0.5, overlap: -0.02, bounce: 1.3, sizeVar: 0.9, os: 0.015, osVar: 0.02, stem: 0.06, wide: 0.66, open: 0 });
+STYLES.graffiti_b = Object.assign({}, GRAF, { label: 'Graffiti · Rabia', sub: 'Rabia', hint: 'a zarpazos: angulosa, desigual, los trazos se pasan de largo', forms: ['capsRabia'], wide: 0.86, slant: 0.1, slantVar: 0.12, hVar: 0.2, wVar: 0.14, wob: 0.02, angular: 1, os: 0.04, osVar: 0.04, stem: 0.12, cb: 0.1, open: 0, overlap: -0.05, weight: 0.9, bounce: 2.4, sizeVar: 1.9 });
+STYLES.graffiti_c = Object.assign({}, GRAF, { label: 'Graffiti · Bomba', sub: 'Bomba', hint: 'mayúsculas gordas y torpes, pegadas, hechas para chorrear', wide: 0.95, slant: 0.02, slantVar: 0.08, hVar: 0.12, wVar: 0.1, wob: 0.03, round: 0.7, os: 0.02, open: 0.3, overlap: -0.02, weight: 1.15, bounce: 1.6, sizeVar: 1.2 });
+STYLES.graffiti_d = Object.assign({}, GRAF, { label: 'Graffiti · De un trazo', sub: 'De un trazo', hint: 'todo ligado, sin levantar la mano, con lazos y un rasgo final', gmode: 'cursiva', lowerAll: true, xhS: 0.62, slantS: 0.34, slantVarS: 0.05, scriptW: 1.25, ascS: 0.85, peakS: 0.4, lead: 0.12, loopVar: 1.4, loopW: 1.2, scriptSmooth: 0.03, bounce: 1.4, weightS: 0.72, trackS: 0.03 });
 // compatibilidad con ajustes guardados de la 2.0
-const ALIAS = { infantil: 'infantil_a', adulta: 'adulta_a', rabiosa: 'nerviosa_a', nerviosa: 'nerviosa_a', elegante: 'elegante_a' };
+const ALIAS = { graffiti: 'graffiti_a', infantil: 'infantil_a', adulta: 'adulta_a', rabiosa: 'nerviosa_a', nerviosa: 'nerviosa_a', elegante: 'elegante_a' };
 const PERSONAS = new Proxy(STYLES, { get: (t, k) => t[k] || t[ALIAS[k]] || undefined });
 // 'neg:estilo': la letra de bloque de los negativos, con la forma del estilo que la acompaña (sus letras, su
 // inclinación, sus picos) pero quieta y con aire: se pinta alrededor
@@ -340,6 +349,8 @@ function printGlyph(styleKey, ch, v, altIdx, cursive, capS) {
   }
   // (cursiva: la raya de la t es una marca aparte; en la letra rápida sale larga y se escapa a la derecha)
   if (cursive && base === 't') for (const s of strokes) if (s.pts.length === 2 && Math.abs(s.pts[0][1] - s.pts[1][1]) < 0.15) { s.dot = true; if (st.tbar) { s.pts[0][0] += st.tbar * 0.4; s.pts[1][0] += st.tbar; s.pts[1][1] += st.tbar * 0.14; } }
+  // (los puntitos de las formas propias son marcas: ni se recortan ni cuentan para los huecos)
+  if (def.form && !cursive) for (const s of strokes) if (!s.fill && s.pts.length === 2 && Math.hypot(s.pts[1][0] - s.pts[0][0], s.pts[1][1] - s.pts[0][1]) < 0.13) s.dot = true;
   // esquinas redondeadas (letra suelta, de rotulador): la mano no para en la esquina de la E, la L, la P...
   if (st.round && !def.ref && !cursive) for (const s of strokes) {
     if (s.fill || s.pts.length < 3) continue;
@@ -570,7 +581,11 @@ function metrics(styleKey, mode) {
   return { cap: CAP, xh, asc: Math.max(CAP * hv, xh * (1.12 + 0.43 * (st.asc || 1)) * hv), desc: xh * 0.58 * (st.desc || 1), space: (mode === 'mayus' ? 0.42 + (st.trackCap != null ? st.trackCap : st.track) : 0.32 * Math.max(1, st.xh / 0.62) + st.track) * (0.55 + 0.45 * st.wide) };
 }
 
-function caseText(text, mode) { return mode === 'mayus' ? text.toLocaleUpperCase('es') : text; }
+function caseText(text, mode, styleKey) {
+  // (graffiti de un trazo: una sola caja, todo en la letra ligada)
+  if (styleKey && styleOf(styleKey).lowerAll) return text.toLocaleLowerCase('es');
+  return mode === 'mayus' ? text.toLocaleUpperCase('es') : text;
+}
 
 // palabra: coloca las letras por su tinta (ningún hueco parece un espacio ni se pisan de más)
 // seedW: para escoger variantes distintas en cada palabra
@@ -609,8 +624,9 @@ function setWord(styleKey, mode, word, trackExtra, inkW, seedW) {
       const gap = (x + bl(g).left) - (pv.x + bl(pv.g).right);
       const w2 = 2 * (inkW || 0) * st.weight;
       const narrow = gg => gg.body.right - gg.body.left < 0.12;
-      const maxGap = tr0 + 0.05 + w2 + Math.max(0, trackExtra || 0) * 0.6;
-      const minGap = st.minGap + w2 * 0.8 + Math.min(0, trackExtra || 0) + (narrow(pv.g) || narrow(g) ? 0.03 : 0);
+      // (graffiti: las letras se tocan; el hueco se mide para que los trazos se rocen o se monten un poco)
+      const maxGap = st.overlap != null ? st.overlap + 0.8 * w2 + 0.05 : tr0 + 0.05 + w2 + Math.max(0, trackExtra || 0) * 0.6;
+      const minGap = st.overlap != null ? st.overlap + 0.8 * w2 : st.minGap + w2 * 0.8 + Math.min(0, trackExtra || 0) + (narrow(pv.g) || narrow(g) ? 0.03 : 0);
       if (gap > maxGap) x -= gap - maxGap; else if (gap < minGap) x += minGap - gap;
     }
     out.push({ g, x });
@@ -745,5 +761,5 @@ function templates(ch) {
 }
 STYLES.__plantilla = { label: '', wide: 1, slant: 0, slantVar: 0, hVar: 0, wVar: 0, wob: 0, wobF: 0, angular: 0, geo: 0, os: 0, osVar: 0, stem: 0, cb: 0, cbShift: 0, open: 0, xh: 0.7, track: 0.05, minGap: 0.03, weight: 1, bounce: 0, sizeVar: 0, double: 0, ovr: null, script: 'script', xhS: 0.55, slantS: 0, trackS: 0 };
 
-const STYLE_KEYS = ['infantil', 'adulta', 'nerviosa', 'elegante'];
+const STYLE_KEYS = ['infantil', 'adulta', 'nerviosa', 'elegante', 'graffiti'];
 module.exports = { STYLES, PERSONAS, STYLE_KEYS, CAP, NVAR, styleOf, glyph, metrics, caseText, setWord, joinCursive, templates, resample, parsePath, densify };

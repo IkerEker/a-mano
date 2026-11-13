@@ -61,7 +61,7 @@
     <!-- ---------------- compartido: estilo ---------------- -->
     <div class="sec"><span class="num" id="numStyle">3</span>ESTILO <span class="sub">con qué se escribe</span></div>
     <div class="seg" id="toolSeg">
-      <div class="segb" data-v="lapiz">Lápiz</div><div class="segb" data-v="carbon">Carbón</div><div class="segb" data-v="cera">Cera</div><div class="segb" data-v="boli">Boli</div><div class="segb" data-v="rotulador">Rotu</div><div class="segb" data-v="pincel">Pincel</div>
+      <div class="segb" data-v="lapiz">Lápiz</div><div class="segb" data-v="carbon">Carbón</div><div class="segb" data-v="cera">Cera</div><div class="segb" data-v="boli">Boli</div><div class="segb" data-v="rotulador">Rotu</div><div class="segb" data-v="pincel">Pincel</div><div class="segb" data-v="spray" title="Bote de spray o rotulador de goteo: nube, salpicaduras y chorretones">Spray</div>
     </div>
     <div class="seg mt4" id="presetSeg"></div>
     <div class="row" id="colorRow">
@@ -78,6 +78,10 @@
     <div id="negBox" class="hidden">
       <sp-slider id="slTupido" min="0" max="100" value="60" show-value="true"><sp-label slot="label">Tupido del negativo (huecos ↔ cargado)</sp-label></sp-slider>
     </div>
+    <div id="sprayBox" class="hidden">
+      <sp-slider id="slGoteo" min="0" max="100" value="45" show-value="true"><sp-label slot="label">Goteo (seco ↔ chorreando)</sp-label></sp-slider>
+      <sp-slider id="slNube" min="0" max="100" value="50" show-value="true"><sp-label slot="label">Nube de spray y salpicaduras</sp-label></sp-slider>
+    </div>
     <div class="row hidden" id="fillRow">
       <div class="lbl">Relleno</div>
       <div class="seg grow" id="fillSeg">
@@ -89,15 +93,18 @@
     <div id="pane-gen2">
       <div class="sec"><span class="num">4</span>LETRA</div>
       <div class="seg" id="fontSeg">
-        <div class="segb f-inf" data-v="infantil">Infantil</div><div class="segb f-adu" data-v="adulta">Adulta</div><div class="segb f-rab" data-v="nerviosa">Nerviosa</div><div class="segb f-ele" data-v="elegante">Elegante</div>
+        <div class="segb f-inf" data-v="infantil">Infantil</div><div class="segb f-adu" data-v="adulta">Adulta</div><div class="segb f-rab" data-v="nerviosa">Nerviosa</div><div class="segb f-ele" data-v="elegante">Elegante</div><div class="segb f-gra" data-v="graffiti" title="Letra de graffiti: una sola caja, con sus propias firmas">Graffiti</div>
       </div>
-      <div class="row mt4">
+      <div class="row mt4" id="versionRow">
         <div class="seg" id="versionSeg"><div class="segb" data-v="a">A</div><div class="segb" data-v="b">B</div></div>
         <div class="hint inline" id="versionHint"></div>
       </div>
       <div class="seg mt4" id="caseSeg">
         <div class="segb" data-v="mayus">MAYÚSCULAS</div><div class="segb" data-v="minus">minúsculas</div><div class="segb" data-v="cursiva"><i>cursiva</i></div>
       </div>
+      <!-- graffiti: en vez de A/B y de mayúsculas/minúsculas/cursiva, sus firmas (una sola caja) -->
+      <div class="seg mt4 hidden" id="grafSeg"></div>
+      <div class="hint hidden" id="grafHint"></div>
     </div>
 
     <sp-slider id="slLegib" min="0" max="100" value="70" show-value="true"><sp-label slot="label">Legibilidad</sp-label></sp-slider>

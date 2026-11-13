@@ -242,7 +242,7 @@ function plan(lay, p, seed) {
       // dirección de llegada) y al soltar ya va hacia el trazo siguiente (una salida que se afila)
       let tipIn = 0, tipOut = 0;
       if (!s.closed && !s.mark && !(isScript && L.g.script) && pts.length > 3 && plen(pts) > 0.12) {
-        const pr = p.prisa || 0, kH = (persona.hook == null ? 1 : persona.hook) * (P.pen ? 0.25 : 1);   // (el boli apenas hace ganchos)
+        const pr = p.prisa || 0, kH = (persona.hook == null ? 1 : persona.hook) * (P.pen ? 0.25 : P.proc === 'spray' ? 0 : 1);   // (el boli apenas hace ganchos; el spray, ninguno)
         const nxt = L.g.strokes[si + 1], prv = L.g.strokes[si - 1];
         const unit = (x, y) => { const l = Math.hypot(x, y) || 1; return [x / l, y / l]; };
         if (rs() < (0.07 + 0.2 * c + 0.12 * pr) * kH) {
@@ -303,8 +303,8 @@ function plan(lay, p, seed) {
         if (!isFinite(ext[k][0]) || !isFinite(ext[k - 1][1])) { shift[k] = shift[k - 1]; continue; }
         const sz = ls[k].size;
         const narrow = (ext[k][1] - ext[k][0] < 0.14 * sz) || (ext[k - 1][1] - ext[k - 1][0] < 0.14 * sz);
-        const minG = (Math.min(0.055, (persona.minGap || 0.04) + 0.012) + 2 * inkW + (narrow ? 0.02 : 0)) * sz;
-        const maxG = (0.15 + 2 * inkW + Math.max(0, p.track || 0) + 0.05 * c) * sz;
+        const minG = persona.overlap != null ? (persona.overlap + 1.6 * inkW) * sz : (Math.min(0.055, (persona.minGap || 0.04) + 0.012) + 2 * inkW + (narrow ? 0.02 : 0)) * sz;
+        const maxG = persona.overlap != null ? (persona.overlap + 1.6 * inkW + 0.06) * sz : (0.15 + 2 * inkW + Math.max(0, p.track || 0) + 0.05 * c) * sz;
         const gap = (ext[k][0] + shift[k - 1]) - (ext[k - 1][1] + shift[k - 1]);
         shift[k] = shift[k - 1] + (gap < minG ? minG - gap : gap > maxG ? maxG - gap : 0);
       }
@@ -462,11 +462,12 @@ function plan(lay, p, seed) {
         if (flick && !s.fill && !blunt) for (const pc of pieces) taperEnds(pc, r, flick, rs);
         let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
         for (const q of fin) { if (q.x < x0) x0 = q.x; if (q.x > x1) x1 = q.x; if (q.y < y0) y0 = q.y; if (q.y > y1) y1 = q.y; }
-        const m = r * 2.5 + 3;
+        // (spray: la nube llega más lejos y los chorretones cuelgan hacia abajo)
+        const m = r * (P.proc === 'spray' ? 4.4 : 2.5) + 3, mB = P.proc === 'spray' ? r * 38 : 0;
         const blob = !!P.proc && pass === 0 && !s.fill && rs() < 0.04;
         pieces.forEach((pc, pi) => {
           if (pc.length < 2) return;
-          out.push({ under: !!s.under, blob: blob && pi === 0, pts: pc, cont0: !!pc.cont0, cont1: !!pc.cont1, r, fill: !!s.fill, seed: (seed + li * 7 + si * 131 + pass * 1777 + pi * 53) >>> 0, P, box: { left: x0 - m, top: y0 - m, right: x1 + m, bottom: y1 + m }, alpha: pass > 0 ? 0.9 : 1, ink: fuse && extra > 0 ? 1 + 0.32 * Math.min(3, extra) : 1, letter: li, word: L.word == null ? 0 : L.word , sk: si, pass });
+          out.push({ under: !!s.under, blob: blob && pi === 0, pts: pc, cont0: !!pc.cont0, cont1: !!pc.cont1, r, fill: !!s.fill, seed: (seed + li * 7 + si * 131 + pass * 1777 + pi * 53) >>> 0, P, box: { left: x0 - m, top: y0 - m, right: x1 + m, bottom: y1 + m + mB }, alpha: pass > 0 ? 0.9 : 1, ink: fuse && extra > 0 ? 1 + 0.32 * Math.min(3, extra) : 1, letter: li, word: L.word == null ? 0 : L.word , sk: si, pass });
         });
       }
     });
@@ -491,7 +492,7 @@ function paint(canvas, strokes, p) {
     const b = s.box;
     if (b.right < canvas.x0 || b.left > canvas.x0 + canvas.w || b.bottom < canvas.y0 || b.top > canvas.y0 + canvas.h) continue;
     const rgb = p.colorVar ? RD.letterColor(rgb0, s.letter || 0, p.colorVar, p.colorSeed || 0) : rgb0;
-    const o = { inkMul: (0.88 + 0.24 * ink) * (s.ink || 1), dryMul: 0.45 + 1.1 * ink, alphaMul: s.alpha, blob: !!s.blob, mask: s.mask || null, contIn: !!s.cont0, contOut: !!s.cont1 };
+    const o = { inkMul: (0.88 + 0.24 * ink) * (s.ink || 1), dryMul: 0.45 + 1.1 * ink, alphaMul: s.alpha, blob: !!s.blob, mask: s.mask || null, contIn: !!s.cont0, contOut: !!s.cont1, goteo: p.goteo, nube: p.nube };
     if (s.fill) INK.paintFill(canvas, s.pts.map(q => [q.x, q.y]), s.P, s.r, rgb, s.seed, o);
     else INK.paintStroke(canvas, s.pts, s.P, s.r, rgb, s.seed, o);
     n++;

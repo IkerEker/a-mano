@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.24)
+## 2. Cómo se usa (2.25)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -546,6 +546,34 @@ ilegibles, casi todo salía del mismo esqueleto genérico estirado o inclinado. 
 - Pruebas: `one.js`/`sheet.py` (pangrama, 8 estilos × 3 modos, con rotulador para ver los grosores) y `alpha.js`
   (abecedario) en el borrador de la sesión; conviene pasarlos a `tests/node/` si se sigue con las letras.
 
+### 2.25 — GRAFFITI: técnica Spray y letra Graffiti con sus firmas
+Pedido (con tres referencias: abecedario a brocha amarilla, «SMOKE SWIG SWEAR» a zarpazos, «BANKSY CUT & RUN» a
+spray negro chorreando): «una tipografía nueva y una técnica nueva, Graffiti, con varias sub-tipografías (sin
+mayúsculas ni minúsculas); que cuando se seleccione cambie la interfaz; infórmate de cómo funciona un graffiti».
+Cómo funciona (lo que se aplicó):
+- Letra de firma (handstyle): una sola caja (la minúscula se construye como mayúscula), peso y anchura parecidos en
+  todas las letras, y las letras se tocan o se montan un poco en vez de dejar huecos; el estilo es exagerar una base
+  correcta, no añadir adornos (theartistblock.ink, «Graffiti Handstyle Fundamentals»).
+- Bote: más deprisa, línea más fina; despacio y cerca, chorretones y salpicaduras; lejos, borde borroso; si el bote
+  se inclina, el trazo se abre por un lado (flare) (machinestudio.com, «3 steps to better can control»).
+Qué se construyó:
+- `ink.js` · `paintSpray` (`proc: 'spray'`, técnica `spray` en `TOOLS`): cuerpo opaco, borde que se deshace en
+  motas, nube y neblina alrededor, gotas que escupe la boquilla, trazo que se deshace al retirarse y **chorretones**
+  que nacen donde se carga la pintura (arranques, esquinas, tramos tumbados) y caen en vertical con su gota al
+  final (~un tercio del ancho del trazo). Boquillas: `gordo`, `fino`, `seco`, `mop`. Parámetros del usuario:
+  `goteo` y `nube` (deslizadores `slGoteo`, `slNube`, solo visibles con spray). Sin ganchos de entrada con spray.
+  La caja de cada trazo se alarga hacia abajo para que los chorretones no se corten al pintar por franjas.
+- `fonts.js` · estilos `graffiti_a…d` (`sub`: Tag, Rabia, Bomba, De un trazo) sobre la base `GRAF`: `gmode` (modo
+  interno: mayúsculas o cursiva), `overlap` (hueco entre letras, puede ser negativo), `lowerAll`. Formas propias en
+  `skeleton.js`: `capsTag` (e e i de minúscula a la altura de las demás, travesaños que cruzan) y `capsRabia` (todo
+  rectas, S en rayo, O en rombo).
+- Interfaz (`main.js` `syncGraf`, `styleKey`, `curMode`; `index.html` `grafSeg`, `grafHint`, `sprayBox`): al elegir
+  Graffiti se ocultan A/B y la caja, salen las firmas, el panel se pone amarillo (`body.graf`) y se coge el spray;
+  al salir vuelve la técnica anterior. Ajustes nuevos: `gsub`, `goteo`, `nube`.
+- `negativo.js`: relleno a spray para las cajas de negativo. Pruebas: 5 nuevas en `tests/sim/harness.js` (64).
+- Pendiente: letra de pompa (throw-up, con contorno), adornos de firma (flecha, subrayado, comillas, corona),
+  y llevar el Graffiti al panel de After Effects.
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -605,7 +633,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.24.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.25.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)

@@ -192,6 +192,8 @@ const STYLE = {
   cera: { fill: ['cera', 'cera'], rFill: 0.024, lineK: 0.8, step: 0.8, legs: [5, 11], len: [0.3, 0.65], cover: 0.9, loose: 0.3, cross: 0.35, split: 3, alpha: 0.62, extra: 2.2, glaze: true },
   // pincel: pinceladas gordas y secas, sueltas, en todas direcciones (como el cartel WRONG); el borde de la caja lo
   // hacen las propias pinceladas al acabar (sin raya)
+  // spray: el relleno se hace a pasadas anchas, como se rellena una pieza
+  spray: { fill: ['spray', 'gordo'], rFill: 0.05, lineK: 0.6, step: 0.85, legs: [2, 5], len: [0.6, 1.2], cover: 0.95, loose: 0.15, cross: 0.4, split: 2, alpha: 1 },
   pincel: { fill: ['pincel', 'seco'], rFill: 0.1, lineK: 0.5, step: 1.05, legs: [1, 2], len: [0.7, 1.5], cover: 0.95, loose: 0.12, cross: 0.5, split: 1, alpha: 1, free: true, noBox: true }
 };
 function styleFor(tool, preset) {

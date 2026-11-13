@@ -71,6 +71,18 @@ const TOOLS = {
   }
 };
 const TOOL_ORDER = ['lapiz', 'carbon', 'cera', 'boli', 'rotulador', 'pincel'];
+// SPRAY (bote de pintura) y MOP (rotulador de goteo). core: hasta dónde tapa del todo (en radios); soft: franja en
+// que se deshace en motas; mist: nube de alrededor; drip: cuánto chorrea; spit: gotas que escupe la boquilla;
+// fill: cuánto tapa el cuerpo (seco: deja ver la pared); haze: velo de color alrededor; flare: finales que se van
+TOOLS.spray = {
+  label: 'Spray', presets: {
+    gordo: { label: 'Gordo', proc: 'spray', w: 0.07, dens: 1, core: 0.6, soft: 0.42, mist: 1, drip: 1, spit: 1, fill: 1, haze: 0.6, flare: 0.3, blend: 'over', tremor: 0.5, lift: 0, minR: 1 },
+    fino: { label: 'Fino', proc: 'spray', w: 0.032, dens: 1, core: 0.74, soft: 0.24, mist: 0.5, drip: 0.4, spit: 0.5, fill: 1, haze: 0.2, flare: 0.45, blend: 'over', tremor: 0.5, lift: 0, minR: 1 },
+    seco: { label: 'Seco', proc: 'spray', w: 0.065, dens: 1, core: 0.5, soft: 0.55, mist: 0.9, drip: 0, spit: 0.3, fill: 0.6, haze: 0.35, flare: 0.5, blend: 'over', tremor: 0.5, lift: 0, minR: 1 },
+    mop: { label: 'Mop', proc: 'spray', mop: true, w: 0.055, dens: 1, core: 0.95, soft: 0.06, mist: 0, drip: 1.25, spit: 0.8, fill: 1, haze: 0, flare: 0, blend: 'over', tremor: 0.5, lift: 0, minR: 1 }
+  }
+};
+TOOL_ORDER.push('spray');
 
 // respuesta a la velocidad de la mano, por herramienta: vW grosor (más ancho donde va despacio), vInk tinta,
 // fly: cuántos trazos empiezan o acaban «al vuelo» (la mano entra o sale moviéndose: punta afilada y más clara)
@@ -167,6 +179,7 @@ function resample(pts, step) {
 function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
   opts = opts || {};
   if (!pts || pts.length < 2) return;
+  if (P.proc === 'spray') return paintSpray(canvas, pts, P, r, rgb, seed, opts);
   load();
   const rnd = R.mulberry32(seed >>> 0);
   r = Math.max(P.minR, r);
@@ -462,6 +475,146 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
   if (opts.mask) applyMask(buf, bx0, by0, bw, bh, opts.mask, seed);
   RD.compositePigment(canvas, buf, bx0, by0, bw, bh, rgb, opts.blend || P.blend, opts.alphaMul == null ? 1 : opts.alphaMul);
 }
+// ------------------------------------------------------------------ SPRAY
+// Cómo pinta un bote: la pintura sale en cono. En el centro tapa del todo; hacia fuera se deshace en motas (más
+// ancho y más blando con boquilla gorda), y más lejos queda una nube de puntitos. Donde la mano para o va
+// despacio (al apretar, en las esquinas, al acabar sin retirar el bote) la pared se carga de pintura y la que
+// sobra chorrea hacia abajo; el trazo que se retira deprisa acaba deshaciéndose. La boquilla escupe gotas.
+// opts: { goteo 0..1, nube 0..1, mask, alphaMul, inkMul, contIn, contOut }
+function paintSpray(canvas, pts, P, r, rgb, seed, opts) {
+  const rnd = R.mulberry32(((seed >>> 0) ^ 0x9e3779b9) >>> 0);
+  r = Math.max(P.minR || 1, r);
+  const Q = resample(pts, Math.max(0.6, r * 0.3)), n = Q.length;
+  if (n < 2) return;
+  const Ls = Q[n - 1].s;
+  if (Ls < 0.3) return;
+  const goteo = opts.goteo == null ? 0.45 : opts.goteo, nube = opts.nube == null ? 0.5 : opts.nube;
+  const isFill = !!opts.mask;                 // relleno o perfil de un negativo: ni chorretones ni escupitajos
+  const short = Ls < r * 2.5;                 // puntos y tildes: un toque de bote
+  const flareOut = !opts.contOut && !isFill && !short && rnd() < (P.flare || 0);
+  const dwell0 = !opts.contIn, dwell1 = !opts.contOut && !flareOut;
+  // ---- por muestra: radio (se abre donde la mano para), densidad (se va en los finales al vuelo), carga
+  const K = new Float32Array(n), Dn = new Float32Array(n), Ld = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const q = Q[i], a = Q[Math.max(0, i - 6)], b = Q[Math.min(n - 1, i + 6)];
+    let turn = 0;
+    const ux = q.x - a.x, uy = q.y - a.y, vx = b.x - q.x, vy = b.y - q.y, lu = Math.hypot(ux, uy), lv = Math.hypot(vx, vy);
+    if (lu > 1e-6 && lv > 1e-6) turn = Math.acos(Math.max(-1, Math.min(1, (ux * vx + uy * vy) / (lu * lv)))) / Math.PI;
+    const d0 = dwell0 ? Math.exp(-q.s / (r * 1.6)) : 0, d1 = dwell1 ? Math.exp(-(Ls - q.s) / (r * 1.3)) : 0;
+    const slow = Math.min(1, d0 + 0.7 * d1 + 0.8 * turn);
+    let k = (q.w == null ? 1 : q.w) * (1 + 0.16 * slow + 0.07 * R.noise1(q.s / (r * 7 + 1), seed + 3)), dn = 1;
+    if (flareOut) { const t = smooth01(0, Math.min(Ls * 0.4, r * 5), Ls - q.s); k *= 0.55 + 0.45 * t; dn *= 0.2 + 0.8 * t; }
+    K[i] = k; Dn[i] = dn; Ld[i] = slow;
+  }
+  // ---- chorretones: nacen donde hay carga y, sobre todo, bajo los tramos tumbados (la pintura cuelga del borde)
+  const drips = [];
+  if (!isFill && P.drip && goteo > 0) {
+    const want = P.drip * goteo * (short ? 0.12 : 0.22 + Ls / (r * 34));
+    let nD = Math.floor(want); if (rnd() < want - nD) nD++;
+    nD = Math.min(nD, 6);
+    const W = new Float32Array(n); let tot = 0;
+    for (let i = 0; i < n; i++) {
+      const a = Q[Math.max(0, i - 1)], b = Q[Math.min(n - 1, i + 1)], l = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+      W[i] = 0.15 + 1.6 * Ld[i] + 0.7 * Math.abs(b.x - a.x) / l;
+      if (flareOut && Ls - Q[i].s < r * 4) W[i] *= 0.1;
+      tot += W[i];
+    }
+    for (let d = 0; d < nD && tot > 1e-6; d++) {
+      let t = rnd() * tot, i = 0; while (i < n - 1 && (t -= W[i]) > 0) i++;
+      const q = Q[i], rr = r * K[i];
+      const w0 = Math.max(0.7, r * (0.27 + 0.22 * rnd()) * (P.mop ? 1.1 : 1));   // (un chorretón mide ~un tercio del trazo)
+      // (casi todos cortos; alguno se escapa muy abajo; los gordos llevan más pintura y bajan más)
+      const len = r * (1.5 + 20 * Math.pow(rnd(), 2.4)) * (0.3 + 1.4 * goteo) * (P.mop ? 1.2 : 1) * (0.6 + w0 / (r * 0.8));
+      drips.push({ x: q.x + (rnd() - 0.5) * rr * 0.9, y: q.y + rr * 0.5, w: w0, len, sd: (seed + d * 131) | 0 });
+      for (let j = Math.max(0, i - 8); j < Math.min(n, i + 9); j++) { tot -= W[j] * 0.9; W[j] *= 0.1; }   // no dos pegados
+    }
+  }
+  // ---- gotas que escupe la boquilla (sobre todo al apretar)
+  const spots = [];
+  if (!isFill && P.spit && nube > 0) {
+    const nS = Math.floor(P.spit * nube * (0.6 + 6 * rnd() * rnd()));
+    const i0 = rnd() < 0.7 ? 0 : Math.floor(rnd() * n);
+    for (let k = 0; k < nS; k++) {
+      const q = Q[Math.min(n - 1, Math.max(0, i0 + Math.floor((rnd() - 0.5) * 8)))], a = rnd() * 6.283, d = r * (1.3 + 2.8 * rnd() * rnd());
+      spots.push({ x: q.x + Math.cos(a) * d, y: q.y + Math.sin(a) * d, r: Math.max(0.5, r * (0.04 + 0.14 * rnd() * rnd())) });
+    }
+  }
+  // ---- caja
+  const core = P.core, e1 = core + P.soft, e2 = e1 + (P.mist || 0) * 1.5 * nube + 0.001;
+  const pad = r * 1.4 * e2 + 3;
+  let bx0 = Infinity, by0 = Infinity, bx1 = -Infinity, by1 = -Infinity;
+  for (const q of Q) { if (q.x < bx0) bx0 = q.x; if (q.x > bx1) bx1 = q.x; if (q.y < by0) by0 = q.y; if (q.y > by1) by1 = q.y; }
+  bx0 -= pad; by0 -= pad; bx1 += pad; by1 += pad;
+  for (const d of drips) { bx0 = Math.min(bx0, d.x - d.w * 2.5); bx1 = Math.max(bx1, d.x + d.w * 2.5); by1 = Math.max(by1, d.y + d.len + d.w * 3); }
+  for (const p of spots) { bx0 = Math.min(bx0, p.x - p.r - 1); bx1 = Math.max(bx1, p.x + p.r + 1); by0 = Math.min(by0, p.y - p.r - 1); by1 = Math.max(by1, p.y + p.r + 1); }
+  bx0 = Math.max(canvas.x0, Math.floor(bx0)); by0 = Math.max(canvas.y0, Math.floor(by0));
+  bx1 = Math.min(canvas.x0 + canvas.w, Math.ceil(bx1)); by1 = Math.min(canvas.y0 + canvas.h, Math.ceil(by1));
+  const bw = bx1 - bx0, bh = by1 - by0;
+  if (bw <= 0 || bh <= 0 || bw * bh > 5e7) return;
+  // ---- distancia al trazo (en radios) y densidad del punto más cercano
+  const U = new Float32Array(bw * bh).fill(99), DD = new Float32Array(bw * bh);
+  for (let i = 0; i < n - 1; i++) {
+    const a = Q[i], b = Q[i + 1], ka = r * K[i], kb = r * K[i + 1], R2 = Math.max(ka, kb) * e2 + 1;
+    const x0 = Math.max(bx0, Math.floor(Math.min(a.x, b.x) - R2)), x1 = Math.min(bx1 - 1, Math.ceil(Math.max(a.x, b.x) + R2));
+    const y0 = Math.max(by0, Math.floor(Math.min(a.y, b.y) - R2)), y1 = Math.min(by1 - 1, Math.ceil(Math.max(a.y, b.y) + R2));
+    const dx = b.x - a.x, dy = b.y - a.y, l2 = dx * dx + dy * dy || 1e-9;
+    for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+      const px = x + 0.5 - a.x, py = y + 0.5 - a.y;
+      let t = (px * dx + py * dy) / l2; t = t < 0 ? 0 : t > 1 ? 1 : t;
+      const ex = px - dx * t, ey = py - dy * t, u = Math.sqrt(ex * ex + ey * ey) / (ka + (kb - ka) * t);
+      const k = (y - by0) * bw + (x - bx0);
+      if (u < U[k]) { U[k] = u; DD[k] = Dn[i] + (Dn[i + 1] - Dn[i]) * t; }
+    }
+  }
+  // ---- cobertura: cuerpo, borde que se deshace en motas, nube
+  const buf = new Float32Array(bw * bh);
+  const cell = Math.max(1, r * 0.09), hs = (seed % 9973) + 11, fillP = P.fill == null ? 1 : P.fill;
+  const dens = Math.min(1, (P.dens || 1) * (opts.inkMul == null ? 1 : Math.max(0.85, opts.inkMul)));
+  for (let y = 0; y < bh; y++) for (let x = 0; x < bw; x++) {
+    const k = y * bw + x, u = U[k];
+    if (u >= e2) continue;
+    const X = bx0 + x, Y = by0 + y, cx = Math.floor(X / cell), cy = Math.floor(Y / cell);
+    const h = R.hash2(cx, cy, hs);
+    let c = 0;
+    if (u <= core) {
+      // (seco: el bote va lejos o casi vacío y el grano de la pared se queda sin tapar, a manchas)
+      c = fillP >= 1 ? 1 : (h < fillP * (0.7 + 0.6 * R.noise2(X / (r * 1.6 + 1), Y / (r * 1.6 + 1), hs + 3)) + 0.25 * (1 - u / core) ? 1 : 0);
+    } else if (u < e1) {
+      const t = (u - core) / (e1 - core), p = (1 - t) * (1 - t);
+      // (la neblina llega hasta el cuerpo: sin ella quedaba un cerco claro entre el borde y la nube)
+      c = Math.max(0.5 * p * fillP, h < p * fillP ? 1 : 0, (P.haze || 0) * 0.18 * nube);
+    } else {
+      const t = (u - e1) / (e2 - e1), q3 = (1 - t) * (1 - t) * (1 - t);
+      if (h < 0.3 * nube * q3) {
+        const h2 = R.hash2(cx, cy, hs + 7), fx = X / cell - cx - (0.25 + 0.5 * h2), fy = Y / cell - cy - (0.25 + 0.5 * R.hash2(cx, cy, hs + 13));
+        if (fx * fx + fy * fy < 0.1 + 0.2 * h2) c = 0.9;
+      }
+      c = Math.max(c, (P.haze || 0) * 0.18 * nube * (1 - t) * (1 - t));
+    }
+    buf[k] = c * dens * DD[k];
+  }
+  // ---- chorretones: un hilo que baja, algo más ancho donde nace, con su gota al final
+  for (const d of drips) {
+    const yA = Math.max(by0, Math.floor(d.y)), yB = Math.min(by1 - 1, Math.ceil(d.y + d.len + d.w * 1.5));
+    const bead = d.w * 1.25, yb = d.y + d.len;
+    for (let Y = yA; Y <= yB; Y++) {
+      const yy = Y + 0.5 - d.y, t = yy / d.len;
+      let hw = t <= 1 ? d.w * (1 - 0.3 * t) * (1 + 0.6 * Math.exp(-yy / (d.w * 3))) : 0;
+      const dyb = Y + 0.5 - yb; if (Math.abs(dyb) < bead) hw = Math.max(hw, Math.sqrt(bead * bead - dyb * dyb));
+      if (hw <= 0) continue;
+      const xc = d.x + d.w * 0.5 * R.noise1(yy / (d.w * 9 + 2), d.sd);
+      const xA = Math.max(bx0, Math.floor(xc - hw - 1)), xB = Math.min(bx1 - 1, Math.ceil(xc + hw + 1));
+      for (let X = xA; X <= xB; X++) { const al = Math.max(0, Math.min(1, hw - Math.abs(X + 0.5 - xc) + 0.5)) * dens, k = (Y - by0) * bw + (X - bx0); if (al > buf[k]) buf[k] = al; }
+    }
+  }
+  for (const p of spots) {
+    const xA = Math.max(bx0, Math.floor(p.x - p.r - 1)), xB = Math.min(bx1 - 1, Math.ceil(p.x + p.r + 1)), yA = Math.max(by0, Math.floor(p.y - p.r - 1)), yB = Math.min(by1 - 1, Math.ceil(p.y + p.r + 1));
+    for (let Y = yA; Y <= yB; Y++) for (let X = xA; X <= xB; X++) { const al = Math.max(0, Math.min(1, p.r - Math.hypot(X + 0.5 - p.x, Y + 0.5 - p.y) + 0.5)) * dens, k = (Y - by0) * bw + (X - bx0); if (al > buf[k]) buf[k] = al; }
+  }
+  if (opts.mask) applyMask(buf, bx0, by0, bw, bh, opts.mask, seed);
+  RD.compositePigment(canvas, buf, bx0, by0, bw, bh, rgb, 'over', opts.alphaMul == null ? 1 : opts.alphaMul);
+}
+
 // mask: { x0, y0, w, h, s (px de máscara por px de documento), d: Float32Array (0..1) }
 function maskAt(M, X, Y) {
   const x = (X - M.x0) * M.s - 0.5, y = (Y - M.y0) * M.s - 0.5;

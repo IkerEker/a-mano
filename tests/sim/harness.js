@@ -62,6 +62,24 @@ const { open } = require('./setup.js');
   await snap('g_colores');
   await run(() => { T.seg('colorModeSeg', 'uno'); });
 
+  // 2c. GRAFFITI: al elegirlo la interfaz cambia (firmas en vez de A/B y de caja; bote de spray; goteo y nube) y escribe
+  await newDoc(3000, 1900); await refresh();
+  await shape('rect');
+  await run(() => { T.seg('toolSeg', 'lapiz'); T.seg('presetSeg', 'hb'); T.seg('fontSeg', 'adulta'); });
+  await run(() => { T.seg('fontSeg', 'graffiti'); });
+  const gUi = await run(() => { const h = id => document.getElementById(id).classList.contains('hidden'); const on = id => { const e = document.getElementById(id).querySelector('.segb.on'); return e ? e.getAttribute('data-v') : ''; }; return { ver: h('versionRow'), cas: h('caseSeg'), graf: h('grafSeg'), spray: h('sprayBox'), tool: on('toolSeg'), n: document.getElementById('grafSeg').querySelectorAll('.segb').length, piel: document.body.classList.contains('graf') }; });
+  const gOk = gUi.ver && gUi.cas && !gUi.graf && !gUi.spray && gUi.tool === 'spray' && gUi.n >= 4 && gUi.piel;
+  for (const sub of ['a', 'b', 'c', 'd']) {
+    await run(s2 => { T.seg('grafSeg', s2); T.seg('presetSeg', s2 === 'b' ? 'seco' : s2 === 'd' ? 'fino' : s2 === 'c' ? 'mop' : 'gordo'); }, sub);
+    await click('btnGo');
+    const sg = await waitDone();
+    await rec('G2d graffiti ' + sub + (gOk ? '' : ' (FALLO interfaz ' + JSON.stringify(gUi) + ')'), gOk ? sg : Object.assign({}, sg, { cls: 'err' }));
+  }
+  await snap('g_graffiti');
+  await run(() => { T.seg('fontSeg', 'adulta'); });
+  const gBack = await run(() => { const e = document.getElementById('toolSeg').querySelector('.segb.on'); return (e ? e.getAttribute('data-v') : '') + '/' + document.getElementById('grafSeg').classList.contains('hidden') + '/' + document.getElementById('caseSeg').classList.contains('hidden') + '/' + document.body.classList.contains('graf'); });
+  await rec('G2e al salir de graffiti vuelven la técnica y la interfaz (' + gBack + ')', Object.assign({}, await run(() => ({ cls: 'ok', text: 'ok' })), gBack === 'lapiz/true/false/false' ? {} : { cls: 'err' }));
+
   // 2c. negrita y subrayado (también en autoencajar)
   await newDoc(3000, 1900); await refresh();
   await shape('rect');
