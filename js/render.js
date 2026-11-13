@@ -167,8 +167,8 @@ function applyRelief(canvas) {
     for (let y = 0; y < h; y++) { const r = y * w, ru = y > 0 ? r - w : r, rd = y < h - 1 ? r + w : r; for (let x = 0; x < w; x++) c[r + x] = (b[ru + x] + 2 * b[r + x] + b[rd + x]) * 0.25; }
     a = c;
   }
-  // un poco de relieve: la película tiene su grosor (poco), lo acumulado abulta, el chorretón es un cordón y su
-  // gota una pompa. Se ilumina desde arriba a la izquierda: claro en lo que mira a la luz, oscuro al otro lado
+  // un poco de relieve: la película tiene su grosor (poco), lo acumulado abulta; el chorretón es un
+  // reguero plano y solo su gota, al final, es una pompa. Se ilumina desde arriba a la izquierda: claro en lo que mira a la luz, oscuro al otro lado
   const blurN = (src, times) => {
     let q = src, t = new Float32Array(n);
     for (let k = 0; k < times; k++) {

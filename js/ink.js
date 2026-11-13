@@ -528,8 +528,15 @@ function drawDrips(buf, bx0, by0, bx1, by1, bw, drips, dens, hb) {
       for (let X = xA; X <= xB; X++) {
         const dx = Math.abs(X + 0.5 - xc), al = Math.max(0, Math.min(1, hw - dx + 0.5)) * dens, k = (Y - by0) * bw + (X - bx0);
         if (al > buf[k]) buf[k] = al;
-        // (el chorretón es un cordón de pintura: sobresale, redondo, y más su gota)
-        if (hb && al > 0) { const u = dx / (hw + 0.5), hv = 0.5 + (yy > lenT - lB * 0.6 ? 0.5 : 0.32) * Math.sqrt(Math.max(0, 1 - u * u)); if (hv > hb[k]) hb[k] = hv; }
+        // (el reguero es una película fina y plana: la gota va dejando pintura al bajar. El bulto está solo al final,
+        //  donde se junta lo que arrastra: una pompa que crece poco a poco hasta la punta)
+        if (hb && al > 0) {
+          let dome;
+          if (yy >= lenT) { const e = yy - lenT; dome = Math.sqrt(Math.max(0, 1 - (dx * dx + e * e) / ((tip + 0.5) * (tip + 0.5)))); }
+          else { const gb = smooth01(lenT - lB, lenT, yy), u = dx / (hw + 0.5); dome = gb * gb * Math.sqrt(Math.max(0, 1 - u * u)); }
+          const hv = 0.5 + 0.5 * dome * (d.bead > 1 ? 1 : 0.55);
+          if (hv > hb[k]) hb[k] = hv;
+        }
       }
     }
   }
