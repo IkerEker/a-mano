@@ -526,7 +526,7 @@ function drawDrips(buf, bx0, by0, bx1, by1, bw, drips, dens, hb) {
       if (yy <= lenT) {
         const t = Math.max(0, yy - inL) / Math.max(1, d.len);
         hw = w * (1 - taper * t) * (1 + 0.1 * R.noise1(yy / (w * 5 + 2), d.sd + 1));
-        hw *= 1 + 1.3 * Math.exp(-Math.abs(yy - inL) / (w * 2.4 + 0.5));       // la pintura que se junta al salir del borde
+        hw *= 1 + 0.7 * Math.exp(-Math.abs(yy - inL) / (w * 2 + 0.5));         // la pintura que se junta al salir del borde (poca: que no asome un pico)
         hw *= smooth01(0, inL, yy);                                            // nace en punta, dentro de la pintura: sin corte
         const tb = smooth01(lenT - lB, lenT, yy); if (tip > hw) hw += (tip - hw) * tb * tb;
       } else { const e = yy - lenT; hw = e < tip ? Math.sqrt(tip * tip - e * e) : 0; }
@@ -542,7 +542,8 @@ function drawDrips(buf, bx0, by0, bx1, by1, bw, drips, dens, hb) {
           let dome;
           if (yy >= lenT) { const e = yy - lenT; dome = Math.sqrt(Math.max(0, 1 - (dx * dx + e * e) / ((tip + 0.5) * (tip + 0.5)))); }
           else { const gb = smooth01(lenT - lB, lenT, yy), u = dx / (hw + 0.5); dome = gb * gb * Math.sqrt(Math.max(0, 1 - u * u)); }
-          const hv = 0.5 + 0.5 * dome * (d.bead > 1 ? 1 : 0.55);
+          // (0,47: marca de reguero —película fina y plana—; render.applyRelief no le da canto ni brillo de bulto)
+          const hv = 0.47 + 0.53 * dome * (d.bead > 1 ? 1 : 0.55);
           if (hv > hb[k]) hb[k] = hv;
         }
       }
@@ -980,6 +981,7 @@ function paintSpray(canvas, pts, P, r, rgb, seed, opts) {
   }
   // ---- lo que se ve en cada píxel
   const buf = new Float32Array(bw * bh), hb = canvas.relief && !P.matte ? new Float32Array(bw * bh) : null;
+  if (hb && isFill) hb.noCross = true;
   const hs = (seed % 9973) + 11, hard = !!P.hard, rag = (P.rag == null ? 0.035 : P.rag) * r;
   const grK = (P.grain == null ? 1 : P.grain) * (0.55 + 0.75 * smooth01(5, 40, r)), nz = Math.max(1.3, Math.min(3.2, r * 0.035));
   const eH = Math.max(0.05, Math.min(0.5, 3.4 / r));

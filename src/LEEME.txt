@@ -45,10 +45,13 @@ GENERAR, de arriba abajo
    Extintor (chorro líquido: borde roto, salpicaduras y una cortina de regueros), Empapado (bote sobre tela o
    papel que chupa: la pintura cala y se corre) y Rodillo (rodillo de tóner: interior claro y rayado, cantos
    negros; al cruzarse se suma).
-   Con Graffiti aparecen «Goteo», «Nube de spray y salpicaduras» y «Brillo del esmalte». Los chorretones nacen
-   dentro del trazo, donde se juntó pintura de más, y caen hacia abajo del documento. El brillo deja la pintura
-   PLANA (un graffiti no tiene volumen): solo coge luz la pintura acumulada (arranques, cruces, chorretones y su
-   gota); a 0 queda mate. Empapado y Rodillo no brillan (la tela se bebe la pintura; el tóner es mate).
+   Con Graffiti aparecen «Goteo», «Nube de spray y salpicaduras», «Textura de la pintura» y «Deriva del texto
+   largo». Los chorretones nacen dentro del trazo, donde se juntó pintura de más (nunca con corte plano), caen
+   hacia abajo del documento y solo abultan en la gota del final. Empapado y Rodillo no llevan textura (la tela
+   se bebe la pintura; el tóner es mate).
+   «Textura de la pintura»: la pintura es una película plana con algo de brillo y de relieve (el canto, los
+   puntos donde se acumuló, la gota del final de cada chorretón) y, solo donde va más densa —acumulaciones,
+   cruces de pasadas, vértices—, grumos de verdad recortados de fotos de pintura. A 0 queda lisa.
    «Deriva del texto largo» (PRUEBA): con poco texto el bloque sale recto y regular; cuanto más texto, más se le
    va la mano (líneas que se tuercen, final de línea apretado, margen que se corre, tamaño que cambia) y cada
    línea se apoya en la de arriba e intenta corregirla: el bloque coge forma. A 0, todo a pauta. No actúa con

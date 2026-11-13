@@ -81,6 +81,8 @@ function compositePigment(canvas, dens, bx, by, bw, bh, rgb, mode, alphaMul, hb)
   pig(canvas);
   // (brillo: el spray apunta además cuánta pintura hay en cada punto —hb, 0,5 = película normal—; ver applyRelief)
   const Hb = hb && canvas.relief ? (canvas.Hh || (canvas.Hh = new Float32Array(canvas.w * canvas.h))) : null;
+  // (y dónde una pasada cae sobre pintura ya puesta: ahí hay doble capa; los rellenos, hechos a pasadas, no cuentan)
+  const Hx = Hb && !hb.noCross ? (canvas.Hx || (canvas.Hx = new Uint8Array(canvas.w * canvas.h))) : null;
   const Wb = canvas.W, Ab = canvas.A, CW = canvas.w, CH = canvas.h;
   const am = alphaMul == null ? 1 : alphaMul;
   const T = [Math.max(0.02, rgb[0] / 255), Math.max(0.02, rgb[1] / 255), Math.max(0.02, rgb[2] / 255)];
@@ -96,7 +98,7 @@ function compositePigment(canvas, dens, bx, by, bw, bh, rgb, mode, alphaMul, hb)
       const cx = bx + x - canvas.x0;
       if (cx < 0 || cx >= CW) continue;
       const k = cy * CW + cx, i = k * 3;
-      if (Hb) { const hv = hb[row + x]; if (hv > Hb[k]) Hb[k] = hv; }
+      if (Hb) { const hv = hb[row + x]; if (Hx && hv >= 0.45 && Hb[k] >= 0.45) Hx[k] = 1; if (hv > Hb[k]) Hb[k] = hv; }
       if (paint) {
         // pintura de bote: cada gotita es del color entero (poca pintura = menos puntos, no un color más pálido) y
         // todo lo que se junta es UNA película: una pasada sobre otra del mismo color solo puede tapar más, nunca
@@ -142,8 +144,83 @@ function finalize(canvas) {
     D[4 * k + 3] = a * 255;
   }
   canvas.W = null; canvas.A = null;
-  if (canvas.Hh) { applyRelief(canvas); canvas.Hh = null; }
+  if (canvas.Hh) { applyRelief(canvas); canvas.Hh = null; canvas.Hx = null; }
   return canvas;
+}
+
+// GRUMOS: bultos sueltos de pintura (pompas, granos, gotas gordas ya secas, costras) recortados uno a uno de fotos
+// de superficie pintada (tools/grumos.py -> grumosdata.js). Son sellos de sombreado: cuánto aclara u oscurece el
+// bulto bajo la luz, con el borde fundido a nada. Tres tamaños. setLumps(datos) los entrega (lo llama main.js; el
+// panel de After Effects no los lleva); se descodifican la primera vez que hacen falta.
+let LUMPS = null, LUMPS_RAW = null;
+function setLumps(data) { LUMPS_RAW = data || null; LUMPS = null; }
+function lumps() {
+  if (LUMPS || !LUMPS_RAW) return LUMPS;
+  const A = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/', T = new Uint8Array(128);
+  for (let i = 0; i < 64; i++) T[A.charCodeAt(i)] = i;
+  const d = LUMPS_RAW.d, nb = Math.floor(d.length * 3 / 4) - (d.charAt(d.length - 2) === '=' ? 2 : d.charAt(d.length - 1) === '=' ? 1 : 0), B = new Uint8Array(nb);
+  for (let i = 0, o = 0; i < d.length; i += 4) {
+    const v = (T[d.charCodeAt(i) & 127] << 18) | (T[d.charCodeAt(i + 1) & 127] << 12) | (T[d.charCodeAt(i + 2) & 127] << 6) | T[d.charCodeAt(i + 3) & 127];
+    if (o < nb) B[o++] = v >> 16; if (o < nb) B[o++] = (v >> 8) & 255; if (o < nb) B[o++] = v & 255;
+  }
+  const half = (src, t) => { const m = t >> 1, o = new Float32Array(m * m); for (let y = 0; y < m; y++) for (let x = 0; x < m; x++) o[y * m + x] = (src[2 * y * t + 2 * x] + src[2 * y * t + 2 * x + 1] + src[(2 * y + 1) * t + 2 * x] + src[(2 * y + 1) * t + 2 * x + 1]) * 0.25; return o; };
+  let off = 0;
+  LUMPS = LUMPS_RAW.cls.map(([t, n]) => {
+    const tiles = [];
+    for (let k = 0; k < n; k++, off += t * t) {
+      const f = new Float32Array(t * t);
+      for (let j = 0; j < t * t; j++) f[j] = (B[off + j] - 128) / 127;
+      const m1 = half(f, t), m2 = half(m1, t >> 1);
+      tiles.push([[f, t], [m1, t >> 1], [m2, t >> 2]]);          // (el sello y sus dos reducciones)
+    }
+    return tiles;
+  });
+  return LUMPS;
+}
+// Estampa grumos en LU (suma de sombreados). Solo donde la pintura va cargada (P: 0..1) y la película los aguanta
+// (F). Dónde cae cada uno depende del sitio del documento (rejilla con azar), no del lienzo: sale igual se pinte
+// por franjas o de una vez. s: escala (según el grosor del trazo). Devuelve si ha puesto alguno.
+function stampLumps(canvas, P, F, s, LU) {
+  const G = lumps(); if (!G) return false;
+  const w = canvas.w, h = canvas.h, x0 = canvas.x0, y0 = canvas.y0;
+  // por tamaño: diámetro (en s), separación de la rejilla (en diámetros), a partir de qué carga salen, cuántos, fuerza
+  const K = [[1, 1.25, 0.03, 3, 0.8, 1], [2, 1.3, 0.1, 2, 0.65, 1.15], [3.1, 1.6, 0.28, 1.6, 0.45, 1.25]];
+  let any = false;
+  for (let c = 0; c < G.length && c < K.length; c++) {
+    const tiles = G[c], d0 = s * K[c][0], cell = d0 * K[c][1], sd = 1301 + c * 97;
+    if (!tiles.length || d0 * 0.75 < 2.6) continue;                    // (tan pequeño no se vería: fuera)
+    const cxa = Math.floor(x0 / cell), cxb = Math.floor((x0 + w) / cell), cya = Math.floor(y0 / cell), cyb = Math.floor((y0 + h) / cell);
+    for (let cy = cya; cy <= cyb; cy++) for (let cx = cxa; cx <= cxb; cx++) {
+      const h1 = R2.hash2(cx, cy, sd);
+      if (h1 >= K[c][4]) continue;
+      const px = (cx + 0.2 + 0.6 * R2.hash2(cx, cy, sd + 1)) * cell, py = (cy + 0.2 + 0.6 * R2.hash2(cx, cy, sd + 2)) * cell;
+      const ix = Math.round(px) - x0, iy = Math.round(py) - y0;
+      if (ix < 0 || iy < 0 || ix >= w || iy >= h) continue;
+      const pk = P[iy * w + ix];
+      if (h1 >= Math.min(K[c][4], K[c][3] * (pk - K[c][2]))) continue;
+      const d = d0 * (0.75 + 0.55 * R2.hash2(cx, cy, sd + 3)), q = Math.round(d * 0.42);
+      // (entero dentro de la pintura: un grumo no puede asomar cortado por el borde del trazo)
+      if (ix - q < 0 || iy - q < 0 || ix + q >= w || iy + q >= h || F[iy * w + ix - q] < 0.44 || F[iy * w + ix + q] < 0.44 || F[(iy - q) * w + ix] < 0.44 || F[(iy + q) * w + ix] < 0.44) continue;
+      const T3 = tiles[Math.min(tiles.length - 1, Math.floor(R2.hash2(cx, cy, sd + 4) * tiles.length))];
+      const lvl = T3[0][1] / d >= 3 ? 2 : T3[0][1] / d >= 1.5 ? 1 : 0, tl = T3[lvl][0], tm = T3[lvl][1];
+      const g = K[c][5] * (0.65 + 0.6 * R2.hash2(cx, cy, sd + 5)), hd = d / 2;
+      const xa = Math.max(0, Math.floor(px - hd) - x0), xb = Math.min(w - 1, Math.ceil(px + hd) - x0), ya = Math.max(0, Math.floor(py - hd) - y0), yb = Math.min(h - 1, Math.ceil(py + hd) - y0);
+      for (let y = ya; y <= yb; y++) {
+        const v = ((y0 + y + 0.5 - py) / d + 0.5) * tm - 0.5;
+        if (v <= -1 || v >= tm) continue;
+        const v0 = Math.floor(v), fv = v - v0, r0 = v0 < 0 ? 0 : v0, r1 = v0 + 1 >= tm ? tm - 1 : v0 + 1;
+        for (let x = xa; x <= xb; x++) {
+          const u = ((x0 + x + 0.5 - px) / d + 0.5) * tm - 0.5;
+          if (u <= -1 || u >= tm) continue;
+          const u0 = Math.floor(u), fu = u - u0, c0 = u0 < 0 ? 0 : u0, c1 = u0 + 1 >= tm ? tm - 1 : u0 + 1;
+          const val = (tl[r0 * tm + c0] * (1 - fu) + tl[r0 * tm + c1] * fu) * (1 - fv) + (tl[r1 * tm + c0] * (1 - fu) + tl[r1 * tm + c1] * fu) * fv;
+          if (val) LU[y * w + x] += val * g;
+        }
+      }
+      any = true;
+    }
+  }
+  return any;
 }
 
 // TEXTURA DE LA PINTURA (solo graffiti). El interior de una letra de bote es PLANO —una película de esmalte, sin
@@ -152,7 +229,9 @@ function finalize(canvas) {
 //    y su gota) el color queda algo más hondo y mojado, en manchas suaves, sin contorno;
 //  · el esmalte brilla: la luz resbala en bandas anchas y blandas que cruzan las letras enteras (dependen del
 //    sitio del documento, no de cada trazo: en las uniones no se nota nada);
-//  · de cerca tiene piel: un granillo fino y alguna pompita.
+//  · de cerca tiene piel: un granillo fino y alguna pompita;
+//  · y GRUMOS de verdad (stampLumps), solo donde la pintura va más densa: donde se acumuló, donde una pasada
+//    cae sobre otra y en los vértices en que la mano da la vuelta; y de esos sitios, no en todos: a zonas.
 // canvas.Hh (lo apunta compositePigment): 0,5 = película normal; hasta 1 = pintura acumulada.
 // canvas.relief = { amount 0..1, size: escala en px (según el grosor del trazo) }
 function applyRelief(canvas) {
@@ -181,7 +260,22 @@ function applyRelief(canvas) {
   };
   const Hs1 = blurN(H0, 2), depth = s * 0.3, Z = new Float32Array(n);
   for (let k = 0; k < n; k++) { const v = Hs1[k]; if (v > 0) Z[k] = depth * (0.95 * Math.min(1, v * 2) + 2.2 * Math.max(0, v - 0.5) + 4 * Math.max(0, a[k] - 0.5)); }
-  const dl = Math.max(1, Math.round(s * 0.22));        // paso del gradiente hacia la luz
+  const dl = Math.max(1, Math.round(s * 0.22)), dlx = Math.round(dl * 0.45);        // paso del gradiente hacia la luz (de arriba, algo a la izquierda)
+  // grumos: carga de cada punto = pintura de más + doble capa (cruces, vértices), y solo a zonas
+  let LU = null;
+  if (lumps()) {
+    const P = new Float32Array(n), Xs = canvas.Hx ? blurN(Float32Array.from(canvas.Hx), s > 6 ? 3 : 2) : null, fz = 1 / (s * 8);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const k = y * w + x;
+      if (Hs1[k] < 0.4) continue;
+      const pv = Math.max(Math.max(0, Math.min(1, (a[k] - 0.52) * 2.6)), Xs ? 0.5 * Xs[k] : 0);
+      if (pv <= 0.01) continue;
+      const zn = R2.noise2((canvas.x0 + x) * fz, (canvas.y0 + y) * fz, 941);
+      P[k] = pv * (zn <= -0.3 ? 0 : zn >= 0.2 ? 1 : (zn + 0.3) / 0.5);
+    }
+    LU = new Float32Array(n);
+    if (!stampLumps(canvas, P, Hs1, s, LU)) LU = null;
+  }
   const f1 = 1 / (s * 15), f2 = 1 / (s * 5.5), f3 = 1 / Math.max(1.5, s * 0.5), cell = Math.max(3, Math.round(s * 2.2));
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
     const k = y * w + x, v = H0[k], i = k * 4;
@@ -196,13 +290,16 @@ function applyRelief(canvas) {
     const cx = Math.floor(X / cell), cy = Math.floor(Y / cell);
     if (R2.hash2(cx, cy, 921) < 0.035) { const px = (cx + 0.25 + 0.5 * R2.hash2(cx, cy, 923)) * cell, py = (cy + 0.25 + 0.5 * R2.hash2(cx, cy, 925)) * cell, dd = Math.hypot(X - px, Y - py); if (dd < 1.1) li += amount * 0.22; else if (dd < 2.1 && Y > py) li -= amount * 0.1; }
     li = (li - amount * 0.32 * acc) * m;
-    // la luz: lo que mira arriba-izquierda aclara, lo de enfrente oscurece; más donde la pintura está cargada y
+    // la luz: lo que mira arriba (y algo a la izquierda) aclara, lo de enfrente oscurece; más donde la pintura está cargada y
     // mojada (y a rachas: no brilla igual en todas partes)
-    { const xa = x >= dl ? x - dl : 0, ya = y >= dl ? y - dl : 0, xb = x + dl < w ? x + dl : w - 1, yb = y + dl < h ? y + dl : h - 1;
-      const e = Math.max(-1, Math.min(1, (Z[yb * w + xb] - Z[ya * w + xa]) / (dl * 2.83) * 4));     // >0: sube hacia abajo-derecha = mira a la luz
+    { const xa = x >= dlx ? x - dlx : 0, ya = y >= dl ? y - dl : 0, xb = x + dlx < w ? x + dlx : w - 1, yb = y + dl < h ? y + dl : h - 1;
+      let e = Math.max(-1, Math.min(1, (Z[yb * w + xb] - Z[ya * w + xa]) / (2 * Math.hypot(dl, dlx)) * 4));     // >0: sube hacia abajo = mira a la luz
+      { const tr = Math.abs(v - 0.47); if (tr < 0.012) e *= 0.25 + 0.75 * tr / 0.012; }      // reguero de un chorretón: plano (el bulto está solo en la gota del final)
       const wet = Math.max(0.5, Math.min(1.5, 0.55 + 1.1 * acc + 0.55 * sheen + 1.3 * Math.max(0, v - 0.5)));
       // (y el destello: un punto de luz neto donde el cordón o la gota miran de lleno a la luz)
       li += amount * (e > 0 ? 0.8 * wet * e + 0.7 * wet * Math.max(0, e - 0.5) * Math.max(0, e - 0.5) : 0.5 * e); }
+    // grumos: su propio claro y su propia sombra
+    if (LU && LU[k]) { const lv = LU[k]; li += amount * m * (lv > 0 ? 1.5 * lv : 1.2 * lv); }
     for (let c = 0; c < 3; c++) { let u = D[i + c]; u += li > 0 ? (255 - u) * li : u * li; D[i + c] = u < 0 ? 0 : u > 255 ? 255 : u; }
   }
 }
@@ -357,4 +454,4 @@ function toDepth(data, bits) {
   return data;
 }
 
-module.exports = { hexToRgb, letterColor, makeCanvas, composite, compositePigment, finalize, rasterLocal, fillPolys, lineGlyphs, lineMapper, mapContours, localScale, renderPlain, trimCanvas, toDepth, polysBBox };
+module.exports = { setLumps, hexToRgb, letterColor, makeCanvas, composite, compositePigment, finalize, rasterLocal, fillPolys, lineGlyphs, lineMapper, mapContours, localScale, renderPlain, trimCanvas, toDepth, polysBBox };

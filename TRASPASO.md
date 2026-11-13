@@ -64,6 +64,13 @@ botón «Escribir en la forma» fijo abajo.
 Panel CEP que escribe y borra el texto animado (secuencia PNG + marcadores «entrada»/«salida»). Ver la sección 6
 de `CONTEXTO_A_MANO.md`. `python3 tools/build_ae.py`, `node tests/ae/harness.js` (19/19). La 0.1.0 cargó y pintó en After real; la 0.2.0 (tempo por golpes, punta redonda con textura) está sin ver allí.
 
+## 2.32 EN CURSO (sin .ccx: el usuario pidió no empaquetar todavía)
+Correcciones de graffiti tras la 2.31: una sola película de pintura (sin cercos en las uniones), repasar = cargar,
+Seco y Empapado rehechos, chorretones que nacen dentro de la pintura y solo abultan en la gota, textura con algo
+de brillo y relieve, y GRUMOS recortados de fotos (`tools/grumos.py` → `js/grumosdata.js`) que se estampan solo
+donde la pintura va más densa. El .ccx de `dist/` sigue siendo el 2.31.0 de antes de estas correcciones. Detalle:
+sección 2.32 de CONTEXTO_A_MANO.md.
+
 ## 2.31: deriva del bloque (prueba)
 `writer.blockDrift`: con poco texto, recto; con mucho, cada línea falla, copia a la de arriba y la corrige (pendiente,
 comba, tamaño que se apura al final, margen). Deslizador «Deriva del texto largo» en modo graffiti. Sección 2.31 de

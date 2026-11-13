@@ -745,6 +745,37 @@ Prueba: `tests/node/letras/drift.js` (6, 18, 54 y 168 letras; con y sin deriva; 
 Sin hacer: que el texto se parta de otra manera al quedarse sin sitio (palabra que baja o se corta), líneas que
 esquivan los chorretones y astas de la de arriba, límite duro contra el borde de la forma.
 
+### 2.32 (en curso, SIN EMPAQUETAR: el usuario pidió no hacer el .ccx todavía) — correcciones de graffiti y grumos
+Tanda de correcciones sobre capturas en verde (13 nov): «esto no es un graffiti realista» (Seco), «la unión entre
+las pinceladas es malísima, en todas», «donde unen no puede haber claro», «nada legible» (Empapado), «los repintes
+quedan falsísimos» (Rodillo), «la textura del interior de las letras no está», luego «un poquito de brillo y un
+poquito de relieve, no en todo igual», «las gotas solo tienen volumen al final», «las gotas no pueden empezar
+planas» y, con cuatro fotos de superficie pintada: «no las uses enteras ni las superpongas; extrae grumos y
+aplícalos en las áreas con grumos o más densidad de pintura (no en todo el graffiti)».
+- **Una sola película** (`render.compositePigment`, modo `'paint'`): color pleno (poca pintura = menos puntos, no un
+  color más pálido) y una pasada nunca aclara otra: sin cercos en las uniones. `'stain'` (empapado, rodillo
+  repasado): solo oscurece.
+- **Repasar es cargar**: con spray, las palabras importantes van en una pasada con más pintura (`fuse` siempre), sin
+  copias desplazadas; el rodillo repasado sale casi tapado (`heavy`). Tope de boquilla por firma (`nibMax`).
+- **Seco**: niebla fina y continua con centro que cierra. **Empapado**: centro estrecho y cargado + cerco calado.
+- **Chorretones**: solo nacen en pintura maciza (`dripExit` mide cuánta hay encima), arrancan dentro y en punta (sin
+  corte plano); el reguero es plano (marca 0,47 en el búfer de altura) y el volumen está solo en la gota.
+- **Textura de la pintura** (`render.applyRelief`, deslizador «Textura de la pintura», 50): fondo plano con bandas
+  de brillo y piel fina; un poco de relieve iluminado desde arriba (canto de la película, bulto donde se acumuló,
+  pompa de la gota); carga algo más honda donde hay pintura de más.
+- **Grumos** (`tools/grumos.py` → `js/grumosdata.js`, 50 sellos, ~75 KB): de las fotos de `referencias/texturas`
+  se recortan bultos sueltos (se quita la luz general, se buscan relieves concentrados y aislados, se descartan
+  hoyos y costras, se funde el borde, se iguala la fuerza); tres tamaños (20, 36 y 56 px). Ninguna foto se usa
+  entera. `render.stampLumps` los estampa como sombreado (claro y sombra propios) en una rejilla con azar anclada
+  al documento, solo donde la carga P es alta: P = pintura de más (búfer de altura) o doble capa (`canvas.Hx`: una
+  pasada sobre pintura ya puesta: cruces y vértices; los rellenos no cuentan), y de esos sitios solo a zonas (ruido
+  lento). Cada grumo ha de caber entero en la película. Tamaño según el grosor del trazo (con trazo fino solo salen
+  los medianos y grandes, pequeños). `main.js` entrega los datos con `RD.setLumps` (el panel de After no los lleva).
+- Con textura, `ps.putBands` pinta franjas más bajas con 48 px de margen; comprobado que sale idéntico por franjas
+  que de una vez (`tests/node/letras/bandtest.js`).
+Pruebas: sim 67/67, AE 19/19. Imágenes: `prueba_correcciones.png`, `prueba_textura*.png`, `prueba_gotas.png`,
+`prueba_grumos*.png`. Falta: empaquetar (subir versión a 2.32.0) cuando el usuario lo pida y ver todo en Photoshop real.
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)

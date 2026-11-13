@@ -3,6 +3,7 @@ const path = require('path');
 const J = f => require(path.join(__dirname, '..', '..', 'js', f));
 const SH = J('shapes.js'), LY = J('layout.js'), WR = J('writer.js'), G = J('geom.js'), RD = J('render.js'), INK = J('ink.js');
 const { writePNG, flatten } = require(path.join(__dirname, '..', '..', 'tools', 'png.js'));
+RD.setLumps(J('grumosdata.js'));
 const OUT = process.argv[2] || '/tmp/prev';
 require('fs').mkdirSync(OUT, { recursive: true });
 

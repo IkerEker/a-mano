@@ -16,6 +16,8 @@ const WR = require('./writer.js');
 const NG = require('./negativo.js');
 const GEO = require('./geom.js');
 const FN = require('./fonts.js');
+// (los grumos de pintura del graffiti: se entregan al dibujo una vez)
+require('./render.js').setLumps(require('./grumosdata.js'));
 const { app, action, constants } = require('photoshop');
 
 const $ = id => document.getElementById(id);
@@ -96,7 +98,7 @@ const docKey = doc => String((doc && (doc.title || doc.id)) || '');
 function chaos() { return Math.max(0, 1 - st.legib / 100); }
 // relieve de la pintura (solo graffiti): 0..1; con él, las franjas se pintan con margen (RELIEF_M) para que casen
 function relieve() { return isGraf() ? Math.max(0, Math.min(1, (st.relieve == null ? 50 : st.relieve) / 100)) : 0; }
-const RELIEF_M = 24;
+const RELIEF_M = 48;
 function genParams() {
   return {
     persona: styleKey(), mode: curMode(), goteo: st.goteo / 100, nube: st.nube / 100, relieve: relieve(), deriva: isGraf() ? (st.deriva == null ? 50 : st.deriva) / 100 : 0, tool: st.tool, preset: st.preset, color: st.color,
@@ -383,7 +385,8 @@ async function handImage(doc, ctx, insts, hp, seed, name, say) {
   const boxes = insts.map(it => { const b = IN.docBounds([it]); return padBox(b, 0.45 * Math.max(b.right - b.left, b.bottom - b.top) + 3); });
   let all = boxes[0];
   for (const b of boxes) all = { left: Math.min(all.left, b.left), top: Math.min(all.top, b.top), right: Math.max(all.right, b.right), bottom: Math.max(all.bottom, b.bottom) };
-  const layer = await P.putBands(doc, name, all, c => { if (hp.relieve > 0) c.relief = { amount: hp.relieve, size: 0 }; return HD.renderHand(c, insts, hp, seed, i => meets(boxes[i], c), pv); }, progressFor(ctx, 'A mano'), hp.relieve > 0 ? RELIEF_M : 0);
+  let relS = 0;      // (textura: el ancho de referencia lo fija la primera franja que pinta y vale para las demás)
+  const layer = await P.putBands(doc, name, all, c => { if (hp.relieve > 0) c.relief = { amount: hp.relieve, size: relS }; const r = HD.renderHand(c, insts, hp, seed, i => meets(boxes[i], c), pv); if (c.relief && !relS) relS = c.relief.size; return r; }, progressFor(ctx, 'A mano'), hp.relieve > 0 ? RELIEF_M : 0);
   if (!layer) throw new P.UserError('No ha salido nada visible.');
   return layer;
 }

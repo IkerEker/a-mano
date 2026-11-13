@@ -167,7 +167,7 @@ async function putBands(doc, name, bounds, draw, progress, margin) {
   const x1 = Math.min(doc.width, Math.ceil(bounds.right)), y1 = Math.min(doc.height, Math.ceil(bounds.bottom));
   if (x1 <= x0 || y1 <= y0) return null;
   const W = x1 - x0;
-  const bandH = Math.max(64, Math.floor(6e6 / W));
+  const bandH = Math.max(64, Math.floor((margin ? 3e6 : 6e6) / W));      // (con textura de pintura, franjas más bajas: pide más memoria)
   const nb = Math.ceil((y1 - y0) / bandH);
   let layer = null, k = 0;
   for (let y = y0; y < y1; y += bandH, k++) {
