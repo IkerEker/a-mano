@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.30)
+## 2. Cómo se usa (2.31)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -723,6 +723,28 @@ Pruebas: sim 67/67 (firmas a, b, g, c, d, e, f; controles escondidos), AE 19/19.
 Pendiente: extras de tag (corona, comillas, subrayado, estrella), throw-up de contorno, más alternativas por
 letra, cifras y signos propios de cada firma, Graffiti en el panel de After Effects.
 
+### 2.31 — Deriva del bloque según la cantidad de texto (prueba)
+Pedido: «falta una ecuación de cómo se comporta un texto de graffiti en conjunto según cuánto texto tenga: con poco
+suele ir recto, regular; con mucho coge una forma entera, porque la mano va fallando y el texto siguiente intenta
+resolver lo que falló el anterior. Infórmate, especula y hazme una prueba».
+Lo que se sabe de escribir sin pauta (terapia ocupacional, escritura infantil): el margen se va corriendo hacia el
+centro línea a línea; las palabras se apelotonan al final de la línea porque no se calcula el sitio que piden; el
+tamaño no se mantiene; y el ojo salta a la letra más cercana de la línea de arriba, no al principio de la
+siguiente: cada línea se refiere a la anterior, no a un plan. Con poco texto se ve entero y se planta de una vez.
+`writer.blockDrift` (al final de `plan`; solo spray, sin autoencajar, sin negativos; `p.deriva` 0..1, deslizador
+«Deriva del texto largo», 50):
+- carga λ = (1 − e^(−(N − 12)/45)) · 2·deriva (N letras: hasta 12 no pasa nada; 30 → 0,33; 60 → 0,66; 170 → 0,97);
+- cada línea: error propio e(u) = pendiente·(u − ½) + comba·4u(1−u) + ruido lento (más, con muchas letras);
+  pendiente = vicio de la mano − g·(lo torcido que va el bloque) + azar (g: cuánto corrige, 0,45–0,85);
+  desplazamiento D_l(u) = c·D_(l−1)(u) + λ·e_l(u) (c: cuánto copia a la de arriba, 0,55–0,85);
+  tamaño s = S_l·(1 − κ_l·h(u)): h vale 0 hasta media línea y sube a 1 al final (κ mayor si la línea es larga); si
+  la línea anterior acabó apretada, la siguiente empieza más pequeña (S); el margen se corre y se corrige a medias;
+- las líneas se miden sobre los trazos ya colocados en el documento (la base, donde apoyan las letras) y todo se
+  aplica como deformación suave de los puntos (el ancho se integra para que las letras encogidas no se pisen).
+Prueba: `tests/node/letras/drift.js` (6, 18, 54 y 168 letras; con y sin deriva; dos tiradas).
+Sin hacer: que el texto se parta de otra manera al quedarse sin sitio (palabra que baja o se corta), líneas que
+esquivan los chorretones y astas de la de arriba, límite duro contra el borde de la forma.
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -782,7 +804,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.30.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.31.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)

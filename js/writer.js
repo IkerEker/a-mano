@@ -481,8 +481,100 @@ function plan(lay, p, seed) {
     for (const st of l.strokes) for (const q of st.pts) { if (q[0] < e.x0) e.x0 = q[0]; if (q[0] > e.x1) e.x1 = q[0]; if (q[1] < e.y0) e.y0 = q[1]; if (q[1] > e.y1) e.y1 = q[1]; }
     wordExt.set(l.word, e);
   }
-  return NG.planWords(lay, out, p, seed, wordExt);
+  return blockDrift(NG.planWords(lay, out, p, seed, wordExt), letters, p, seed, auto);
 }
+
+// DERIVA DEL BLOQUE (graffiti). Quien pinta en una pared no tiene pauta: mira lo que acaba de escribir, no el plan.
+// Con poco texto lo ve entero de un golpe y lo planta recto y regular. Con mucho, la mano va fallando —la línea
+// se tuerce, el tamaño se le va, el margen se corre, el final de línea se le echa encima— y cada línea nueva se
+// apoya en la de arriba (la sigue) mientras intenta arreglar lo que aquella hizo mal. El bloque acaba con forma.
+//   carga  λ = (1 − e^(−(N − N0)/Ns)) · deriva      N letras; N0 = 12 (hasta ahí se planea entero); Ns = 45
+//   línea l, u ∈ [0,1] a lo ancho:
+//     error propio    e_l(u) = a_l·(u − ½) + b_l·4u(1−u) + ruido lento        (a: pendiente; b: comba del brazo)
+//     pendiente       a_l = −g·A_(l−1) + ε_l      (A: lo torcido que va el bloque; g: cuánto se corrige; ε ~ λ)
+//     desplazamiento  D_l(u) = c·D_(l−1)(u) + e_l(u)                          (c: cuánto copia a la de arriba)
+//     tamaño          s_l(u) = S_l · (1 − κ_l·h(u))   h: 0 hasta ~0,55 y sube a 1 al final (se queda sin sitio)
+//                     S_l = S_(l−1) + corrección: si la anterior acabó apretada, esta empieza más pequeña
+//     margen          m_l = m_(l−1) + deriva hacia dentro − g·m_(l−1)
+// Todo es suave en (línea, u): se aplica como una deformación a los trazos ya planeados.
+function blockDrift(strokes, letters, p, seed, auto) {
+  const k = p.deriva == null ? 0 : p.deriva;
+  if (!(k > 0) || p.tool !== 'spray' || auto || !strokes.length || strokes.some(s => s.mask)) return strokes;
+  const N = letters.filter(L => !L.under).length, lam = (1 - Math.exp(-Math.max(0, N - 12) / 45)) * Math.min(2, k * 2);
+  if (lam < 0.01) return strokes;
+  // ---- las líneas, medidas sobre los trazos ya colocados en el documento (base: donde se apoyan las letras)
+  const lb = new Map();                      // línea -> letra -> [arriba, abajo]
+  for (const s of strokes) {
+    const L = s.letter != null ? letters[s.letter] : null;
+    if (!L || L.under || s.under || s.fill) continue;
+    let m = lb.get(L.line); if (!m) { m = new Map(); lb.set(L.line, m); }
+    let e = m.get(s.letter); if (!e) { e = [Infinity, -Infinity]; m.set(s.letter, e); }
+    for (const q of s.pts) { if (q.y < e[0]) e[0] = q.y; if (q.y > e[1]) e[1] = q.y; }
+  }
+  const med = a => a.slice().sort((x, y) => x - y)[a.length >> 1];
+  const lines = Array.from(lb.entries()).map(([id, m]) => { const es = Array.from(m.values()), base = med(es.map(e => e[1])), top = med(es.map(e => e[0])); return { id, base, size: Math.max(4, (base - top) * 1.3), x0: Infinity, x1: -Infinity, n: es.length }; }).sort((a, b) => a.base - b.base);
+  if (!lines.length) return strokes;
+  const idx = new Map(lines.map((l, i) => [l.id, i]));
+  const lineOf = s => {
+    if (s.letter != null && letters[s.letter] && idx.has(letters[s.letter].line)) return idx.get(letters[s.letter].line);
+    let cy = 0; for (const q of s.pts) cy += q.y; cy /= s.pts.length;
+    let best = 0, bd = Infinity; lines.forEach((l, i) => { const d = Math.abs(cy - (l.base - 0.4 * l.size)); if (d < bd) { bd = d; best = i; } });
+    return best;
+  };
+  const sl = strokes.map(lineOf);
+  strokes.forEach((s, i) => { const l = lines[sl[i]]; for (const q of s.pts) { if (q.x < l.x0) l.x0 = q.x; if (q.x > l.x1) l.x1 = q.x; } });
+  let X0 = Infinity, X1 = -Infinity; for (const l of lines) { if (l.x0 < X0) X0 = l.x0; if (l.x1 > X1) X1 = l.x1; }
+  const WB = Math.max(1, X1 - X0);
+  // ---- la mano: cada línea falla y la siguiente copia y corrige
+  const rnd = R.mulberry32(((seed >>> 0) ^ 0x6a09e667) >>> 0), g = () => R.gauss(rnd);
+  const habit = g() * 0.02, gain = 0.45 + 0.4 * rnd(), copy = 0.55 + 0.3 * rnd();     // (su vicio de torcerse, cuánto corrige, cuánto copia)
+  const K = 9, prev = new Float64Array(K);                                             // D de la línea de arriba, en K puntos del ancho del bloque
+  let A = 0, S = 1, m = 0, sq = 0;
+  lines.forEach((l, i) => {
+    const wl = Math.max(1, l.x1 - l.x0), many = Math.min(1.6, Math.sqrt(l.n / 9));     // (muchas letras en la línea: más ocasión de irse)
+    const a = (i === 0 ? habit * 2 : habit - gain * A) + g() * 0.03 * many;            // pendiente (rad), ya corregida
+    const b = g() * 0.1 * l.size * many, ns = (seed + i * 811) | 0;
+    l.a = a * lam; A = A * copy + l.a;
+    l.D = new Float64Array(K);
+    for (let j = 0; j < K; j++) {
+      const xb = X0 + WB * j / (K - 1), u = (xb - l.x0) / wl;
+      const own = Math.tan(a) * (u - 0.5) * wl + b * 4 * Math.max(0, Math.min(1, u)) * (1 - Math.max(0, Math.min(1, u))) + 0.07 * l.size * many * R.noise1(u * 2.2, ns);
+      l.D[j] = copy * prev[j] + lam * own;
+    }
+    for (let j = 0; j < K; j++) prev[j] = l.D[j];
+    // tamaño: si la de arriba acabó apretada, esta empieza más pequeña; si le sobró, se anima
+    S = Math.max(0.72, Math.min(1.22, S * (1 - 0.35 * sq) + lam * g() * 0.05 + (1 - S) * 0.25));
+    l.S = S;
+    l.kap = Math.max(0, lam * (0.1 + 0.28 * rnd() * rnd() + 0.2 * (wl / WB - 0.8)));   // cuánto se encoge hacia el final (más, si la línea es larga)
+    sq = l.kap;
+    m = m * (1 - gain * 0.6) + lam * l.size * (0.12 + 0.3 * g());                      // el margen se corre (hacia dentro) y se corrige a medias
+    l.m = m;
+  });
+  // (que el bloque no se vaya de su sitio: se quita el desplazamiento medio)
+  let mD = 0, mM = 0, nn = 0; for (const l of lines) { for (let j = 0; j < K; j++) mD += l.D[j]; mM += l.m; nn += K; }
+  mD /= nn; mM /= lines.length;
+  const h = u => { const t = Math.max(0, Math.min(1, (u - 0.5) / 0.5)); return t * t * (3 - 2 * t); };
+  const H = u => { const t = Math.max(0, Math.min(1, (u - 0.5) / 0.5)); return 0.5 * (t * t * t - 0.5 * t * t * t * t); };   // ∫ h
+  const Dat = (l, x) => { const f = Math.max(0, Math.min(K - 1.001, (x - X0) / WB * (K - 1))), j = Math.floor(f); return l.D[j] + (l.D[j + 1] - l.D[j]) * (f - j) - mD; };
+  return strokes.map((s, i) => {
+    const l = lines[sl[i]], wl = Math.max(1, l.x1 - l.x0);
+    let bx0 = Infinity, by0 = Infinity, bx1 = -Infinity, by1 = -Infinity, nx0 = Infinity, ny0 = Infinity, nx1 = -Infinity, ny1 = -Infinity;
+    const pts = s.pts.map(q => {
+      const u = (q.x - l.x0) / wl, uc = Math.max(0, Math.min(1, u)), sc = l.S * (1 - l.kap * h(uc));
+      // (las letras encogen a lo alto y a lo ancho: el ancho se integra para que no se pisen)
+      const x = l.x0 + (l.m - mM) + wl * (l.S * (uc - l.kap * H(uc)) + (u - uc) * sc) + (1 - l.S) * wl * 0.5;
+      const y = l.base + Dat(l, q.x) + (q.y - l.base) * sc;
+      if (q.x < bx0) bx0 = q.x; if (q.x > bx1) bx1 = q.x; if (q.y < by0) by0 = q.y; if (q.y > by1) by1 = q.y;
+      if (x < nx0) nx0 = x; if (x > nx1) nx1 = x; if (y < ny0) ny0 = y; if (y > ny1) ny1 = y;
+      return Object.assign({}, q, { x, y });
+    });
+    const o = Object.assign({}, s, { pts, r: s.r * l.S * (1 - 0.5 * l.kap * h(Math.max(0, Math.min(1, ((bx0 + bx1) / 2 - l.x0) / wl)))) });
+    if (pc0(s)) { o.pts.cont0 = s.pts.cont0; o.pts.cont1 = s.pts.cont1; }
+    o.box = { left: nx0 - (bx0 - s.box.left), top: ny0 - (by0 - s.box.top), right: nx1 + (s.box.right - bx1), bottom: ny1 + (s.box.bottom - by1) };
+    return o;
+  });
+}
+function pc0(s) { return s.pts && (s.pts.cont0 != null || s.pts.cont1 != null); }
 
 // pinta el plan en un lienzo (solo los trazos que caen en él)
 function paint(canvas, strokes, p) {

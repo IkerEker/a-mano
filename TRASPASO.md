@@ -1,11 +1,11 @@
-# A mano · traspaso para seguir en un chat nuevo (13 nov 2026, versión 2.30.0)
+# A mano · traspaso para seguir en un chat nuevo (13 nov 2026, versión 2.31.0)
 
 Pega este archivo al empezar el chat nuevo. Todo lo demás está en el repositorio.
 
 ## Qué es
 «A mano»: plugin UXP para Photoshop (2024+) que escribe texto a mano dentro de una forma (pestaña GENERAR) o pinta a
 mano encima de capas de texto (CALCAR). Repositorio: **github.com/IkerEker/a-mano** (rama principal, último commit
-`2.30`). En el entorno de trabajo: `/home/claude/a-mano`.
+`2.31`). En el entorno de trabajo: `/home/claude/a-mano`.
 
 ## Cómo trabajar (reglas del usuario)
 - Todo en español (respuestas, interfaz, comentarios, commits).
@@ -63,6 +63,11 @@ botón «Escribir en la forma» fijo abajo.
 ## A mano AE (After Effects) — 0.2.0
 Panel CEP que escribe y borra el texto animado (secuencia PNG + marcadores «entrada»/«salida»). Ver la sección 6
 de `CONTEXTO_A_MANO.md`. `python3 tools/build_ae.py`, `node tests/ae/harness.js` (19/19). La 0.1.0 cargó y pintó en After real; la 0.2.0 (tempo por golpes, punta redonda con textura) está sin ver allí.
+
+## 2.31: deriva del bloque (prueba)
+`writer.blockDrift`: con poco texto, recto; con mucho, cada línea falla, copia a la de arriba y la corrige (pendiente,
+comba, tamaño que se apura al final, margen). Deslizador «Deriva del texto largo» en modo graffiti. Sección 2.31 de
+CONTEXTO_A_MANO.md. Pendiente de la opinión del usuario.
 
 ## 2.30: Graffiti rehecho
 Aerosol nuevo (la pintura se suma en una rejilla: borde con grano, nube, arranques cargados, salidas al vuelo),

@@ -30,7 +30,7 @@ const store = {
 const DEF = {
   tab: 'gen', tool: 'rotulador', preset: 'fino', fill: '', color: '#1d1d1f', persona: 'adulta', version: 'a', mode: 'mayus', textMode: 'importancia', repaso: 'auto', legib: 70,
   grosor: 0, tinta: 55, pulso: 40, repasado: 50, follow: 'auto', locura: 50, prisa: 15, tight: 0,
-  contraste: 50, inter: 100, llenar: 30, margen: 5, align: 'center', kind: 'imagen', colorMode: 'uno', colorVar: 45, tupido: 60, goteo: 45, nube: 50, relieve: 35, gsub: 'a',
+  contraste: 50, inter: 100, llenar: 30, margen: 5, align: 'center', kind: 'imagen', colorMode: 'uno', colorVar: 45, tupido: 60, goteo: 45, nube: 50, relieve: 35, deriva: 50, gsub: 'a',
   text: 'Nadie había cerrado\nla puerta del sótano', levels: [0, 2, 1, 0, 0, -1, 0], marks: []
 };
 const st = Object.assign({}, DEF, store.get('settings2', {}));
@@ -99,7 +99,7 @@ function relieve() { return isGraf() ? Math.max(0, Math.min(1, (st.relieve == nu
 const RELIEF_M = 24;
 function genParams() {
   return {
-    persona: styleKey(), mode: curMode(), goteo: st.goteo / 100, nube: st.nube / 100, relieve: relieve(), tool: st.tool, preset: st.preset, color: st.color,
+    persona: styleKey(), mode: curMode(), goteo: st.goteo / 100, nube: st.nube / 100, relieve: relieve(), deriva: isGraf() ? (st.deriva == null ? 50 : st.deriva) / 100 : 0, tool: st.tool, preset: st.preset, color: st.color,
     colorVar: st.colorMode === 'letras' ? Math.max(0.02, st.colorVar / 100) : 0, tupido: st.tupido / 100,
     auto: st.textMode === 'auto', repaso: st.repaso, marks: st.marks || [],
     legib: st.legib / 100, locura: st.locura / 50, pulso: st.pulso / 100, prisa: st.prisa / 100,
@@ -257,7 +257,7 @@ async function refreshCtx() {
     else { ctxC.textContent = 'Selecciona en Capas las capas de texto que quieras pasar a mano (o un grupo que las contenga).'; ctxC.className = 'ctx'; }
   }
 }
-const SAVED_KEYS = ['text', 'levels', 'marks', 'tupido', 'persona', 'version', 'mode', 'textMode', 'tool', 'preset', 'color', 'colorMode', 'colorVar', 'legib', 'gsub', 'goteo', 'nube', 'relieve'];
+const SAVED_KEYS = ['text', 'levels', 'marks', 'tupido', 'persona', 'version', 'mode', 'textMode', 'tool', 'preset', 'color', 'colorMode', 'colorVar', 'legib', 'gsub', 'goteo', 'nube', 'relieve', 'deriva'];
 function loadSaved(saved) {
   for (const k of SAVED_KEYS) if (saved[k] != null) st[k] = Array.isArray(saved[k]) ? saved[k].slice() : saved[k];
   save(); syncControls();
@@ -473,7 +473,7 @@ function setColor(hex) {
   st.color = hex; save();
   const sw = $('swColor'); if (sw) sw.style.backgroundColor = hex;
 }
-const SLIDERS = { slGoteo: 'goteo', slNube: 'nube', slRelieve: 'relieve', slTupido: 'tupido', slColorVar: 'colorVar', slLegib: 'legib', slGrosor: 'grosor', slTinta: 'tinta', slPulso: 'pulso', slRepasado: 'repasado', slLocura: 'locura', slPrisa: 'prisa', slTight: 'tight', slContraste: 'contraste', slInter: 'inter', slLlenar: 'llenar', slMargen: 'margen' };
+const SLIDERS = { slGoteo: 'goteo', slNube: 'nube', slRelieve: 'relieve', slDeriva: 'deriva', slTupido: 'tupido', slColorVar: 'colorVar', slLegib: 'legib', slGrosor: 'grosor', slTinta: 'tinta', slPulso: 'pulso', slRepasado: 'repasado', slLocura: 'locura', slPrisa: 'prisa', slTight: 'tight', slContraste: 'contraste', slInter: 'inter', slLlenar: 'llenar', slMargen: 'margen' };
 // graffiti: la interfaz cambia. En vez de A/B y de MAYÚSCULAS/minúsculas/cursiva salen sus firmas; el panel se
 // pone de amarillo; aparecen el goteo, la nube y el relieve; y se esconde lo que con un bote no pinta nada: la tinta
 // (carga, sequedad), el modo de repasado y, al calcar, el relleno de brocha o sello y el grosor «de la letra»

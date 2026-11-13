@@ -1,8 +1,8 @@
-A MANO 2.30 · plugin para Photoshop (2024 o posterior)
+A MANO 2.31 · plugin para Photoshop (2024 o posterior)
 =====================================================
 
 INSTALAR
-- Doble clic en A_mano_v2.30.0.ccx -> Creative Cloud avisa de que no viene del
+- Doble clic en A_mano_v2.31.0.ccx -> Creative Cloud avisa de que no viene del
   Marketplace -> "Instalar". Sustituye a las versiones anteriores. Es independiente de Cartelator.
 - En Photoshop: Plugins > A mano.
 
@@ -49,6 +49,10 @@ GENERAR, de arriba abajo
    dentro del trazo, donde se juntó pintura de más, y caen hacia abajo del documento. El brillo deja la pintura
    PLANA (un graffiti no tiene volumen): solo coge luz la pintura acumulada (arranques, cruces, chorretones y su
    gota); a 0 queda mate. Empapado y Rodillo no brillan (la tela se bebe la pintura; el tóner es mate).
+   «Deriva del texto largo» (PRUEBA): con poco texto el bloque sale recto y regular; cuanto más texto, más se le
+   va la mano (líneas que se tuercen, final de línea apretado, margen que se corre, tamaño que cambia) y cada
+   línea se apoya en la de arriba e intenta corregirla: el bloque coge forma. A 0, todo a pauta. No actúa con
+   autoencajar ni si hay palabras en negativo.
    En modo Graffiti se esconde lo que con un bote no hace nada: Tinta, el modo de Repasado y, al calcar, el
    relleno de brocha o sello y el grosor «de la letra».
 
