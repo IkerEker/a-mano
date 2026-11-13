@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.25)
+## 2. Cómo se usa (2.26)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -574,6 +574,32 @@ Qué se construyó:
 - Pendiente: letra de pompa (throw-up, con contorno), adornos de firma (flecha, subrayado, comillas, corona),
   y llevar el Graffiti al panel de After Effects.
 
+### 2.26 — Graffiti, segunda vuelta: que parezca pintura de verdad
+Pedido: «son una mierda; mira cómo es la tipografía de un graffiti de verdad, mira cómo es su textura; búsqueda muy
+extensa; muchísimo más realista». Lo que fallaba: eran mayúsculas normales con textura de aerógrafo.
+Lo aprendido (búsqueda sobre firmas, estilos regionales, boquillas, mops y brocha plana):
+- La herramienta de las firmas es el **rotulador de punta biselada** (y la brocha plana): el trazo sale gordo en una
+  dirección y fino en la otra y acaba en corte recto. Sin eso no parece un tag.
+- Estilos: Filadelfia (letras estiradas en vertical, de uno o pocos trazos, que se enganchan y se montan), São Paulo
+  (altas, estrechas, angulosas, negras), cholo de Los Ángeles (de un solo trazo, con remates), busflow de San
+  Francisco (redondas, ligadas, de una línea, todas del mismo tamaño, con lazos), Nueva York (firma rápida a rotulador
+  biselado). En todos: el abecedario de debajo se sigue reconociendo; consistencia de peso y anchura; las
+  extensiones solo si sirven a la estructura.
+- Bote: despacio y cerca chorrea y salpica; deprisa afina; lejos emborrona; inclinado se abre por un lado.
+Qué se cambió:
+- `ink.js` · `paintFlat` (puntas `plano` y `rastro` «Barra», `flat: true`): la punta es un filo con ángulo fijo que se
+  arrastra; anchura según la dirección, extremos en corte recto, vetas a lo largo (el «peine» de la punta, el mismo
+  en todo el trazo, más abiertas hacia el final y en los bordes), chorretones donde la punta se para.
+- `ink.js` · cobertura del spray rehecha: el borde ya no es un círculo perfecto (se ondula a dos escalas); del
+  cuerpo a la nube no hay degradado gris sino motas juntas que se separan, de tres tamaños; el final al vuelo se
+  estrecha y se deshace en motas; neblina desigual. Chorretones más finos (gordos solo en el mop) y a veces en grupo.
+  `drawDrips` es común al spray y a la punta plana.
+- Firmas: cada una trae su punta (`pre`): Tag → Plano, Rabia → Barra, Bomba → Gordo, De un trazo → Mop; más peso, más
+  montadas; Rabia mucho más alta y estrecha.
+- Pendiente: letra de pompa (throw-up), adornos de firma, brocha con color translúcido que se suma al cruzarse.
+Fuentes: en.wikipedia.org/wiki/Handstyle; theartistblock.ink (5 tipos de tags; fundamentos del handstyle; guía de
+extensiones); machinestudio.com (control del bote); sprayplanet.com (boquillas).
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -633,7 +659,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.25.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.26.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)

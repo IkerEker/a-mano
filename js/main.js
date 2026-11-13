@@ -519,11 +519,12 @@ function bind() {
   segBind('fontSeg', v => {
     const was = st.persona; st.persona = v;
     // al entrar en graffiti se coge el bote (y al salir se vuelve a lo que se tenía, si no se ha cambiado)
-    if (v === 'graffiti' && was !== 'graffiti') { if (st.tool !== 'spray') { st.toolBefore = st.tool + '|' + st.preset; st.tool = 'spray'; st.preset = 'gordo'; } }
+    if (v === 'graffiti' && was !== 'graffiti') { if (st.tool !== 'spray') { st.toolBefore = st.tool + '|' + st.preset; st.tool = 'spray'; st.preset = FN.styleOf('graffiti_' + st.gsub).pre || 'gordo'; } }
     else if (v !== 'graffiti' && was === 'graffiti' && st.tool === 'spray' && st.toolBefore) { const tb = String(st.toolBefore).split('|'); if (INK.TOOLS[tb[0]]) { st.tool = tb[0]; st.preset = tb[1]; } st.toolBefore = ''; }
     save(); segSet('fontSeg', v); segSet('toolSeg', st.tool); renderPresets(); syncGraf(); syncText();
   });
-  segBind('grafSeg', v => { st.gsub = v; save(); syncGraf(); });
+  // (cada firma trae su punta: la del Tag es plana, la Bomba va a bote gordo...; luego se puede cambiar)
+  segBind('grafSeg', v => { st.gsub = v; if (st.tool === 'spray') { st.preset = FN.styleOf('graffiti_' + v).pre || st.preset; renderPresets(); } save(); syncGraf(); });
   segBind('versionSeg', v => { st.version = v; save(); segSet('versionSeg', v); syncText(); });
   segBind('textModeSeg', v => { st.textMode = v; save(); segSet('textModeSeg', v); syncText(); });
   segBind('repasoSeg', v => { st.repaso = v; save(); segSet('repasoSeg', v); });

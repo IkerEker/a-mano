@@ -79,7 +79,10 @@ TOOLS.spray = {
     gordo: { label: 'Gordo', proc: 'spray', w: 0.07, dens: 1, core: 0.6, soft: 0.42, mist: 1, drip: 1, spit: 1, fill: 1, haze: 0.6, flare: 0.3, blend: 'over', tremor: 0.5, lift: 0, minR: 1 },
     fino: { label: 'Fino', proc: 'spray', w: 0.032, dens: 1, core: 0.74, soft: 0.24, mist: 0.5, drip: 0.4, spit: 0.5, fill: 1, haze: 0.2, flare: 0.45, blend: 'over', tremor: 0.5, lift: 0, minR: 1 },
     seco: { label: 'Seco', proc: 'spray', w: 0.065, dens: 1, core: 0.5, soft: 0.55, mist: 0.9, drip: 0, spit: 0.3, fill: 0.6, haze: 0.35, flare: 0.5, blend: 'over', tremor: 0.5, lift: 0, minR: 1 },
-    mop: { label: 'Mop', proc: 'spray', mop: true, w: 0.055, dens: 1, core: 0.95, soft: 0.06, mist: 0, drip: 1.25, spit: 0.8, fill: 1, haze: 0, flare: 0, blend: 'over', tremor: 0.5, lift: 0, minR: 1 }
+    mop: { label: 'Mop', proc: 'spray', mop: true, w: 0.055, dens: 1, core: 0.95, soft: 0.06, mist: 0, drip: 1.25, spit: 0.8, fill: 1, haze: 0, flare: 0, blend: 'over', tremor: 0.5, lift: 0, minR: 1 },
+    // punta plana: rotulador biselado o brocha (la herramienta de las firmas); nib: ángulo del filo; thick: su grosor; dry: vetas
+    plano: { label: 'Plano', proc: 'spray', flat: true, w: 0.085, dens: 1, nib: -0.62, thick: 0.2, dry: 0.5, drip: 0.5, blend: 'over', tremor: 0.4, lift: 0, minR: 1.2 },
+    rastro: { label: 'Barra', proc: 'spray', flat: true, w: 0.08, dens: 1, nib: -0.45, thick: 0.3, dry: 0.85, drip: 0, blend: 'over', tremor: 0.4, lift: 0, minR: 1.2 }
   }
 };
 TOOL_ORDER.push('spray');
@@ -475,6 +478,114 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
   if (opts.mask) applyMask(buf, bx0, by0, bw, bh, opts.mask, seed);
   RD.compositePigment(canvas, buf, bx0, by0, bw, bh, rgb, opts.blend || P.blend, opts.alphaMul == null ? 1 : opts.alphaMul);
 }
+// chorretones: un hilo que baja, algo más ancho donde nace, con su gota al final (para el spray y la punta plana)
+function drawDrips(buf, bx0, by0, bx1, by1, bw, drips, dens) {
+  for (const d of drips) {
+    const yA = Math.max(by0, Math.floor(d.y)), yB = Math.min(by1 - 1, Math.ceil(d.y + d.len + d.w * 1.5));
+    const bead = d.w * 1.25, yb = d.y + d.len;
+    for (let Y = yA; Y <= yB; Y++) {
+      const yy = Y + 0.5 - d.y, t = yy / d.len;
+      let hw = t <= 1 ? d.w * (1 - 0.3 * t) * (1 + 0.6 * Math.exp(-yy / (d.w * 3))) : 0;
+      const dyb = Y + 0.5 - yb; if (Math.abs(dyb) < bead) hw = Math.max(hw, Math.sqrt(bead * bead - dyb * dyb));
+      if (hw <= 0) continue;
+      const xc = d.x + d.w * 0.5 * R.noise1(yy / (d.w * 9 + 2), d.sd);
+      const xA = Math.max(bx0, Math.floor(xc - hw - 1)), xB = Math.min(bx1 - 1, Math.ceil(xc + hw + 1));
+      for (let X = xA; X <= xB; X++) { const al = Math.max(0, Math.min(1, hw - Math.abs(X + 0.5 - xc) + 0.5)) * dens, k = (Y - by0) * bw + (X - bx0); if (al > buf[k]) buf[k] = al; }
+    }
+  }
+}
+
+// PUNTA PLANA (rotulador biselado, brocha plana, barra): la herramienta de las firmas. La punta es un filo que la
+// mano lleva siempre con el mismo ángulo: el trazo sale gordo en una dirección y fino en la otra, y acaba en corte
+// recto; cuando la pintura escasea o la mano corre, los pelos se separan y dejan vetas a lo largo del trazo.
+function paintFlat(canvas, pts, P, r, rgb, seed, opts) {
+  const rnd = R.mulberry32(((seed >>> 0) ^ 0x51ed270b) >>> 0);
+  r = Math.max(P.minR || 1, r);
+  const Q = resample(pts, Math.max(0.6, r * 0.2)), n = Q.length;
+  if (n < 2) return;
+  const Ls = Q[n - 1].s;
+  if (Ls < 0.3) return;
+  const goteo = opts.goteo == null ? 0.45 : opts.goteo, isFill = !!opts.mask;
+  const a0 = (P.nib == null ? -0.62 : P.nib) + (rnd() - 0.5) * 0.2;
+  const th = Math.max(0.6, r * (P.thick || 0.16));
+  const NX = new Float32Array(n), NY = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const a = a0 + 0.14 * R.noise1(Q[i].s / (r * 16 + 1), seed + 5);
+    const hw = r * (0.94 + 0.1 * R.noise1(Q[i].s / (r * 7 + 1), seed + 9)) * (0.75 + 0.25 * (Q[i].w == null ? 1 : Q[i].w));
+    NX[i] = Math.cos(a) * hw; NY[i] = Math.sin(a) * hw;
+  }
+  // (unos trazos salen cargados y otros a medio gas; siempre más secos hacia el final)
+  const dryK = (P.dry || 0) * (0.35 + 1.1 * rnd());
+  const drips = [];
+  if (!isFill && P.drip && goteo > 0) {
+    // la pintura se acumula donde la punta se para: al final de los trazos que bajan y bajo los tramos tumbados
+    const e = Q[n - 1], b = Q[Math.max(0, n - 6)], cand = [];
+    if (e.y - b.y > Math.abs(e.x - b.x) * 0.5) cand.push(n - 1);
+    const nR = Math.floor(P.drip * goteo * (0.4 + Ls / (r * 22)) + rnd());
+    for (let k = 0; k < nR; k++) cand.push(Math.floor(rnd() * n));
+    for (const i of cand) {
+      if (rnd() > Math.min(0.95, P.drip * goteo * 1.3)) continue;
+      const w0 = Math.max(0.7, r * (0.12 + 0.13 * rnd())), len = r * (1.2 + 16 * Math.pow(rnd(), 2.2)) * (0.3 + 1.4 * goteo);
+      drips.push({ x: Q[i].x + (rnd() - 0.5) * Math.abs(NX[i]) * 1.4, y: Q[i].y + Math.abs(NY[i]) * 0.6, w: w0, len, sd: (seed + i * 131) | 0 });
+    }
+  }
+  const pad = r * 1.15 + th + 3;
+  let bx0 = Infinity, by0 = Infinity, bx1 = -Infinity, by1 = -Infinity;
+  for (const q of Q) { if (q.x < bx0) bx0 = q.x; if (q.x > bx1) bx1 = q.x; if (q.y < by0) by0 = q.y; if (q.y > by1) by1 = q.y; }
+  bx0 -= pad; by0 -= pad; bx1 += pad; by1 += pad;
+  for (const d of drips) { bx0 = Math.min(bx0, d.x - d.w * 2.5); bx1 = Math.max(bx1, d.x + d.w * 2.5); by1 = Math.max(by1, d.y + d.len + d.w * 3); }
+  bx0 = Math.max(canvas.x0, Math.floor(bx0)); by0 = Math.max(canvas.y0, Math.floor(by0));
+  bx1 = Math.min(canvas.x0 + canvas.w, Math.ceil(bx1)); by1 = Math.min(canvas.y0 + canvas.h, Math.ceil(by1));
+  const bw = bx1 - bx0, bh = by1 - by0;
+  if (bw <= 0 || bh <= 0 || bw * bh > 5e7) return;
+  const buf = new Float32Array(bw * bh);
+  const dens = Math.min(1, (P.dens || 1) * (opts.inkMul == null ? 1 : Math.max(0.85, opts.inkMul)));
+  const sU = (seed % 977) * 0.37, gr = Math.max(1, r * 0.07);
+  // cuánta pintura deja el pelo u (−1..1 a lo ancho de la punta) a la altura s del trazo
+  const ink = (u, sAt, X, Y) => {
+    const f = sAt / Ls;
+    const b = 0.5 + 0.5 * (0.62 * R.noise1(u * 6.5 + sU, seed + 31) + 0.38 * R.noise1(u * 19 + sU, seed + 37));     // el peine de la punta: el mismo en todo el trazo
+    // (por seco que vaya, casi la mitad de los pelos sigue marcando: el trazo se raya pero no desaparece)
+    const thr = Math.min(0.56, dryK * (0.08 + 0.92 * Math.pow(f, 1.4))) + 0.3 * dryK * smooth01(0.7, 1, Math.abs(u)) - 0.12 + 0.1 * R.noise1(sAt / (r * 2.5 + 1) + u * 3, seed + 41);
+    let a = smooth01(thr - 0.07, thr + 0.07, b);
+    // (la veta no es limpia: el grano del soporte la rompe)
+    if (thr > 0.05 && a > 0) a *= R.hash2(Math.floor(X / gr), Math.floor(Y / gr), seed + 43) < 0.3 + 0.7 * a ? 1 : 0.35;
+    return a * (0.9 + 0.1 * R.noise1(u * 11 + sU, seed + 47));
+  };
+  for (let i = 0; i < n - 1; i++) {
+    const A = Q[i], B = Q[i + 1], nx = (NX[i] + NX[i + 1]) / 2, ny = (NY[i] + NY[i + 1]) / 2;
+    const dx = B.x - A.x, dy = B.y - A.y, dl = Math.hypot(dx, dy) || 1e-9, hw = Math.hypot(nx, ny) || 1e-9;
+    const det = dx * ny - dy * nx, wper = Math.abs(det) / dl;
+    const x0 = Math.max(bx0, Math.floor(Math.min(A.x, B.x) - Math.abs(nx) - th - 1)), x1 = Math.min(bx1 - 1, Math.ceil(Math.max(A.x, B.x) + Math.abs(nx) + th + 1));
+    const y0 = Math.max(by0, Math.floor(Math.min(A.y, B.y) - Math.abs(ny) - th - 1)), y1 = Math.min(by1 - 1, Math.ceil(Math.max(A.y, B.y) + Math.abs(ny) + th + 1));
+    for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+      const px = x + 0.5 - A.x, py = y + 0.5 - A.y;
+      let cov = 0, u = 0, t = 0;
+      if (wper > 0.05) {
+        t = (px * ny - py * nx) / det; u = (dx * py - dy * px) / det;
+        if (t >= -0.03 && t <= 1.03) {
+          cov = Math.min(1, (1 - Math.abs(u)) * wper + 0.5);
+          // (los extremos del trazo: corte recto, con el ángulo de la punta)
+          if (i === 0 && !opts.contIn) cov = Math.min(cov, t * Math.abs(det) / hw + 0.5);
+          if (i === n - 2 && !opts.contOut) cov = Math.min(cov, (1 - t) * Math.abs(det) / hw + 0.5);
+          if (cov < 0) cov = 0;
+        }
+      }
+      // el filo tiene su grosor: aunque la mano vaya a lo largo de la punta, queda una línea
+      let tc = (px * dx + py * dy) / (dl * dl); tc = tc < 0 ? 0 : tc > 1 ? 1 : tc;
+      const ex = px - dx * tc, ey = py - dy * tc, c2 = Math.min(1, th - Math.hypot(ex, ey) + 0.5);
+      if (c2 > cov) { cov = c2; t = tc; u = (ex * nx + ey * ny) / (hw * hw); }
+      if (cov <= 0) continue;
+      const a = cov * ink(u < -1 ? -1 : u > 1 ? 1 : u, A.s + (t < 0 ? 0 : t > 1 ? 1 : t) * dl, x + 0.5, y + 0.5) * dens;
+      const k = (y - by0) * bw + (x - bx0);
+      if (a > buf[k]) buf[k] = a;
+    }
+  }
+  drawDrips(buf, bx0, by0, bx1, by1, bw, drips, dens);
+  if (opts.mask) applyMask(buf, bx0, by0, bw, bh, opts.mask, seed);
+  RD.compositePigment(canvas, buf, bx0, by0, bw, bh, rgb, 'over', opts.alphaMul == null ? 1 : opts.alphaMul);
+}
+
 // ------------------------------------------------------------------ SPRAY
 // Cómo pinta un bote: la pintura sale en cono. En el centro tapa del todo; hacia fuera se deshace en motas (más
 // ancho y más blando con boquilla gorda), y más lejos queda una nube de puntitos. Donde la mano para o va
@@ -482,6 +593,7 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
 // sobra chorrea hacia abajo; el trazo que se retira deprisa acaba deshaciéndose. La boquilla escupe gotas.
 // opts: { goteo 0..1, nube 0..1, mask, alphaMul, inkMul, contIn, contOut }
 function paintSpray(canvas, pts, P, r, rgb, seed, opts) {
+  if (P.flat) return paintFlat(canvas, pts, P, r, rgb, seed, opts);
   const rnd = R.mulberry32(((seed >>> 0) ^ 0x9e3779b9) >>> 0);
   r = Math.max(P.minR || 1, r);
   const Q = resample(pts, Math.max(0.6, r * 0.3)), n = Q.length;
@@ -522,10 +634,12 @@ function paintSpray(canvas, pts, P, r, rgb, seed, opts) {
     for (let d = 0; d < nD && tot > 1e-6; d++) {
       let t = rnd() * tot, i = 0; while (i < n - 1 && (t -= W[i]) > 0) i++;
       const q = Q[i], rr = r * K[i];
-      const w0 = Math.max(0.7, r * (0.27 + 0.22 * rnd()) * (P.mop ? 1.1 : 1));   // (un chorretón mide ~un tercio del trazo)
+      const w0 = Math.max(0.7, r * (P.mop ? 0.28 + 0.2 * rnd() : 0.16 + 0.16 * rnd()));   // (fino en el spray, gordo en el mop)
       // (casi todos cortos; alguno se escapa muy abajo; los gordos llevan más pintura y bajan más)
       const len = r * (1.5 + 20 * Math.pow(rnd(), 2.4)) * (0.3 + 1.4 * goteo) * (P.mop ? 1.2 : 1) * (0.6 + w0 / (r * 0.8));
       drips.push({ x: q.x + (rnd() - 0.5) * rr * 0.9, y: q.y + rr * 0.5, w: w0, len, sd: (seed + d * 131) | 0 });
+      // (donde chorrea uno suelen chorrear dos o tres, cada uno hasta una altura)
+      if (rnd() < 0.45) drips.push({ x: q.x + (rnd() < 0.5 ? -1 : 1) * r * (0.7 + 0.9 * rnd()), y: q.y + rr * 0.45, w: w0 * (0.6 + 0.35 * rnd()), len: len * (0.2 + 0.5 * rnd()), sd: (seed + d * 131 + 77) | 0 });
       for (let j = Math.max(0, i - 8); j < Math.min(n, i + 9); j++) { tot -= W[j] * 0.9; W[j] *= 0.1; }   // no dos pegados
     }
   }
@@ -567,46 +681,43 @@ function paintSpray(canvas, pts, P, r, rgb, seed, opts) {
     }
   }
   // ---- cobertura: cuerpo, borde que se deshace en motas, nube
+  // Un trazo de bote de verdad no es un aerógrafo: el cuerpo tapa del todo; el borde no es un círculo (la presión
+  // y la mano lo ondulan); del cuerpo a la nube no hay degradado gris sino motas muy juntas que se van separando,
+  // de tamaños distintos; y donde el trazo se va (final al vuelo) el chorro se estrecha y se deshace en motas.
   const buf = new Float32Array(bw * bh);
-  const cell = Math.max(1, r * 0.09), hs = (seed % 9973) + 11, fillP = P.fill == null ? 1 : P.fill;
+  const hs = (seed % 9973) + 11, fillP = P.fill == null ? 1 : P.fill;
   const dens = Math.min(1, (P.dens || 1) * (opts.inkMul == null ? 1 : Math.max(0.85, opts.inkMul)));
+  const cF = Math.max(1, r * 0.045), cM = Math.max(1.6, r * 0.13), cG = Math.max(3, r * 0.34);
+  const dot = (X, Y, cell, sd, p, rad) => {       // ¿cae una mota redonda (de tamaño variable) en este píxel?
+    const cx = Math.floor(X / cell), cy = Math.floor(Y / cell), h = R.hash2(cx, cy, sd);
+    if (h >= p) return 0;
+    const fx = X / cell - cx - (0.2 + 0.6 * R.hash2(cx, cy, sd + 7)), fy = Y / cell - cy - (0.2 + 0.6 * R.hash2(cx, cy, sd + 13)), rr = rad * (0.35 + 0.65 * h / p);
+    return fx * fx + fy * fy < rr * rr ? 1 : 0;
+  };
   for (let y = 0; y < bh; y++) for (let x = 0; x < bw; x++) {
-    const k = y * bw + x, u = U[k];
-    if (u >= e2) continue;
-    const X = bx0 + x, Y = by0 + y, cx = Math.floor(X / cell), cy = Math.floor(Y / cell);
-    const h = R.hash2(cx, cy, hs);
+    const k = y * bw + x;
+    if (U[k] >= e2) continue;
+    const X = bx0 + x + 0.5, Y = by0 + y + 0.5, dd = DD[k];
+    let u = U[k] * (1 + 0.09 * R.noise2(X / (r * 1.7 + 1), Y / (r * 1.7 + 1), hs + 21) + 0.05 * R.noise2(X / (r * 0.45 + 1), Y / (r * 0.45 + 1), hs + 22));
+    if (dd < 0.97) u /= 0.5 + 0.5 * dd;
     let c = 0;
     if (u <= core) {
+      c = 1;
       // (seco: el bote va lejos o casi vacío y el grano de la pared se queda sin tapar, a manchas)
-      c = fillP >= 1 ? 1 : (h < fillP * (0.7 + 0.6 * R.noise2(X / (r * 1.6 + 1), Y / (r * 1.6 + 1), hs + 3)) + 0.25 * (1 - u / core) ? 1 : 0);
+      if (fillP < 1) c = R.hash2(Math.floor(X / cM), Math.floor(Y / cM), hs) < fillP * (0.7 + 0.6 * R.noise2(X / (r * 1.6 + 1), Y / (r * 1.6 + 1), hs + 3)) + 0.25 * (1 - u / core) ? 1 : 0;
+      if (dd < 0.97 && R.hash2(Math.floor(X / cF), Math.floor(Y / cF), hs + 40) > Math.pow(dd, 1.3) * 1.05) c = dot(X, Y, cM, hs + 41, dd * 0.7, 0.6);
     } else if (u < e1) {
-      const t = (u - core) / (e1 - core), p = (1 - t) * (1 - t);
-      // (la neblina llega hasta el cuerpo: sin ella quedaba un cerco claro entre el borde y la nube)
-      c = Math.max(0.5 * p * fillP, h < p * fillP ? 1 : 0, (P.haze || 0) * 0.18 * nube);
+      const t = (u - core) / (e1 - core), p = Math.pow(1 - t, 1.6) * fillP * (dd < 0.97 ? dd : 1);
+      c = Math.max(R.hash2(Math.floor(X / cF), Math.floor(Y / cF), hs) < p * 1.1 ? 1 : 0, dot(X, Y, cM, hs + 3, p * 0.75, 0.62));
     } else {
-      const t = (u - e1) / (e2 - e1), q3 = (1 - t) * (1 - t) * (1 - t);
-      if (h < 0.3 * nube * q3) {
-        const h2 = R.hash2(cx, cy, hs + 7), fx = X / cell - cx - (0.25 + 0.5 * h2), fy = Y / cell - cy - (0.25 + 0.5 * R.hash2(cx, cy, hs + 13));
-        if (fx * fx + fy * fy < 0.1 + 0.2 * h2) c = 0.9;
-      }
-      c = Math.max(c, (P.haze || 0) * 0.18 * nube * (1 - t) * (1 - t));
+      const q = Math.exp(-3.2 * (u - e1) / (e2 - e1 + 1e-6)) * nube;
+      c = Math.max(dot(X, Y, cF * 1.3, hs + 5, 0.16 * q, 0.5), dot(X, Y, cM, hs + 9, 0.1 * q, 0.5), dot(X, Y, cG, hs + 15, 0.035 * q, 0.42));
     }
-    buf[k] = c * dens * DD[k];
+    // neblina: polvo finísimo alrededor, desigual, que llega hasta el cuerpo
+    if (u > core && P.haze) c = Math.max(c, P.haze * 0.15 * nube * Math.exp(-2.4 * (u - core) / (e2 - core)) * (0.6 + 0.5 * R.noise2(X / (r * 2.2 + 1), Y / (r * 2.2 + 1), hs + 30)));
+    buf[k] = c * dens;
   }
-  // ---- chorretones: un hilo que baja, algo más ancho donde nace, con su gota al final
-  for (const d of drips) {
-    const yA = Math.max(by0, Math.floor(d.y)), yB = Math.min(by1 - 1, Math.ceil(d.y + d.len + d.w * 1.5));
-    const bead = d.w * 1.25, yb = d.y + d.len;
-    for (let Y = yA; Y <= yB; Y++) {
-      const yy = Y + 0.5 - d.y, t = yy / d.len;
-      let hw = t <= 1 ? d.w * (1 - 0.3 * t) * (1 + 0.6 * Math.exp(-yy / (d.w * 3))) : 0;
-      const dyb = Y + 0.5 - yb; if (Math.abs(dyb) < bead) hw = Math.max(hw, Math.sqrt(bead * bead - dyb * dyb));
-      if (hw <= 0) continue;
-      const xc = d.x + d.w * 0.5 * R.noise1(yy / (d.w * 9 + 2), d.sd);
-      const xA = Math.max(bx0, Math.floor(xc - hw - 1)), xB = Math.min(bx1 - 1, Math.ceil(xc + hw + 1));
-      for (let X = xA; X <= xB; X++) { const al = Math.max(0, Math.min(1, hw - Math.abs(X + 0.5 - xc) + 0.5)) * dens, k = (Y - by0) * bw + (X - bx0); if (al > buf[k]) buf[k] = al; }
-    }
-  }
+  drawDrips(buf, bx0, by0, bx1, by1, bw, drips, dens);
   for (const p of spots) {
     const xA = Math.max(bx0, Math.floor(p.x - p.r - 1)), xB = Math.min(bx1 - 1, Math.ceil(p.x + p.r + 1)), yA = Math.max(by0, Math.floor(p.y - p.r - 1)), yB = Math.min(by1 - 1, Math.ceil(p.y + p.r + 1));
     for (let Y = yA; Y <= yB; Y++) for (let X = xA; X <= xB; X++) { const al = Math.max(0, Math.min(1, p.r - Math.hypot(X + 0.5 - p.x, Y + 0.5 - p.y) + 0.5)) * dens, k = (Y - by0) * bw + (X - bx0); if (al > buf[k]) buf[k] = al; }
