@@ -104,7 +104,7 @@ function genParams() {
     contrast: st.contraste / 50, leading: st.inter / 100, align: st.align, stretch: 1 + st.llenar / 100,
     xFill: st.llenar / 150, margin: st.margen / 100, track: st.tight / 50 * 0.07,
     // (el grosor de la técnica pide su aire entre letras; el reparto en líneas no depende de él: layout.canon)
-    inkPad: INK.preset(st.tool, st.preset).w * (curMode() === 'cursiva' && FN.styleOf(styleKey()).weightS || FN.styleOf(styleKey()).weight) * Math.pow(2, st.grosor / 50)
+    inkPad: INK.preset(st.tool, st.preset).w * (INK.preset(st.tool, st.preset).padK || 1) * (curMode() === 'cursiva' && FN.styleOf(styleKey()).weightS || FN.styleOf(styleKey()).weight) * Math.pow(2, st.grosor / 50)
   };
 }
 function handParams() {

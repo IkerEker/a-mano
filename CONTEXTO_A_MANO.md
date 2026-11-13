@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.27)
+## 2. Cómo se usa (2.28)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -618,6 +618,30 @@ rollo de un tóner». Referencias en `referencias/tipos/graffiti_*.png`.
   veces traqueteo en zigzag; al cruzarse dos bandas se suman. Letra geométrica con vueltas anchas (`roundR`).
 - Pruebas: las 6 firmas en `tests/sim/harness.js` (66).
 
+### 2.28 — Borrón y Rodillo rehechos (letra y pintura)
+Pedido (con capturas de la 2.27): «esta tipografía no se parece en nada a la muestra; el efecto tóner tiene que ser
+muchísimo más realista» y, de Borrón, «lo mismo: la tipo está mal y a la tinta le falta muchísimo realismo;
+ultrarrealista, detallado, finísimo». Lo que fallaba: eran las mayúsculas de siempre con otra textura; el rodillo
+salía casi hueco (parecía letra de contorno) y el empapado era un desenfoque gris.
+- **Letras propias** (`skeleton.js`): `geoPath()` construye letras con rectas y arcos de círculo. `RODILLO`
+  (`capsRodillo`, A–Z y 0–9): como se pinta con rodillo: barras rectas con corte a escuadra que se cruzan y se pasan
+  un poco en las uniones, y vueltas de medio círculo (la W de cuatro barras, el 2 de arco + diagonal + base, el 4 de
+  tres barras...). `BLOB` (`capsBlob`): redonda, de una caja (i con punto, n y m de arcos, e de dos panzas, O
+  circular); lo que falta lo toma de `capsRodillo`. Estilos: `zoom` y `bigO` (cada letra de un tamaño; O, Q y 0
+  enormes).
+- **Empapado** (`paintSoak`): ya no hay «tubo» con borde. Se suma en una rejilla la pintura que cae (chorro + nube;
+  más donde la mano arranca, para o gira) y cada píxel se mancha o no con probabilidad 1 − e^(−pintura) contra un
+  umbral de grano fino + grumos + trama de la tela. Resultado: centro negro, borde de grano (no difuminado), trama en
+  las medias tintas, hilos que se llevan la pintura a lo largo y a lo ancho, motas, gotas negras y borrones grises.
+  La rejilla va anclada al documento (sale igual por franjas). En trazos muy pequeños el borde se suaviza.
+- **Rodillo** (`paintBand`): cientos de hilos finos a lo largo, cada uno con su carga, que se abren y se juntan;
+  aguada clara a franjas; zonas cargadas en negro con hilos secos; cantos con raya negra irregular (a veces otra por
+  dentro) que ondulan por separado; costuras en el arranque, al levantar y en paradas a medio trazo (tras cada una
+  los hilos no casan); extremos en corte recto algo torcido; motas; traqueteo. Los lazos se cierran pisándose. En
+  multiplicar: los cruces se suman. Banda más estrecha (0,085 em) para que las letras respiren.
+- `padK` en una punta: aire extra en el encaje (el empapado mancha más ancho que su trazo).
+- Pruebas visuales: `tests/node/letras/graf3.js` (pocas letras grandes, una frase, y la frase a 520 px).
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -677,7 +701,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.27.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.28.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)

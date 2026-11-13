@@ -1,8 +1,8 @@
-A MANO 2.27 · plugin para Photoshop (2024 o posterior)
+A MANO 2.28 · plugin para Photoshop (2024 o posterior)
 =====================================================
 
 INSTALAR
-- Doble clic en A_mano_v2.27.0.ccx -> Creative Cloud avisa de que no viene del
+- Doble clic en A_mano_v2.28.0.ccx -> Creative Cloud avisa de que no viene del
   Marketplace -> "Instalar". Sustituye a las versiones anteriores. Es independiente de Cartelator.
 - En Photoshop: Plugins > A mano.
 
@@ -59,7 +59,9 @@ GENERAR, de arriba abajo
    FIRMAS de Graffiti (salen aquí cuando la técnica es Graffiti; cada una trae su punta, que luego se puede cambiar):
    · Tag: alta, estrecha e inclinada, a punta plana.          · Rabia: a zarpazos, alta y angulosa, a barra seca.
    · Bomba: mayúsculas gordas y torpes, a bote gordo.         · De un trazo: todo ligado, con lazos, a mop.
-   · Borrón: gordas y blandas, empapadas en la tela.          · Rodillo: geométrica, de banda ancha y translúcida.
+   · Borrón: redonda y gordísima, empapada en la tela; cada letra de un tamaño (las redondas, enormes).
+   · Rodillo: barras a escuadra que se cruzan y vueltas de medio círculo, a rodillo de tóner.
+   Borrón y Rodillo lucen con pocas letras grandes: el grano y los hilos necesitan tamaño para verse.
 - LEGIBILIDAD: de garabato a muy legible.
 - "Escribir en la forma": crea un grupo "✍ A mano · ..." con lo escrito y la forma
   (invisible). Para cambiarlo, selecciona el grupo, deforma la forma o cambia

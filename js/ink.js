@@ -84,9 +84,9 @@ TOOLS.spray = {
     plano: { label: 'Plano', proc: 'spray', flat: true, w: 0.085, dens: 1, nib: -0.62, thick: 0.2, dry: 0.5, drip: 0.5, blend: 'over', tremor: 0.4, lift: 0, minR: 1.2 },
     rastro: { label: 'Barra', proc: 'spray', flat: true, w: 0.08, dens: 1, nib: -0.45, thick: 0.3, dry: 0.85, drip: 0, blend: 'over', tremor: 0.4, lift: 0, minR: 1.2 },
     // empapado: bote sobre tela o papel que chupa: la pintura cala y se corre, sin borde, con la trama a la vista
-    empapado: { label: 'Empapado', proc: 'spray', soak: true, w: 0.11, dens: 1, core: 0.42, soft: 1.15, mist: 0.6, drip: 0, spit: 1.6, spotK: 2.6, fill: 1, haze: 0, flare: 0.25, swell: 0.5, puls: 0.17, blend: 'over', tremor: 0.5, lift: 0, minR: 1.5 },
+    empapado: { label: 'Empapado', proc: 'spray', soak: true, w: 0.095, padK: 1.3, dens: 1, drip: 0, spit: 1.5, blend: 'over', tremor: 0.5, lift: 0, minR: 1.5 },
     // rodillo de tóner: banda ancha, translúcida y rayada, con los cantos cargados (se suma al cruzarse)
-    rodillo: { label: 'Rodillo', proc: 'spray', band: true, w: 0.12, dens: 1, drip: 0, blend: 'multiply', tremor: 0.2, lift: 0, minR: 3 }
+    rodillo: { label: 'Rodillo', proc: 'spray', band: true, w: 0.085, dens: 1, drip: 0, blend: 'multiply', tremor: 0.15, lift: 0, minR: 3 }
   }
 };
 TOOL_ORDER.push('spray');
@@ -499,30 +499,166 @@ function drawDrips(buf, bx0, by0, bx1, by1, bw, drips, dens) {
   }
 }
 
-// RODILLO (rodillo de tóner, rasqueta): una banda ancha que la mano arrastra de canto. Deja una aguada translúcida
-// rayada a lo largo (cientos de hilos), con el tóner amontonado en los dos cantos y una raya oscura donde arranca y
-// donde se levanta; donde va cargado, negro; donde dos bandas se cruzan, se suman (se pinta en multiplicar).
+// EMPAPADO: bote sobre tela o papel que chupa. No se dibuja un «tubo» con borde: se va sumando la pintura que cae
+// (el chorro y la nube; más donde la mano para, repasa o gira) y luego cada punto de la tela se mancha o no según
+// cuánta le ha caído. Así el centro se empapa (negro del todo), el borde es grano y no difuminado, la trama de los
+// hilos asoma en las medias tintas y los hilos tiran de la pintura a lo largo y a lo ancho.
+function paintSoak(canvas, pts, P, r, rgb, seed, opts) {
+  const rnd = R.mulberry32(((seed >>> 0) ^ 0x2545f491) >>> 0);
+  r = Math.max(P.minR || 1.5, r);
+  const nube = opts.nube == null ? 0.5 : opts.nube, goteo = opts.goteo == null ? 0.45 : opts.goteo, isFill = !!opts.mask;
+  const Q = resample(pts, Math.max(0.6, r * 0.25)), n = Q.length;
+  if (n < 2) return;
+  const Ls = Q[n - 1].s;
+  const far = 1 + (rnd() < 0.3 ? 0.55 * rnd() : 0);                     // (algunos trazos, con el bote más lejos)
+  const sc = 0.55 * r, sH = (1.5 + 1.1 * nube) * r * far;
+  const lam0 = 7.5 * (P.dens || 1) * (opts.inkMul == null ? 1 : opts.inkMul), lamH = 0.32 * (0.35 + 1.3 * nube) * far;
+  // ---- cuánta pintura suelta la mano en cada tramo
+  const dw0 = isFill || opts.contIn ? 0 : 1 + 3.6 * rnd() * rnd(), dw1 = isFill || opts.contOut ? 0 : 0.6 + 3 * rnd() * rnd();
+  const fade = !isFill && !opts.contOut && Ls > r * 4 && rnd() < 0.2;    // a veces el trazo se va al vuelo
+  const W = new Float32Array(n), K = new Float32Array(n);
+  let wTot = 0;
+  for (let i = 0; i < n; i++) {
+    const q = Q[i], a = Q[Math.max(0, i - 5)], b = Q[Math.min(n - 1, i + 5)];
+    const ds = i === 0 ? (Q[1].s - q.s) / 2 : i === n - 1 ? (q.s - Q[n - 2].s) / 2 : (Q[i + 1].s - Q[i - 1].s) / 2;
+    let turn = 0;
+    const ux = q.x - a.x, uy = q.y - a.y, vx = b.x - q.x, vy = b.y - q.y, lu = Math.hypot(ux, uy), lv = Math.hypot(vx, vy);
+    if (lu > 1e-6 && lv > 1e-6) turn = Math.acos(Math.max(-1, Math.min(1, (ux * vx + uy * vy) / (lu * lv)))) / Math.PI;
+    let w = (1 + 1.4 * turn + 0.3 * R.noise1(q.s / (r * 3.5 + 1), seed + 3)) * (1 + dw0 * Math.exp(-q.s / (r * 0.7)) + (fade ? 0 : dw1 * Math.exp(-(Ls - q.s) / (r * 0.7))));
+    let k = far * (1 + 0.16 * R.noise1(q.s / (r * 6 + 1), seed + 5));
+    if (fade) { const t = smooth01(0, Math.min(Ls * 0.45, r * 5), Ls - q.s); w *= 0.1 + 0.9 * t; k *= 1.5 - 0.5 * t; }
+    W[i] = ds * w; K[i] = k; wTot += W[i];
+  }
+  // (un toque de bote —punto, tilde— deja al menos su borrón)
+  if (Ls < r * 2 && !isFill) { const want = r * (1.5 + 1.2 * rnd()), f = want / Math.max(1e-6, wTot); if (f > 1) for (let i = 0; i < n; i++) W[i] *= f; }
+  // ---- gotas que escupe la boquilla y borrones que la tela chupa
+  const drops = [];
+  if (!isFill) {
+    const nD = Math.floor((P.spit || 0) * (0.3 + 1.4 * nube) * (0.6 + 3.2 * rnd() * rnd()) * Math.min(1.6, 0.35 + Ls / (r * 8)));
+    for (let k = 0; k < nD; k++) {
+      const q = Q[Math.floor(rnd() * n)], a = rnd() * 6.283, d = r * (1.2 + 3.6 * rnd() * rnd());
+      drops.push({ x: q.x + Math.cos(a) * d, y: q.y + Math.sin(a) * d * 0.9 + d * 0.25, r: Math.max(0.7, r * (0.03 + 0.3 * Math.pow(rnd(), 3.4))), gray: 0, sd: (seed + k * 37) | 0 });
+    }
+    if (rnd() < 0.12 + 0.4 * goteo) { const q = Q[Math.floor(rnd() * n)], a = rnd() * 6.283, d = r * (0.8 + 2.4 * rnd()); drops.push({ x: q.x + Math.cos(a) * d, y: q.y + Math.abs(Math.sin(a)) * d, r: r * (0.22 + 0.5 * rnd()), gray: 0.22 + 0.4 * rnd(), sd: (seed + 911) | 0 }); }
+  }
+  // ---- caja
+  const pad = 3.1 * sH * 1.6 + 4;
+  let bx0 = Infinity, by0 = Infinity, bx1 = -Infinity, by1 = -Infinity;
+  for (const q of Q) { if (q.x < bx0) bx0 = q.x; if (q.x > bx1) bx1 = q.x; if (q.y < by0) by0 = q.y; if (q.y > by1) by1 = q.y; }
+  bx0 -= pad; by0 -= pad; bx1 += pad; by1 += pad;
+  for (const d of drops) { const e = d.r * 2.4 + 3; bx0 = Math.min(bx0, d.x - e); bx1 = Math.max(bx1, d.x + e); by0 = Math.min(by0, d.y - e); by1 = Math.max(by1, d.y + e); }
+  bx0 = Math.max(canvas.x0, Math.floor(bx0)); by0 = Math.max(canvas.y0, Math.floor(by0));
+  bx1 = Math.min(canvas.x0 + canvas.w, Math.ceil(bx1)); by1 = Math.min(canvas.y0 + canvas.h, Math.ceil(by1));
+  const bw = bx1 - bx0, bh = by1 - by0;
+  if (bw <= 0 || bh <= 0 || bw * bh > 5e7) return;
+  // ---- la pintura que cae, sumada en una rejilla (anclada al documento: sale igual se pinte por franjas o entera)
+  const q = Math.max(1, r / 7), ox = Math.floor(bx0 / q) * q, oy = Math.floor(by0 / q) * q;
+  const gw = Math.ceil((bx1 - ox) / q) + 2, gh = Math.ceil((by1 - oy) / q) + 2;
+  const GC = new Float32Array(gw * gh), GH = new Float32Array(gw * gh);
+  const splat = (G, px, py, sig, A) => {
+    const cx = (px - ox) / q, cy = (py - oy) / q, sg = sig / q, R3 = 3 * sg, i2 = 1 / (2 * sg * sg);
+    const x0 = Math.max(0, Math.floor(cx - R3)), x1 = Math.min(gw - 1, Math.ceil(cx + R3)), y0 = Math.max(0, Math.floor(cy - R3)), y1 = Math.min(gh - 1, Math.ceil(cy + R3));
+    for (let gy = y0; gy <= y1; gy++) { const dy = gy - cy, row = gy * gw; for (let gx = x0; gx <= x1; gx++) { const dx = gx - cx, d2 = dx * dx + dy * dy; if (d2 < R3 * R3) G[row + gx] += A * Math.exp(-d2 * i2); } }
+  };
+  for (let i = 0; i < n; i++) {
+    const p = Q[i], k = K[i];
+    splat(GC, p.x, p.y, sc * k, lam0 * W[i] / (sc * 2.5066 * k * k));
+    if (i % 2 === 0) splat(GH, p.x, p.y, sH * k / far, lamH * (W[i] + (i + 1 < n ? W[i + 1] : 0)) / (sH * k / far * 2.5066));
+  }
+  // ---- cada punto de la tela, ¿se mancha?
+  const buf = new Float32Array(bw * bh);
+  const hs = (seed % 9973) + 11, fine = Math.max(1, r * 0.022), wvP = Math.max(2.3, r * 0.055), wf = 6.2832 / wvP;
+  const thr = (X, Y) => {        // umbral: grano fino + grumos + trama de la tela (la trama es la misma para todos los trazos)
+    const g1 = R.hash2(Math.floor(X / fine), Math.floor(Y / fine), hs + 1), g2 = R.hash2(Math.floor(X / (fine * 2.7)), Math.floor(Y / (fine * 2.7)), hs + 2);
+    const wx = X + wvP * 0.6 * R.noise2(X / (wvP * 9), Y / (wvP * 9), 91), wy = Y + wvP * 0.6 * R.noise2(X / (wvP * 9) + 31, Y / (wvP * 9), 92);
+    return 0.04 + 0.92 * ((0.8 - wvK) * g1 + 0.2 * g2 + wvK * (0.5 + 0.25 * (Math.sin(wx * wf) + Math.sin(wy * wf))));
+  };
+  const wvK = 0.32 * smooth01(5, 16, r);
+  const cS = fine * 2.5, soft = 0.05 + 0.22 * (1 - smooth01(5, 18, r));     // (trazo muy pequeño: el grano no cabe; borde más suave)
+  for (let y = 0; y < bh; y++) {
+    const Y = by0 + y + 0.5, gyf = (Y - oy) / q, gy0 = Math.floor(gyf), fy = gyf - gy0;
+    if (gy0 < 0 || gy0 >= gh - 1) continue;
+    for (let x = 0; x < bw; x++) {
+      const X = bx0 + x + 0.5, gxf = (X - ox) / q, gx0 = Math.floor(gxf), fx = gxf - gx0;
+      if (gx0 < 0 || gx0 >= gw - 1) continue;
+      const i00 = gy0 * gw + gx0, i10 = i00 + 1, i01 = i00 + gw, i11 = i01 + 1;
+      const lc = (GC[i00] * (1 - fx) + GC[i10] * fx) * (1 - fy) + (GC[i01] * (1 - fx) + GC[i11] * fx) * fy;
+      const lh = (GH[i00] * (1 - fx) + GH[i10] * fx) * (1 - fy) + (GH[i01] * (1 - fx) + GH[i11] * fx) * fy;
+      if (lc + lh < 0.003) continue;
+      // la tela no chupa igual en todas partes (manchas) y los hilos se llevan la pintura a lo largo y a lo ancho
+      const m1 = R.noise2(X / (r * 1.3 + 1), Y / (r * 1.3 + 1), hs + 21), m2 = R.noise2(X / (r * 0.3 + 1), Y / (r * 0.3 + 1), hs + 22);
+      const th = Math.max(R.noise2(X / (r * 0.7 + 2), Y / (fine * 1.5), 77), R.noise2(X / (fine * 1.5), Y / (r * 0.7 + 2), 78));
+      const lam = lc * (1 + 0.28 * m1 + 0.2 * m2 + 0.34 * th) + lh * (1 + 0.5 * m1) + 0.012 * nube * Math.sqrt(lh / lamH);
+      const p = 1 - Math.exp(-lam);
+      let a = smooth01(-soft, soft, p - thr(X, Y));
+      // motas sueltas de la nube, algo mayores que el grano
+      if (a < 1 && lam < 0.7) { const cx = Math.floor(X / cS), cy = Math.floor(Y / cS), h = R.hash2(cx, cy, hs + 5); if (h < lam * 0.2) { const ex = X / cS - cx - (0.25 + 0.5 * R.hash2(cx, cy, hs + 6)), ey = Y / cS - cy - (0.25 + 0.5 * R.hash2(cx, cy, hs + 7)); if (ex * ex + ey * ey < 0.06 + 0.12 * R.hash2(cx, cy, hs + 8)) a = 1; } }
+      buf[y * bw + x] = a;
+    }
+  }
+  for (const d of drops) {
+    const e = d.r * (d.gray ? 1.2 : 2.4) + 2;
+    const xA = Math.max(bx0, Math.floor(d.x - e)), xB = Math.min(bx1 - 1, Math.ceil(d.x + e)), yA = Math.max(by0, Math.floor(d.y - e)), yB = Math.min(by1 - 1, Math.ceil(d.y + e));
+    for (let Y = yA; Y <= yB; Y++) for (let X = xA; X <= xB; X++) {
+      const dx = X + 0.5 - d.x, dy = Y + 0.5 - d.y, dist = Math.hypot(dx, dy);
+      const rr = d.r * (1 + 0.13 * R.noise1(Math.atan2(dy, dx) * 1.7 + d.sd % 97, d.sd));
+      let a = 0;
+      if (d.gray) { const t = dist / rr; if (t > 1.12) continue; a = d.gray * (1 - smooth01(0.7, 1.12, t)) > thr(X + 0.5, Y + 0.5) ? 1 : 0; }
+      else { a = Math.max(0, Math.min(1, rr - dist + 0.5)); if (a < 1 && 0.6 * Math.exp(-(dist - rr) / (rr * 0.4 + 1)) > thr(X + 0.5, Y + 0.5)) a = 1; }
+      const k = (Y - by0) * bw + (X - bx0);
+      if (a > buf[k]) buf[k] = a;
+    }
+  }
+  if (opts.mask) applyMask(buf, bx0, by0, bw, bh, opts.mask, seed);
+  RD.compositePigment(canvas, buf, bx0, by0, bw, bh, rgb, 'over', opts.alphaMul == null ? 1 : opts.alphaMul);
+}
+
+// RODILLO (rodillo de tóner): una banda ancha que la mano arrastra de canto. Lo que deja no es un gris liso:
+//  · cientos de hilos finos a lo largo (los surcos del rodillo), cada uno con su carga, que se abren y se juntan;
+//  · una aguada entre ellos, a franjas; zonas donde va cargado y sale negro, con hilos secos en blanco;
+//  · el tóner amontonado en los dos cantos (una raya negra irregular, a veces con otra fina por dentro);
+//  · una costura oscura donde el rodillo se apoya, donde se levanta y donde se para a medio trazo (y tras cada
+//    parada los hilos ya no casan); extremos en corte recto, algo torcido; motas; a ratos, traqueteo en zigzag.
+// Se pinta en multiplicar: donde dos bandas se cruzan, se suman.
 function paintBand(canvas, pts, P, r, rgb, seed, opts) {
   const rnd = R.mulberry32(((seed >>> 0) ^ 0x7f4a7c15) >>> 0);
   r = Math.max(P.minR || 2, r);
+  // (un toque —punto, tilde—: el rodillo no puede dejar menos que un cuadradito)
+  { const a = pts[0], b = pts[pts.length - 1]; let L0 = 0; for (let i = 1; i < pts.length; i++) L0 += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
+    if (L0 < r * 1.3) { let dx = b.x - a.x, dy = b.y - a.y; const l = Math.hypot(dx, dy); if (l < 0.5) { dx = 0.2; dy = 1; } const m = Math.hypot(dx, dy), cx = (a.x + b.x) / 2, cy = (a.y + b.y) / 2, h = r * 0.7; pts = [{ x: cx - dx / m * h, y: cy - dy / m * h }, { x: cx + dx / m * h, y: cy + dy / m * h }]; } }
   const Q = resample(pts, Math.max(0.8, r * 0.12)), n = Q.length;
   if (n < 2) return;
   const Ls = Q[n - 1].s;
   if (Ls < 0.5) return;
-  const hwK = Math.min(1, 0.4 + Ls / (r * 3.2));          // (puntos y tildes: un toque más estrecho)
-  const HW = new Float32Array(n);
-  for (let i = 0; i < n; i++) HW[i] = r * hwK * (0.97 + 0.05 * R.noise1(Q[i].s / (r * 9 + 1), seed + 9)) * (0.85 + 0.15 * (Q[i].w == null ? 1 : Q[i].w));
-  const pad = r * 1.1 + 3;
+  const hw0 = r, HWm = hw0 * 1.07, W2 = 2 * hw0;
+  const pad = HWm + 3;
   let bx0 = Infinity, by0 = Infinity, bx1 = -Infinity, by1 = -Infinity;
   for (const q of Q) { if (q.x < bx0) bx0 = q.x; if (q.x > bx1) bx1 = q.x; if (q.y < by0) by0 = q.y; if (q.y > by1) by1 = q.y; }
   bx0 = Math.max(canvas.x0, Math.floor(bx0 - pad)); by0 = Math.max(canvas.y0, Math.floor(by0 - pad));
   bx1 = Math.min(canvas.x0 + canvas.w, Math.ceil(bx1 + pad)); by1 = Math.min(canvas.y0 + canvas.h, Math.ceil(by1 + pad));
   const bw = bx1 - bx0, bh = by1 - by0;
+  // ---- cómo viene este trazo (se decide antes de mirar la caja: sale igual se pinte por franjas o entero)
+  const ink01 = opts.inkMul == null ? 0.5 : Math.max(0, Math.min(1.6, (opts.inkMul - 0.88) / 0.24));
+  // (casi todos los trazos van con poco tóner: aguada clara con los hilos marcados; alguno sale cargado)
+  const tone = (rnd() < 0.12 ? 0.42 + 0.35 * rnd() : 0.06 + 0.24 * rnd() * rnd()) * (0.5 + ink01);
+  const T1 = Math.max(4, Math.min(190, W2 / 2.2)), px1 = W2 / T1, T2 = T1 * 2.7;
+  const fine = smooth01(40, 110, W2), small = 1 - smooth01(14, 60, W2);
+  const o1 = rnd() * 997, o2 = rnd() * 997, oB = rnd() * 97, tilt = (rnd() - 0.5) * 0.9;
+  const A0 = Q[0], A1 = Q[Math.min(n - 1, 3)], E1 = Q[n - 1], E0 = Q[Math.max(0, n - 4)];
+  const dir = (a, b, rot) => { let x = b.x - a.x, y = b.y - a.y; const l = Math.hypot(x, y) || 1; x /= l; y /= l; const c = Math.cos(rot), s2 = Math.sin(rot); return [x * c - y * s2, x * s2 + y * c]; };
+  const t0 = dir(A0, A1, (rnd() - 0.5) * 0.14), t1 = dir(E0, E1, (rnd() - 0.5) * 0.14);
+  const sk0 = Math.max(1, r * (0.05 + 0.08 * rnd())), sk1 = rnd() < 0.75 ? Math.max(1, r * (0.04 + 0.08 * rnd())) : 0;
+  const loop = Math.hypot(A0.x - E1.x, A0.y - E1.y) < hw0 * 1.3 && Ls > hw0 * 5;
+  const seams = [];
+  if (Ls > r * 8) { const m = (rnd() < 0.6 ? 1 : 0) + (Ls > r * 16 && rnd() < 0.5 ? 1 : 0); for (let k = 0; k < m; k++) seams.push({ s: Ls * (0.18 + 0.64 * rnd()), skew: (rnd() - 0.5) * 0.8, th: Math.max(1.2, r * (0.03 + 0.06 * rnd())), jump: 3 + rnd() * 40, load: rnd() < 0.5 ? 0.3 + 0.5 * rnd() : 0.05 }); seams.sort((a, b) => a.s - b.s); }
+  const load0 = rnd() < 0.3 ? 0.25 + 0.45 * rnd() : 0.06 * rnd(), loadLen = r * (1.2 + 4 * rnd());
+  const endLoad = rnd() < 0.25 ? 0.15 + 0.4 * rnd() : 0;
+  const chat0 = rnd() < 0.35 ? Ls * (0.1 + 0.6 * rnd()) : -1e9, chatL = r * (0.9 + 2.2 * rnd()), chatP = Math.max(3, r * 0.11), chatA = 0.7 + 1.5 * rnd();
   if (bw <= 0 || bh <= 0 || bw * bh > 5e7) return;
-  // ---- coordenadas de la banda en cada píxel: u (a lo ancho, con signo) y s (a lo largo); extremos en corte recto
+  // ---- coordenadas de la banda en cada píxel: u (a lo ancho, con signo) y s (a lo largo)
   const U = new Float32Array(bw * bh).fill(9), S = new Float32Array(bw * bh);
   for (let i = 0; i < n - 1; i++) {
-    const a = Q[i], b = Q[i + 1], hw = Math.max(HW[i], HW[i + 1]) + 1.5;
+    const a = Q[i], b = Q[i + 1], hw = HWm + 1.5;
     const dx = b.x - a.x, dy = b.y - a.y, l2 = dx * dx + dy * dy || 1e-9, dl = Math.sqrt(l2);
     const x0 = Math.max(bx0, Math.floor(Math.min(a.x, b.x) - hw)), x1 = Math.min(bx1 - 1, Math.ceil(Math.max(a.x, b.x) + hw));
     const y0 = Math.max(by0, Math.floor(Math.min(a.y, b.y) - hw)), y1 = Math.min(by1 - 1, Math.ceil(Math.max(a.y, b.y) + hw));
@@ -530,42 +666,75 @@ function paintBand(canvas, pts, P, r, rgb, seed, opts) {
       const px = x + 0.5 - a.x, py = y + 0.5 - a.y;
       let t = (px * dx + py * dy) / l2;
       if (t < 0) { if (i > 0) t = 0; else continue; } else if (t > 1) { if (i < n - 2) t = 1; else continue; }
-      const ex = px - dx * t, ey = py - dy * t, u = Math.hypot(ex, ey) / (HW[i] + (HW[i + 1] - HW[i]) * t);
+      const ex = px - dx * t, ey = py - dy * t, u = Math.hypot(ex, ey) / HWm;
       const k = (y - by0) * bw + (x - bx0);
       if (u < Math.abs(U[k])) { U[k] = dx * ey - dy * ex >= 0 ? u : -u; S[k] = a.s + t * dl; }
     }
   }
-  // ---- la pintura
+  // ---- el tóner
   const buf = new Float32Array(bw * bh);
-  const dens = Math.min(1, (P.dens || 1) * (opts.inkMul == null ? 1 : Math.max(0.85, opts.inkMul)));
-  const o1 = (seed % 613) * 0.71, o2 = (seed % 419) * 1.3, o3 = (seed % 241) * 2.1, hwPx = r * hwK;
-  const loadA = rnd() < 0.35 ? 0.5 + 0.8 * rnd() : 0.12 * rnd(), loadL = r * (1.5 + 5 * rnd()), base = 0.16 + 0.2 * rnd(), tilt = (rnd() - 0.5) * 2;
-  const chat0 = rnd() < 0.3 ? Ls * (0.15 + 0.6 * rnd()) : -1e9, chatL = r * (1 + 2 * rnd()), endK = rnd();
-  // (hilos: tantos como quepan en el ancho; con la banda pequeña, menos y más gordos)
-  const f1 = Math.min(34, hwPx * 0.5), f2 = Math.min(90, hwPx * 0.45), f3 = Math.min(230, hwPx * 0.4);
-  const A0 = Q[0], A1 = Q[Math.min(n - 1, 3)], E1 = Q[n - 1], E0 = Q[Math.max(0, n - 4)];
-  const l0 = Math.hypot(A1.x - A0.x, A1.y - A0.y) || 1, l1 = Math.hypot(E1.x - E0.x, E1.y - E0.y) || 1;
-  const t0x = (A1.x - A0.x) / l0, t0y = (A1.y - A0.y) / l0, t1x = (E1.x - E0.x) / l1, t1y = (E1.y - E0.y) / l1;
+  const dens = Math.min(1, P.dens || 1), cs = Math.max(1.5, r * 0.04);
   for (let y = 0; y < bh; y++) for (let x = 0; x < bw; x++) {
-    const k = y * bw + x, us = U[k], ua = Math.abs(us);
-    if (ua > 1 + 0.6 / hwPx) continue;
-    const s = S[k], X = bx0 + x + 0.5, Y = by0 + y + 0.5;
-    let aa = Math.max(0, Math.min(1, (1 - ua) * hwPx + 0.5));
-    // corte recto en los dos extremos (lo que queda detrás del arranque o más allá del final no se pinta)
-    if (s < hwPx * 1.6) aa = Math.min(aa, (X - A0.x) * t0x + (Y - A0.y) * t0y + 0.5);
-    if (Ls - s < hwPx * 1.6) aa = Math.min(aa, 0.5 - ((X - E1.x) * t1x + (Y - E1.y) * t1y));
+    const k = y * bw + x;
+    if (U[k] > 1 || U[k] < -1) continue;
+    let s = S[k];
+    const X = bx0 + x + 0.5, Y = by0 + y + 0.5, u = U[k] * 1.07, ua = Math.abs(u), sd = u > 0 ? 0 : 1;
+    // los cantos no son paralelos: cada uno ondula por su cuenta
+    const side = 1 + 0.035 * R.noise1(s / (r * 1.3 + 1), seed + 55 + sd) + 0.014 * R.noise1(s / (r * 0.28 + 1), seed + 58 + sd);
+    const dE = (side - ua) * hw0;
+    if (dE < -0.5) continue;
+    let aa = Math.min(1, dE + 0.5), d0 = s, d1 = Ls - s;
+    // extremos en corte recto (algo torcido y deshilachado). En un lazo, lo que cae detrás del arranque es el final
+    // del trazo y lo que pasa del final es el arranque: se pisan (queda la costura, nunca un hueco)
+    if (s < hw0 * 1.8) {
+      d0 = (X - A0.x) * t0[0] + (Y - A0.y) * t0[1] + r * 0.035 * R.noise1(u * 3.7 + o1, seed + 61);
+      if (loop && d0 < 0.5) { s = Ls - 0.01; d0 = 1e9; d1 = 1e9; } else aa = Math.min(aa, d0 + 0.5);
+    }
+    if (d1 < 1e8 && Ls - s < hw0 * 1.8) {
+      d1 = -((X - E1.x) * t1[0] + (Y - E1.y) * t1[1]) + r * 0.035 * R.noise1(u * 3.7 + o2, seed + 62);
+      if (loop && d1 < 0.5) { d1 = 1e9; d0 = Math.max(0, (X - A0.x) * t0[0] + (Y - A0.y) * t0[1]); s = Math.max(0.01, d0); } else aa = Math.min(aa, d1 + 0.5);
+    }
     if (aa <= 0) continue;
-    let u2 = us + 0.012 * R.noise1(s / (r * 2.5 + 1), seed + 51);
-    // (traqueteo: a ratos el rodillo salta y los hilos hacen zigzag)
-    if (s > chat0 && s < chat0 + chatL) u2 += 0.02 * (Math.abs(((s / (r * 0.07 + 1)) % 2) - 1) - 0.5);
-    const c = 0.5 + 0.5 * (0.45 * R.noise1(u2 * f1 + o1, seed + 31) + 0.33 * R.noise1(u2 * f2 + o2, seed + 37) + 0.22 * R.noise1(u2 * f3 + o3, seed + 39));
-    // carga de tóner a lo largo: mucha al arrancar, luego se va; a ratos vuelve. Y nunca apoya parejo: más de un lado
-    const L = base + loadA * Math.exp(-s / loadL) + 0.22 * Math.max(0, R.noise1(s / (r * 4 + 1), seed + 53));
-    let a = L * (0.35 + 1.25 * c * c) * (0.85 + 0.3 * tilt * us);
-    // el tóner se amontona en los cantos (una raya oscura a cada lado) y donde el rodillo arranca y se levanta
-    if (ua > 1 - Math.max(1.4 / hwPx, 0.035 + 0.025 * R.noise1(s / (r * 1.2 + 1), seed + (us > 0 ? 55 : 57)))) a = Math.max(a, 0.92);
-    const eS = Math.max(1.4, r * 0.07);
-    if (s < eS || Ls - s < eS * (0.5 + endK)) a = Math.max(a, 0.8);
+    // paradas a medio trazo: una costura, y a partir de ahí otra pasada (los hilos no casan, la carga vuelve)
+    let jump = 0, sl = s, pl = load0, seamA = 0;
+    for (const m of seams) {
+      const ds = s - (m.s + m.skew * u * hw0);
+      if (ds > 0) { jump += m.jump; sl = ds; pl = m.load; }
+      if (Math.abs(ds) < m.th * (0.6 + 0.8 * (0.5 + 0.5 * R.noise1(u * 4.1 + m.jump, seed + 75)))) seamA = 0.95;
+    }
+    // hilos
+    const wan = R.noise1(s / (r * 3.5 + 1) + jump, seed + 51);
+    let v = (u * 0.5 + 0.5) * T1 + 0.9 * wan + 0.3 * R.noise1(s / (r * 0.8 + 1), seed + 52) + jump;
+    if (s > chat0 && s < chat0 + chatL) v += chatA * (Math.abs(((s - chat0) / chatP) % 2 - 1) - 0.5) * Math.min(1, (s - chat0) / (chatL * 0.2), (chat0 + chatL - s) / (chatL * 0.2));
+    const j = Math.floor(v), f = Math.abs(v - j - 0.5);
+    const h1 = R.hash2(j, 7, seed + 31), h2 = R.hash2(j, 11, seed + 33);
+    const dj = Math.pow(h1, 1.6) * Math.max(0, 0.5 + 0.9 * R.noise1(s / (r * 6 + 1) + j * 7.13, seed + 35));
+    const wj = 0.1 + 0.26 * h2, e = 0.5 / px1;
+    const l1 = 1 - smooth01(wj - e, wj + e, f);
+    let l2 = 0;
+    if (fine > 0) { const v2 = (u * 0.5 + 0.5) * T2 + 2.4 * wan + jump * 1.7 + 0.37, j2 = Math.floor(v2); l2 = Math.pow(R.hash2(j2, 17, seed + 37), 3) * (1 - smooth01(0.12, 0.34, Math.abs(v2 - j2 - 0.5))) * fine; }
+    // aguada a franjas y carga a lo largo
+    const B = 0.5 + 0.5 * R.noise1(u * 2.3 + oB + jump * 0.31, seed + 39);
+    const load = Math.max(0.03, tone * (1 + 0.5 * tilt * u) + pl * Math.exp(-sl / loadLen) + endLoad * smooth01(Ls - r * 5, Ls, s) + 0.08 * R.noise1(s / (r * 4 + 1), seed + 53));
+    let a = load * (0.25 + 0.9 * B * B) + 0.06 * small + l1 * dj * (0.6 + 0.9 * load) * (0.5 + 0.8 * B) + l2 * 0.45 * (0.4 + load);
+    // zonas cargadas: negro, con hilos secos
+    const th = 0.5 - 0.55 * (load - 0.25), patch = smooth01(th, th + 0.16, R.noise2(s / (r * 4.2 + 1) + o1, u * 1.2 + o2, seed + 71));
+    if (patch > 0) a += (1 - a) * patch * (0.95 - 0.7 * (h1 > 0.72 ? l1 : 0) - 0.3 * l2);
+    // cantos
+    const te = Math.max(1.2 - 0.5 * small, hw0 * (0.06 + 0.045 * R.noise1(s / (r * 1.1 + 1), seed + 63 + sd)));
+    if (dE < te) a = Math.max(a, 0.97 - 0.3 * small);
+    else {
+      a += (1 - a) * 0.38 * Math.exp(-(dE - te) / (te * 1.5));
+      const d2 = dE - te * (2.7 + 0.9 * R.noise1(s / (r * 2 + 1), seed + 67));
+      if (Math.abs(d2) < Math.max(0.55, te * 0.28) && R.noise1(s / (r * 3 + 1), seed + 68 + sd) > 0.05) a = Math.max(a, 0.72);
+    }
+    // costuras de arranque y de salida
+    if (d0 < sk0 * (0.6 + 0.8 * (0.5 + 0.5 * R.noise1(u * 3.3 + o1, seed + 73)))) a = Math.max(a, 0.95 - 0.35 * small); else if (d0 < sk0 * 5) a += (1 - a) * 0.3 * Math.exp(-(d0 - sk0) / (sk0 * 1.6));
+    if (sk1 && d1 < sk1 * (0.6 + 0.8 * (0.5 + 0.5 * R.noise1(u * 3.3 + o2, seed + 74)))) a = Math.max(a, 0.92 - 0.35 * small);
+    if (seamA) a = Math.max(a, seamA);
+    // motas
+    const hsp = R.hash2(Math.floor(X / cs), Math.floor(Y / cs), seed + 81);
+    if (hsp < 0.004) a = Math.max(a, 0.8); else if (hsp > 0.9985) a *= 0.4;
     buf[k] = Math.max(0, Math.min(1, a)) * Math.min(1, aa) * dens;
   }
   if (opts.mask) applyMask(buf, bx0, by0, bw, bh, opts.mask, seed);
@@ -672,6 +841,7 @@ function paintFlat(canvas, pts, P, r, rgb, seed, opts) {
 function paintSpray(canvas, pts, P, r, rgb, seed, opts) {
   if (P.flat) return paintFlat(canvas, pts, P, r, rgb, seed, opts);
   if (P.band) return paintBand(canvas, pts, P, r, rgb, seed, opts);
+  if (P.soak) return paintSoak(canvas, pts, P, r, rgb, seed, opts);
   const rnd = R.mulberry32(((seed >>> 0) ^ 0x9e3779b9) >>> 0);
   r = Math.max(P.minR || 1, r);
   const Q = resample(pts, Math.max(0.6, r * 0.3)), n = Q.length;
@@ -776,19 +946,6 @@ function paintSpray(canvas, pts, P, r, rgb, seed, opts) {
     const k = y * bw + x;
     if (U[k] >= e2) continue;
     const X = bx0 + x + 0.5, Y = by0 + y + 0.5, dd = DD[k];
-    if (P.soak) {
-      // EMPAPADO: la pintura cala en la tela y se corre. No hay borde: hay un degradado ancho que la trama de los
-      // hilos rompe en puntitos; por dentro, zonas más y menos cargadas (donde el bote paró, negro del todo)
-      const uu = U[k] * (1 + 0.16 * R.noise2(X / (r * 2.4 + 1), Y / (r * 2.4 + 1), hs + 21) + 0.07 * R.noise2(X / (r * 0.6 + 1), Y / (r * 0.6 + 1), hs + 22));
-      const g0 = uu <= core ? 1 : Math.exp(-2.6 * Math.pow((uu - core) / (e1 - core), 2));
-      const t = g0 * dd * fillP * (0.82 + 0.3 * R.noise2(X / (r * 3 + 1), Y / (r * 3 + 1), hs + 23));
-      const wf = 6.2832 / Math.max(2.6, r * 0.1);
-      const wv = 0.5 + 0.25 * (Math.sin((X * 0.94 + Y * 0.34) * wf) + Math.sin((Y * 0.94 - X * 0.34) * wf));
-      const T = 0.12 + 0.62 * (0.72 * wv + 0.28 * R.hash2(bx0 + x, by0 + y, hs + 24));
-      const a = t >= 0.97 ? 1 : 0.4 * Math.pow(Math.max(0, t), 1.3) + 0.6 * smooth01(T - 0.1, T + 0.1, t) * Math.min(1, t * 1.6);
-      buf[k] = Math.min(1, a) * dens;
-      continue;
-    }
     let u = U[k] * (1 + 0.09 * R.noise2(X / (r * 1.7 + 1), Y / (r * 1.7 + 1), hs + 21) + 0.05 * R.noise2(X / (r * 0.45 + 1), Y / (r * 0.45 + 1), hs + 22));
     if (dd < 0.97) u /= 0.5 + 0.5 * dd;
     let c = 0;

@@ -232,7 +232,8 @@ function plan(lay, p, seed) {
       // extremos: se pasa o se queda corto; los óvalos no siempre cierran
       if (s.closed) {
         // en em: abre un poco el óvalo o se pasa de largo al cerrarlo
-        const open = (0.015 + 0.09 * c) * (0.4 + persona.open) * (rs() < 0.6 ? 1 : -0.5);
+        // (rodillo: el lazo siempre se cierra pisándose un poco: queda la costura, no un hueco)
+        const open = (0.015 + 0.09 * c) * (0.4 + persona.open) * (P.band ? -1.6 : rs() < 0.6 ? 1 : -0.5);
         pts = trimEnds(pts, 0, -open);
       } else if (pts.length > 3 && !s.mark && !(isScript && L.g.script)) {
         const e0 = Math.max(-0.05, Math.min(0.04, g(rs) * (0.008 + 0.03 * c))), e1 = Math.max(-0.06, Math.min(0.05, g(rs) * (0.01 + 0.035 * c) + (rs() < P.lift ? -0.025 : 0)));
