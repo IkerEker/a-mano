@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.28)
+## 2. Cómo se usa (2.29)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -642,6 +642,27 @@ salía casi hueco (parecía letra de contorno) y el empapado era un desenfoque g
 - `padK` en una punta: aire extra en el encaje (el empapado mancha más ancho que su trazo).
 - Pruebas visuales: `tests/node/letras/graf3.js` (pocas letras grandes, una frase, y la frase a 520 px).
 
+### 2.29 — Empapado: tinta que cala (tono continuo, aguadas, manchas), no ruido
+Pedido (con la muestra «GERONIMO» otra vez): «la tinta entra y empapa, no es solo ruido; mira los difuminados, las
+manchas, las aguadas; es pigmento y spray; muchísimo más fino y realista». La 2.28 era un punteado binario.
+Se midió la muestra ampliada: negros de 0–5, degradados anchos y suaves con grano fino encima (no puntos duros),
+velos grises amplios solo en algunos tramos, redondeles de tinta aguada de distintos grises con borde blando, gotas
+negras con satélites, contornos abultados.
+`paintSoak` rehecho:
+- **Tono continuo**: densidad D = chorro (rejilla, gaussiana) + velo + manchas; tono = 1 − e^(−D) con una curva de
+  contraste (lo muy tenue se pierde, lo denso llega antes a negro). Encima, grano fino aditivo (ruido de píxel +
+  ruido suave de ~2 px + un poco de trama), proporcional a t·(1−t): manda en las medias tintas y conserva el tono
+  medio (el umbral de la 2.28 comprimía los degradados a 6–8 px).
+- **Pigmento desigual**: un tercio de los trazos van aguados (carbón, no negro); la carga cambia a lo largo del
+  trazo; el bote se acerca y se aleja (`far`, `K`: bordes casi limpios o muy difuminados); charcos en el arranque,
+  al final, en las dudas a medio trazo y en los giros; el charco no cae justo en la línea (contorno abultado).
+- **Velo**: gaussiana ancha solo a ratos y descentrada (el bote va ladeado).
+- **Manchas** (`stains`, a resolución completa): aguadas (redondeles de contorno irregular, grises claros, medios u
+  oscuros, borde blando, a veces con cerco), chorreos que se alargan hacia abajo y se agotan, gotas de pigmento con
+  reguero de satélites y motas. «Goteo» regula manchas y chorreos; «Nube», el velo.
+- Absorción desigual de la tela (a manchas) y capilaridad a lo largo de los hilos, como antes.
+Comparación a tamaño de muestra: `tests/node/letras/graf4.js` (600 px).
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -701,7 +722,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.28.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.29.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)

@@ -1,8 +1,8 @@
-A MANO 2.28 · plugin para Photoshop (2024 o posterior)
+A MANO 2.29 · plugin para Photoshop (2024 o posterior)
 =====================================================
 
 INSTALAR
-- Doble clic en A_mano_v2.28.0.ccx -> Creative Cloud avisa de que no viene del
+- Doble clic en A_mano_v2.29.0.ccx -> Creative Cloud avisa de que no viene del
   Marketplace -> "Instalar". Sustituye a las versiones anteriores. Es independiente de Cartelator.
 - En Photoshop: Plugins > A mano.
 
@@ -62,6 +62,7 @@ GENERAR, de arriba abajo
    · Borrón: redonda y gordísima, empapada en la tela; cada letra de un tamaño (las redondas, enormes).
    · Rodillo: barras a escuadra que se cruzan y vueltas de medio círculo, a rodillo de tóner.
    Borrón y Rodillo lucen con pocas letras grandes: el grano y los hilos necesitan tamaño para verse.
+   En Borrón, «Goteo» da más o menos manchas, aguadas y chorreos; «Nube», más o menos velo gris alrededor.
 - LEGIBILIDAD: de garabato a muy legible.
 - "Escribir en la forma": crea un grupo "✍ A mano · ..." con lo escrito y la forma
   (invisible). Para cambiarlo, selecciona el grupo, deforma la forma o cambia
