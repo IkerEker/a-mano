@@ -1,8 +1,8 @@
-A MANO 2.29 · plugin para Photoshop (2024 o posterior)
+A MANO 2.30 · plugin para Photoshop (2024 o posterior)
 =====================================================
 
 INSTALAR
-- Doble clic en A_mano_v2.29.0.ccx -> Creative Cloud avisa de que no viene del
+- Doble clic en A_mano_v2.30.0.ccx -> Creative Cloud avisa de que no viene del
   Marketplace -> "Instalar". Sustituye a las versiones anteriores. Es independiente de Cartelator.
 - En Photoshop: Plugins > A mano.
 
@@ -39,11 +39,18 @@ GENERAR, de arriba abajo
    GRAFFITI es una técnica propia: se elige en la fila de técnicas (último botón) y no se mezcla con lápiz, boli,
    cera... Al elegirla el panel cambia: se pone amarillo, las técnicas dejan paso a sus PUNTAS y la letra a sus
    FIRMAS (una sola caja, sin mayúsculas ni minúsculas). Para salir, elige cualquier otra técnica.
-   Puntas: Gordo (bote ancho: borde de motas y nube), Fino, Seco (no tapa del todo), Mop (rotulador de goteo),
-   Plano (punta biselada: gordo/fino, corte recto, vetas), Barra (plana y seca), Empapado (bote sobre tela o
-   papel que chupa: la pintura cala y se corre, sin borde, con la trama a la vista) y Rodillo (rodillo de tóner:
-   banda ancha y translúcida, rayada, con los cantos cargados; al cruzarse se suma).
-   Con Graffiti aparecen «Goteo» y «Nube de spray y salpicaduras». Los chorretones caen hacia abajo del documento.
+   Boquillas: Gordo (bote ancho, borde blando y nube), Fino (boquilla fina: arranques cargados y salidas al
+   vuelo), Seco (bote lejos o casi vacío: polvoriento, no llega a tapar), Mop (rotulador de goteo: borde neto,
+   tinta de sobra), Plano (boquilla plana de caligrafía: gordo en una dirección y fino en la otra, pero es bote),
+   Extintor (chorro líquido: borde roto, salpicaduras y una cortina de regueros), Empapado (bote sobre tela o
+   papel que chupa: la pintura cala y se corre) y Rodillo (rodillo de tóner: interior claro y rayado, cantos
+   negros; al cruzarse se suma).
+   Con Graffiti aparecen «Goteo», «Nube de spray y salpicaduras» y «Brillo del esmalte». Los chorretones nacen
+   dentro del trazo, donde se juntó pintura de más, y caen hacia abajo del documento. El brillo deja la pintura
+   PLANA (un graffiti no tiene volumen): solo coge luz la pintura acumulada (arranques, cruces, chorretones y su
+   gota); a 0 queda mate. Empapado y Rodillo no brillan (la tela se bebe la pintura; el tóner es mate).
+   En modo Graffiti se esconde lo que con un bote no hace nada: Tinta, el modo de Repasado y, al calcar, el
+   relleno de brocha o sello y el grosor «de la letra».
 
 4. LETRA: infantil, adulta, nerviosa o elegante, cada una en versión A o B;
    MAYÚSCULAS, minúsculas o cursiva. Las letras salen de escritura real (los
@@ -57,8 +64,13 @@ GENERAR, de arriba abajo
    · Elegante A: la más «correcta», fina y tranquila.
    · Elegante B: de cartel: redonda y regular, con «a» de imprenta; cursiva de invitación, menuda, con rasgos largos.
    FIRMAS de Graffiti (salen aquí cuando la técnica es Graffiti; cada una trae su punta, que luego se puede cambiar):
-   · Tag: alta, estrecha e inclinada, a punta plana.          · Rabia: a zarpazos, alta y angulosa, a barra seca.
-   · Bomba: mayúsculas gordas y torpes, a bote gordo.         · De un trazo: todo ligado, con lazos, a mop.
+   · Tag: de rotulador, rápida y picuda: zigzag sin levantar la mano, trazos que se pasan de largo. A bote fino.
+   · Bisel: de punta plana, a golpes rectos: angulosa, panzas en pico, E y S en zigzag, Y en tridente. A boquilla plana.
+   · Flechas: redonda y de lazo; cada letra remata en flecha. A mop.
+   · Bomba: gorda, redonda y sencilla (la A de caja, la i con su punto, la O con su raya dentro). A bote gordo.
+   · De un trazo: todo ligado, con lazos, a mop.
+   En las cuatro primeras casi todas las letras tienen dos o tres maneras de hacerse y cada aparición sale
+   distinta (otra forma, otro largo de salida, otra flecha): no hay dos letras iguales.
    · Borrón: redonda y gordísima, empapada en la tela; cada letra de un tamaño (las redondas, enormes).
    · Rodillo: barras a escuadra que se cruzan y vueltas de medio círculo, a rodillo de tóner.
    Borrón y Rodillo lucen con pocas letras grandes: el grano y los hilos necesitan tamaño para verse.

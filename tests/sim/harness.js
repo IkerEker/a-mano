@@ -67,10 +67,10 @@ const { open } = require('./setup.js');
   await shape('rect');
   await run(() => { T.seg('toolSeg', 'lapiz'); T.seg('presetSeg', 'hb'); T.seg('fontSeg', 'adulta'); });
   await run(() => { T.seg('toolSeg', 'spray'); });
-  const gUi = await run(() => { const h = id => document.getElementById(id).classList.contains('hidden'); const on = id => { const e = document.getElementById(id).querySelector('.segb.on'); return e ? e.getAttribute('data-v') : ''; }; return { ver: h('versionRow'), cas: h('caseSeg'), graf: h('grafSeg'), spray: h('sprayBox'), tool: on('toolSeg'), n: document.getElementById('grafSeg').querySelectorAll('.segb').length, piel: document.body.classList.contains('graf') }; });
-  const gOk = gUi.ver && gUi.cas && !gUi.graf && !gUi.spray && gUi.tool === 'spray' && gUi.n >= 4 && gUi.piel;
-  for (const sub of ['a', 'b', 'c', 'd', 'e', 'f']) {
-    await run(s2 => { T.seg('grafSeg', s2); T.seg('presetSeg', s2 === 'e' ? 'empapado' : s2 === 'f' ? 'rodillo' : s2 === 'b' ? 'seco' : s2 === 'd' ? 'fino' : s2 === 'c' ? 'mop' : 'gordo'); }, sub);
+  const gUi = await run(() => { const h = id => document.getElementById(id).classList.contains('hidden'); const on = id => { const e = document.getElementById(id).querySelector('.segb.on'); return e ? e.getAttribute('data-v') : ''; }; return { ver: h('versionRow'), cas: h('caseSeg'), graf: h('grafSeg'), spray: h('sprayBox'), tinta: h('slTinta'), rep: h('repasoBox'), brillo: h('slRelieve'), tool: on('toolSeg'), n: document.getElementById('grafSeg').querySelectorAll('.segb').length, piel: document.body.classList.contains('graf') }; });
+  const gOk = gUi.ver && gUi.cas && !gUi.graf && !gUi.spray && gUi.tinta && gUi.rep && !gUi.brillo && gUi.tool === 'spray' && gUi.n >= 7 && gUi.piel;
+  for (const sub of ['a', 'b', 'g', 'c', 'd', 'e', 'f']) {
+    await run(s2 => { T.seg('grafSeg', s2); T.seg('presetSeg', s2 === 'e' ? 'empapado' : s2 === 'f' ? 'rodillo' : s2 === 'b' ? 'plano' : s2 === 'g' ? 'rastro' : s2 === 'd' ? 'seco' : s2 === 'c' ? 'mop' : 'gordo'); }, sub);
     await click('btnGo');
     const sg = await waitDone();
     await rec('G2d graffiti ' + sub + (gOk ? '' : ' (FALLO interfaz ' + JSON.stringify(gUi) + ')'), gOk ? sg : Object.assign({}, sg, { cls: 'err' }));

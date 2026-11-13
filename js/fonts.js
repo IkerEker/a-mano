@@ -52,9 +52,11 @@ STYLES.bloque = { label: 'Bloque', hint: '', wide: 1.0, slant: 0.02, slantVar: 0
 // o se montan un poco en vez de dejar huecos; anchuras parecidas; el trazo manda. Cada sub-tipografía es una manera
 // de firmar. gmode: el modo interno que usa; overlap: hueco mínimo entre letras (puede ser negativo: se montan)
 const GRAF = { wide: 0.8, slant: 0.1, slantVar: 0.04, hVar: 0.08, wVar: 0.06, wob: 0.012, wobF: 0, angular: 0, geo: 0, os: 0.04, osVar: 0.04, stem: 0.05, cb: 0.05, cbShift: 0, open: 0.2, xh: 0.74, track: 0, minGap: 0, weight: 1, bounce: 1.2, sizeVar: 1, double: 0, ovr: null, flick: 0, hook: 0, gmode: 'mayus', script: 'own', xhS: 0.56, slantS: 0.3, trackS: 0, scriptW: 1 };
-STYLES.graffiti_a = Object.assign({}, GRAF, { label: 'Graffiti · Tag', sub: 'Tag', hint: 'firma alta, estrecha e inclinada; las letras se tocan', pre: 'plano', weight: 1.1, forms: ['capsTag'], wide: 0.62, slant: 0.26, slantVar: 0.03, hVar: 0.07, round: 0.5, overlap: -0.05, bounce: 1.3, sizeVar: 0.9, os: 0.015, osVar: 0.02, stem: 0.06, wide: 0.7, open: 0 });
-STYLES.graffiti_b = Object.assign({}, GRAF, { label: 'Graffiti · Rabia', sub: 'Rabia', hint: 'a zarpazos: angulosa, desigual, los trazos se pasan de largo', pre: 'rastro', forms: ['capsRabia'], wide: 0.55, slant: 0.05, slantVar: 0.13, hVar: 0.15, wVar: 0.14, wob: 0.02, angular: 1, os: 0.04, osVar: 0.04, stem: 0.12, cb: 0.1, open: 0, overlap: -0.05, weight: 1, bounce: 2.4, sizeVar: 1.9 });
-STYLES.graffiti_c = Object.assign({}, GRAF, { label: 'Graffiti · Bomba', sub: 'Bomba', hint: 'mayúsculas gordas y torpes, pegadas, hechas para chorrear', pre: 'gordo', wide: 0.95, slant: 0.02, slantVar: 0.1, hVar: 0.15, wVar: 0.1, wob: 0.035, round: 0.7, os: 0.02, open: 0.3, overlap: -0.06, weight: 1.35, bounce: 1.8, sizeVar: 1.5 });
+// (firmas de mano —handstyles—: cada una con su abecedario y varias maneras de hacer cada letra; ver skeleton.FORMS)
+STYLES.graffiti_a = Object.assign({}, GRAF, { label: 'Graffiti · Tag', sub: 'Tag', hint: 'de rotulador, rápida y picuda: zigzag sin levantar la mano, trazos que se pasan de largo, travesaños que cruzan', pre: 'fino', weight: 1.15, over: 0.17, forms: ['capsTag'], wide: 0.78, slant: 0.22, slantVar: 0.06, hVar: 0.1, wVar: 0.08, wob: 0.012, round: 0.16, overlap: -0.05, bounce: 1.7, sizeVar: 1.3, os: 0.02, osVar: 0.03, stem: 0.05, cb: 0.05, open: 0 });
+STYLES.graffiti_b = Object.assign({}, GRAF, { label: 'Graffiti · Bisel', sub: 'Bisel', hint: 'de punta plana, a golpes rectos: angulosa, panzas en pico, la E y la S en zigzag, la Y en tridente', pre: 'plano', weight: 1, over: 0.08, forms: ['capsBisel'], wide: 0.76, slant: 0.12, slantVar: 0.04, hVar: 0.07, wVar: 0.06, wob: 0.006, round: 0.05, angular: 0, os: 0.015, osVar: 0.02, stem: 0.04, cb: 0.04, open: 0, overlap: -0.04, bounce: 1.3, sizeVar: 1 });
+STYLES.graffiti_g = Object.assign({}, GRAF, { label: 'Graffiti · Flechas', sub: 'Flechas', hint: 'redonda y de lazo, de vuelta amplia; cada letra remata en flecha', pre: 'mop', weight: 1, over: 0.13, arrowK: 1.7, forms: ['capsFlechas'], wide: 0.9, slant: 0.16, slantVar: 0.05, hVar: 0.09, wVar: 0.07, wob: 0.012, round: 0.4, os: 0.01, osVar: 0.02, stem: 0.03, cb: 0.04, open: 0, overlap: -0.06, bounce: 1.6, sizeVar: 1.2 });
+STYLES.graffiti_c = Object.assign({}, GRAF, { label: 'Graffiti · Bomba', sub: 'Bomba', hint: 'gorda, redonda y sencilla: la A de caja, la i con su punto, la O con su raya dentro', pre: 'gordo', over: 0.03, forms: ['capsBomba'], wide: 0.92, slant: 0.03, slantVar: 0.1, hVar: 0.13, wVar: 0.1, wob: 0.03, round: 0.7, os: 0.02, open: 0, overlap: -0.06, weight: 1.3, bounce: 1.9, sizeVar: 1.5 });
 STYLES.graffiti_d = Object.assign({}, GRAF, { label: 'Graffiti · De un trazo', sub: 'De un trazo', hint: 'todo ligado, sin levantar la mano, con lazos y un rasgo final', pre: 'mop', gmode: 'cursiva', lowerAll: true, xhS: 0.62, slantS: 0.34, slantVarS: 0.05, scriptW: 1.25, ascS: 0.85, peakS: 0.4, lead: 0.12, loopVar: 1.4, loopW: 1.2, scriptSmooth: 0.03, bounce: 1.4, weightS: 0.72, trackS: 0.03 });
 STYLES.graffiti_f = Object.assign({}, GRAF, { label: 'Graffiti · Rodillo', sub: 'Rodillo', hint: 'de rodillo de tóner: barras a escuadra que se cruzan y vueltas de medio círculo', pre: 'rodillo', forms: ['capsRodillo'], wide: 1, slant: 0, slantVar: 0.012, hVar: 0.02, wVar: 0.02, wob: 0.003, round: 0, os: 0, osVar: 0, stem: 0, cb: 0.015, open: 0, overlap: 0.08, weight: 1, bounce: 0.5, sizeVar: 0.4 });
 STYLES.graffiti_e = Object.assign({}, GRAF, { label: 'Graffiti · Borrón', sub: 'Borrón', hint: 'redonda y gordísima, empapada en la tela; cada letra de un tamaño, casi sin huecos', pre: 'empapado', forms: ['capsBlob', 'capsRodillo'], wide: 1, slant: 0, slantVar: 0.06, hVar: 0.1, wVar: 0.1, wob: 0.035, zoom: 0.17, bigO: 1.3, round: 0, os: 0, osVar: 0, stem: 0, cb: 0.04, open: 0, overlap: 0.02, weight: 1, bounce: 2.4, sizeVar: 1.6 });
@@ -229,7 +231,7 @@ function defFor(st, base, cursive, v) {
   const rf = refDef(st, base, v);
   if (rf) return rf;
   // formas propias de la mano (otra manera de construir la letra)
-  if (st.forms) for (const name of st.forms) { const f = SK.FORMS[name] && SK.FORMS[name][base]; if (f) return { w: f[0], d: f[1], lower: /[a-zñ]/.test(base), form: true }; }
+  if (st.forms) for (const name of st.forms) { let f = SK.FORMS[name] && SK.FORMS[name][base]; if (f) { if (Array.isArray(f[0])) f = f[(v || 0) % f.length]; return { w: f[0], d: f[1], lower: /[a-zñ]/.test(base), form: true }; } }
   const ov = st.ovr && OVR[st.ovr] ? OVR[st.ovr][base] : null;
   if (ov) {
     if (typeof ov === 'string' && ov.indexOf('lower:') === 0) { const l = SK.LOWER[ov.slice(6)]; return l ? { w: l[0], d: l[1], lower: true, asCap: true } : null; }
@@ -373,6 +375,24 @@ function printGlyph(styleKey, ch, v, altIdx, cursive, capS) {
   const wob = st.wob * (def.ref ? 0.35 : cursive ? 0.3 : 1), seedW = (rnd() * 1e6) | 0;
   const lv_ = st.loopVar == null ? 1 : st.loopVar;
   const cv = cursive ? { loopA: Math.max(0.55, 1 + g() * 0.35 * lv_) * (st.loopW || 1), hA: 1.02 + Math.abs(g()) * 0.1 * lv_, loopD: Math.max(0.3, 1 + g() * 0.35 * lv_), hD: 1 + g() * 0.12 * lv_, in: g() * 0.05 * lv_, out: g() * 0.07 * lv_, outX: g() * 0.04 * lv_ } : null;
+  // firmas de graffiti: la mano entra y, sobre todo, sale pasándose de largo (cada vez distinto); las puntas de
+  // flecha crecen y se van con el trazo que rematan
+  if (st.over && def.form) {
+    const slen = P => { let L = 0; for (let i = 1; i < P.length; i++) L += Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]); return L; };
+    const arrows = strokes.filter(s => !s.fill && !s.dot && s.pts.length === 3 && slen(s.pts) < 0.5);
+    for (const s of strokes) {
+      const P = s.pts, n = P.length;
+      if (s.fill || s.dot || n < 2 || arrows.indexOf(s) >= 0 || slen(P) < 0.45) continue;
+      const ext = (i0, i1, k) => {
+        const dx = P[i0][0] - P[i1][0], dy = P[i0][1] - P[i1][1], L = Math.hypot(dx, dy) || 1, ex = dx / L * k, ey = dy / L * k;
+        for (const a of arrows) if (Math.hypot(a.pts[1][0] - P[i0][0], a.pts[1][1] - P[i0][1]) < 0.09) for (const q of a.pts) { q[0] += ex; q[1] += ey; }
+        P[i0][0] += ex; P[i0][1] += ey;
+      };
+      ext(0, 1, st.over * 0.9 * rnd() * rnd());
+      ext(n - 1, n - 2, st.over * (0.15 + 1.5 * rnd() * rnd()));
+    }
+    if (st.arrowK) for (const a of arrows) { const t = a.pts[1], k = st.arrowK * (0.8 + 0.4 * rnd()); for (const i of [0, 2]) { a.pts[i][0] = t[0] + (a.pts[i][0] - t[0]) * k; a.pts[i][1] = t[1] + (a.pts[i][1] - t[1]) * k; } }
+  }
   for (const s of strokes) {
     const P = s.pts;
     const n = P.length;

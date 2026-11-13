@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.29)
+## 2. Cómo se usa (2.30)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -663,6 +663,66 @@ negras con satélites, contornos abultados.
 - Absorción desigual de la tela (a manchas) y capilaridad a lo largo de los hilos, como antes.
 Comparación a tamaño de muestra: `tests/node/letras/graf4.js` (600 px).
 
+### 2.30 — Graffiti rehecho: aerosol de verdad, chorretones que nacen del trazo, brillo plano, firmas de mano
+Pedido (13 nov, una tanda de capturas del cartel «Nadie había cerrado / la puerta del sótano»): las gotas no tocan
+las letras y no son realistas; el spray punteado «es una mierda»; el fino «no es un graffiti para nada»; Mop «la
+tipo bien, las letras mal»; Barra y Plano «son NADA graffiti»; el Empapado «apenas se lee»; el Rodillo «fatal: los
+repintes, la textura, poco legible»; las N y las A (de Infantil B) mal. Después: una opción de textura solo en modo
+graffiti —y, visto el primer intento con volumen, «no: el graffiti es plano; brillante, pero plano; solo se acumula
+un poco más de pintura en algunos puntos»—; esconder en modo graffiti lo que no se usa; y cinco hojas de abecedarios
+de tags para rehacer «las firmas que se ven iguales y mal», con variaciones dentro de cada una.
+
+**Aerosol (`ink.paintSpray`, nuevo; desaparece `paintFlat`).** La pintura se SUMA: cada muestra del trazo deja una
+huella (supergaussiana `exp(-ρ^m)`, `m` = `edge`) en una rejilla anclada al documento (celda r/7; r/11 si `hard`);
+tono = 1 − e^(−D). `lam` es la carga en el centro; `sig` se calcula para que la media tinta caiga a r. Por muestra:
+`W` (pintura: 1 + giro − `speed` en mitad de los tramos largos + pulso + charcos de arranque y parada `dwell`), `K`
+(tamaño de la huella: `swell`, `wav`, `q.w`), salidas y entradas al vuelo (`flare`, `flareIn`: el flujo cae a casi
+nada y la huella se estrecha). Encima: deformación del dominio (`rag`: el borde ondula; mucho en el chorro), grano
+(ruido de píxel + ruido de ~2 px, proporcional a t·(1−t): solo en el borde), nube (segunda rejilla gaussiana,
+descentrada, pintada como motas de tres tamaños), gotas que escupe la boquilla y salpicaduras (`splash`).
+`hard` (mop, extintor): borde neto por umbral; por dentro, más o menos cargado (`thin`). `fan` + `nib`: huella
+elíptica (boquilla plana). La caja del trazo ya NO se recorta al lienzo (sale igual por franjas o de una vez).
+
+**Chorretones (`dripExit`, `drawDrips`).** Se decide antes dónde (peso: carga del punto, lo más bajo del tramo,
+tramos tumbados) y, ya pintado el trazo, cada gota baja por la columna de pintura hasta su borde de abajo: nace
+dentro y sale por ahí (si en su sitio no hay pintura, no hay gota: nunca flotan). Forma: embudo de salida, hilo
+recto que adelgaza un poco y ondula apenas, lágrima (se ensancha poco a poco hasta la gota). Casi todas cortas
+(colgajos), alguna larga; van en grupos de dos o tres. Presets: `drip`, `dripW`, `dripL`.
+
+**Boquillas.** Gordo, Fino y Seco (parámetros nuevos); Mop (`hard`, w 0,046); **Plano** = bote con boquilla plana
+(`fan: 3`): conserva el gordo/fino de las firmas a bisel pero es spray; **`rastro` pasa de «Barra» a «Extintor»**
+(chorro líquido: borde roto, ancho a golpes, salpicaduras, cortina de regueros finos). Empapado: huella más ceñida
+(`sc` 0,46 r), menos charcos y aguadas más pequeñas y más lejos (se lee con texto largo). Rodillo: interior claro
+(aguada ×0,45) con hilos, cantos negros siempre (también en pequeño), menos zonas cargadas, w 0,078 y las bandas
+se pasan menos en las esquinas (`overR` 1,1 r): los cruces ya no son rectángulos negros.
+
+**Brillo del esmalte (`render.applyRelief`, deslizador «Brillo», solo graffiti; `st.relieve`, 35).** Primer intento
+(almohadillado desde el borde + brillo interior + sombra): rechazado, «así no es un graffiti». Ahora la película es
+PLANA: `compositePigment` admite un búfer de altura (0,5 = película normal; hasta 1 = pintura acumulada: exceso de
+`lc/lam`, cruces de pasadas, cordón del chorretón y su gota); `applyRelief` (en `finalize`) solo ilumina esas
+pendientes (brillo suave, exponente 12) y añade un satinado mínimo. Sin sombra, sin bisel. Empapado y Rodillo son
+`matte` (no apuntan altura; el deslizador se esconde). Con brillo, `ps.putBands` pinta cada franja con 24 px de
+margen y recorta. El ancho de referencia sale del trazo mediano del plan (`writer.paint`).
+
+**Interfaz en modo graffiti.** Se esconden `slTinta`, `repasoBox` y, al calcar, `fillRow` y `followRow`; aparece
+`slRelieve` (si la boquilla no es mate). Las firmas ocupan dos filas.
+
+**Firmas (handstyles).** `skeleton.FORMS`: una letra puede ser `[[ancho, trazos], …]` (varias maneras de hacerla);
+`fonts.defFor` elige según la variante. `capsTag` rehecha (rotulador redondo: zigzag, travesaños que cruzan con
+rizo), `capsBisel` (punta plana, angulosa: sustituye a Rabia), `capsFlechas` (redonda, remates en flecha; firma
+nueva `graffiti_g`), `capsBomba` (gorda y sencilla; Bomba ya tiene abecedario propio). Parámetro de estilo `over`:
+cada trazo largo de una forma se pasa de largo al entrar y, sobre todo, al salir, distinto en cada variante; las
+puntas de flecha (trazos de 3 puntos cortos) crecen (`arrowK`) y se van con el trazo que rematan. Las hojas de
+muestra sirvieron para analizar cómo se construyen esas letras; los abecedarios están dibujados de nuevo, no calcados.
+Orden: Tag (fino), Bisel (plano), Flechas (mop), Bomba (gordo), De un trazo (mop), Rodillo, Borrón.
+
+**Infantil B.** Fuera las N, A y W sacadas de la muestra «hello» (N con joroba, A de travesaño descolgado, W de
+ondas con pico): usa las genéricas con sus proporciones (`glyphspec.json` → `skip`).
+
+Pruebas: sim 67/67 (firmas a, b, g, c, d, e, f; controles escondidos), AE 19/19. Sin ver en Photoshop real.
+Pendiente: extras de tag (corona, comillas, subrayado, estrella), throw-up de contorno, más alternativas por
+letra, cifras y signos propios de cada firma, Graffiti en el panel de After Effects.
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -722,7 +782,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.29.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.30.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)
