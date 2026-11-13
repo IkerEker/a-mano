@@ -385,7 +385,8 @@ function plan(lay, p, seed) {
   const passMul = p.repasado == null ? 1 : p.repasado;
   // repasado: «fundido» (más pigmento en el mismo trazo) o «visible» (pasadas sueltas encima, como cuando se
   // repasa una palabra para ponerla en negrita). Por defecto: fundido solo con pintura que tapa (pincel, óleo)
-  const fuse = p.repaso === 'fundido' ? true : p.repaso === 'visible' ? false : P.blend === 'over';
+  // (graffiti: repasar es cargar —más pintura en la misma pasada—, nunca copias desplazadas)
+  const fuse = P.proc === 'spray' ? true : p.repaso === 'fundido' ? true : p.repaso === 'visible' ? false : P.blend === 'over';
   const flick = persona.flick || 0;
   cursiveLetters.forEach((l, li) => {
     const L = l.L;
@@ -406,7 +407,7 @@ function plan(lay, p, seed) {
       if (!s.pts || s.pts.length < 2) return;
       const extra = s.fill ? 0 : passes - 1;
       let np = s.fill || fuse ? 1 : passes;
-      if (s.retrace && !s.fill) np = Math.max(np, 2);
+      if (s.retrace && !s.fill && P.proc !== 'spray') np = Math.max(np, 2);
       // centro del trazo (para el pequeño giro de cada pasada)
       let smx = 0, smy = 0; for (const q of s.pts) { smx += q[0]; smy += q[1]; } smx /= s.pts.length; smy /= s.pts.length;
       for (let pass = 0; pass < np; pass++) {
@@ -451,6 +452,8 @@ function plan(lay, p, seed) {
         if (pass === 0 && s.tipOut && fin.length > s.tipOut + 2) for (let k = 0; k <= s.tipOut; k++) fin[fin.length - 1 - k].w = 0.3 + 0.7 * k / s.tipOut;
         let r = Math.max(0.5, wEm * emPx * (lv.w || 1) / Math.max(0.5, Math.sqrt(L.size)));
         if (pass > 0) r *= 0.88 + 0.12 * rs();
+        // (graffiti: la boquilla no puede ser más gorda de lo que la letra de esa firma aguanta sin cegarse)
+        if (P.proc === 'spray' && persona.nibMax) r = Math.min(r, persona.nibMax * (P.band || P.soak ? 0.8 : 1) * emPx * (lv.w || 1));
         if (s.extra) r *= 0.8;
         if (s.under) r *= 0.9;
         if (fuse && extra > 0) r *= 1 + 0.05 * Math.min(3, extra);
@@ -543,9 +546,9 @@ function blockDrift(strokes, letters, p, seed, auto) {
     }
     for (let j = 0; j < K; j++) prev[j] = l.D[j];
     // tamaño: si la de arriba acabó apretada, esta empieza más pequeña; si le sobró, se anima
-    S = Math.max(0.72, Math.min(1.22, S * (1 - 0.35 * sq) + lam * g() * 0.05 + (1 - S) * 0.25));
+    S = Math.max(0.84, Math.min(1.2, S * (1 - 0.35 * sq) + lam * g() * 0.05 + (1 - S) * 0.25));
     l.S = S;
-    l.kap = Math.max(0, lam * (0.1 + 0.28 * rnd() * rnd() + 0.2 * (wl / WB - 0.8)));   // cuánto se encoge hacia el final (más, si la línea es larga)
+    l.kap = Math.min(0.2, Math.max(0, lam * (0.08 + 0.22 * rnd() * rnd() + 0.16 * (wl / WB - 0.8))));   // cuánto se encoge hacia el final (más, si la línea es larga)
     sq = l.kap;
     m = m * (1 - gain * 0.6) + lam * l.size * (0.12 + 0.3 * g());                      // el margen se corre (hacia dentro) y se corrige a medias
     l.m = m;

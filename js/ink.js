@@ -81,7 +81,7 @@ TOOLS.spray = {
   label: 'Graffiti', presets: {
     gordo: { label: 'Gordo', proc: 'spray', w: 0.07, dens: 1, edge: 4.4, lam: 6, halo: 1, grain: 1, dwell: 1, swell: 0.22, speed: 0.3, flare: 0.25, drip: 1, dripW: 0.15, spit: 1, blend: 'over', tremor: 0.5, lift: 0, minR: 1 },
     fino: { label: 'Fino', proc: 'spray', w: 0.036, dens: 1, edge: 5.6, lam: 5.5, halo: 0.5, grain: 0.9, dwell: 0.9, swell: 0.3, speed: 0.45, flare: 0.5, flareIn: 0.12, drip: 0.6, dripW: 0.16, spit: 0.5, blend: 'over', tremor: 0.5, lift: 0, minR: 1 },
-    seco: { label: 'Seco', proc: 'spray', w: 0.06, dens: 1, edge: 3, lam: 2.1, halo: 1.6, haloR: 1.1, grain: 1.7, dwell: 0.35, swell: 0.1, speed: 0.45, puls: 0.35, flare: 0.6, flareIn: 0.25, drip: 0, spit: 0.6, blend: 'over', tremor: 0.5, lift: 0, minR: 1 },
+    seco: { label: 'Seco', proc: 'spray', w: 0.06, dens: 1, edge: 2.5, lam: 3.4, halo: 1.3, haloR: 1.1, grain: 0.5, dwell: 0.35, swell: 0.1, speed: 0.45, puls: 0.35, flare: 0.6, flareIn: 0.25, drip: 0, spit: 0.6, blend: 'over', tremor: 0.5, lift: 0, minR: 1 },
     mop: { label: 'Mop', proc: 'spray', hard: true, w: 0.046, dens: 1, edge: 8, lam: 5, halo: 0, dwell: 0.6, swell: 0.12, speed: 0.1, flare: 0, drip: 1.5, dripW: 0.24, dripL: 1.3, spit: 0.3, rag: 0.05, blend: 'over', tremor: 0.5, lift: 0, minR: 1 },
     // boquilla plana (de caligrafía): la huella es un abanico; nib: su ángulo; fan: cuánto más larga que ancha
     plano: { label: 'Plano', proc: 'spray', fan: 3, nib: -0.62, w: 0.085, dens: 1, edge: 5, lam: 5, halo: 0.7, grain: 1, dwell: 0.8, swell: 0.14, speed: 0.3, flare: 0.35, drip: 0.8, dripW: 0.09, spit: 0.6, blend: 'over', tremor: 0.4, lift: 0, minR: 1.2 },
@@ -556,7 +556,7 @@ function paintSoak(canvas, pts, P, r, rgb, seed, opts) {
   const thin = !isFill && rnd() < 0.16;                                   // trazo aguado: no llega a negro
   const lam0 = (thin ? 1.9 + 1.4 * rnd() : 4.2 + 3.6 * rnd()) * (P.dens || 1) * (opts.inkMul == null ? 1 : opts.inkMul);
   const fog = isFill ? 0 : (rnd() < 0.6 ? 0.2 + 0.8 * rnd() : 0.04) * (0.3 + 1.4 * nube);
-  const sc = 0.46 * r, sH = (1.2 + 0.7 * nube) * r;
+  const sc = 0.36 * r, sH = (1.2 + 0.7 * nube) * r;
   const fa = rnd() * 6.283, fd = r * (0.3 + 1.1 * rnd()), fox = Math.cos(fa) * fd, foy = Math.sin(fa) * fd;
   const dw0 = isFill || opts.contIn ? 0 : 0.6 + 2.2 * rnd() * rnd(), dw1 = isFill || opts.contOut ? 0 : 0.35 + 1.7 * rnd() * rnd();
   const fade = !isFill && !opts.contOut && Ls > r * 4 && rnd() < 0.2;    // a veces el trazo se va al vuelo
@@ -630,6 +630,7 @@ function paintSoak(canvas, pts, P, r, rgb, seed, opts) {
     const p = Q[i], k = K[i];
     const jx = r * 0.16 * R.noise1(p.s / (r * 1.6 + 1), seed + 13), jy = r * 0.16 * R.noise1(p.s / (r * 1.6 + 1) + 40, seed + 14);
     splat(GC, p.x + jx, p.y + jy, sc * k, lam0 * C[i] * W[i] / (sc * 2.5066 * k * k));
+    if (i % 2 === 0) splat(GC, p.x + jx, p.y + jy, sc * k * 2.3, 0.11 * lam0 * C[i] * (W[i] + (i + 1 < n ? W[i + 1] : 0)) / (sc * 2.5066 * k * k));     // cerco: la tela chupa alrededor
     if (i % 2 === 0) { const f = F[i] * W[i] + (i + 1 < n ? F[i + 1] * W[i + 1] : 0); if (f > 0) splat(GH, p.x + fox, p.y + foy, sH, 0.85 * f / (sH * 2.5066)); }
   }
   // ---- las manchas, a resolución completa
@@ -680,7 +681,7 @@ function paintSoak(canvas, pts, P, r, rgb, seed, opts) {
     }
   }
   if (opts.mask) applyMask(buf, bx0, by0, bw, bh, opts.mask, seed);
-  RD.compositePigment(canvas, buf, bx0, by0, bw, bh, rgb, 'over', opts.alphaMul == null ? 1 : opts.alphaMul);
+  RD.compositePigment(canvas, buf, bx0, by0, bw, bh, rgb, 'stain', opts.alphaMul == null ? 1 : opts.alphaMul);
 }
 
 // RODILLO (rodillo de tóner): una banda ancha que la mano arrastra de canto. Lo que deja no es un gris liso:
@@ -710,7 +711,8 @@ function paintBand(canvas, pts, P, r, rgb, seed, opts) {
   // ---- cómo viene este trazo (se decide antes de mirar la caja: sale igual se pinte por franjas o entero)
   const ink01 = opts.inkMul == null ? 0.5 : Math.max(0, Math.min(1.6, (opts.inkMul - 0.88) / 0.24));
   // (casi todos los trazos van con poco tóner: aguada clara con los hilos marcados; alguno sale cargado)
-  const tone = (rnd() < 0.045 ? 0.38 + 0.3 * rnd() : 0.04 + 0.15 * rnd() * rnd()) * (0.5 + ink01);
+  const heavy = opts.inkMul != null && opts.inkMul > 1.25;
+  const tone = heavy ? 0.5 + 0.3 * rnd() : (rnd() < 0.045 ? 0.38 + 0.3 * rnd() : 0.04 + 0.15 * rnd() * rnd()) * (0.5 + Math.min(1, ink01));
   const T1 = Math.max(4, Math.min(190, W2 / 2.2)), px1 = W2 / T1, T2 = T1 * 2.7;
   const fine = smooth01(40, 110, W2), small = 1 - smooth01(14, 60, W2);
   const o1 = rnd() * 997, o2 = rnd() * 997, oB = rnd() * 97, tilt = (rnd() - 0.5) * 0.9;
@@ -787,6 +789,8 @@ function paintBand(canvas, pts, P, r, rgb, seed, opts) {
     const B = 0.5 + 0.5 * R.noise1(u * 2.3 + oB + jump * 0.31, seed + 39);
     const load = Math.max(0.03, tone * (1 + 0.5 * tilt * u) + pl * Math.exp(-sl / loadLen) + endLoad * smooth01(Ls - r * 5, Ls, s) + 0.08 * R.noise1(s / (r * 4 + 1), seed + 53));
     let a = load * (0.1 + 0.5 * B * B) + 0.012 + l1 * dj * (0.75 + 1.1 * load) * (0.55 + 0.8 * B) + l2 * 0.45 * (0.4 + load);
+    // (repasada: el rodillo vuelve por su carril y lo deja casi tapado, con algún hilo seco)
+    if (heavy) a += (1 - a) * (0.66 - 0.5 * (h1 > 0.7 ? l1 : 0)) * (0.75 + 0.25 * B);
     // zonas cargadas: negro, con hilos secos
     const th = 0.7 - 0.6 * (load - 0.25), patch = smooth01(th, th + 0.16, R.noise2(s / (r * 4.2 + 1) + o1, u * 1.2 + o2, seed + 71));
     if (patch > 0) a += (1 - a) * patch * (0.95 - 0.7 * (h1 > 0.72 ? l1 : 0) - 0.3 * l2);
@@ -808,7 +812,8 @@ function paintBand(canvas, pts, P, r, rgb, seed, opts) {
     buf[k] = Math.max(0, Math.min(1, a)) * Math.min(1, aa) * dens;
   }
   if (opts.mask) applyMask(buf, bx0, by0, bw, bh, opts.mask, seed);
-  RD.compositePigment(canvas, buf, bx0, by0, bw, bh, rgb, 'multiply', opts.alphaMul == null ? 1 : opts.alphaMul);
+  // (banda repasada: tapa; dos bandas cargadas que se montan no dibujan un cuadrado más negro)
+  RD.compositePigment(canvas, buf, bx0, by0, bw, bh, rgb, heavy ? 'stain' : 'multiply', opts.alphaMul == null ? 1 : opts.alphaMul);
 }
 
 // ------------------------------------------------------------------ SPRAY
@@ -1029,7 +1034,7 @@ function paintSpray(canvas, pts, P, r, rgb, seed, opts) {
   if (opts.mask) applyMask(buf, bx0, by0, bw, bh, opts.mask, seed);
   // (relieve: si nadie ha dicho el ancho del canto, lo pone el primer trazo)
   if (canvas.relief && !canvas.relief.size) canvas.relief.size = Math.max(1.6, Math.min(14, r * 0.42));
-  RD.compositePigment(canvas, buf, bx0, by0, bw, bh, rgb, 'over', opts.alphaMul == null ? 1 : opts.alphaMul, hb);
+  RD.compositePigment(canvas, buf, bx0, by0, bw, bh, rgb, 'paint', opts.alphaMul == null ? 1 : opts.alphaMul, hb);
 }
 
 // mask: { x0, y0, w, h, s (px de máscara por px de documento), d: Float32Array (0..1) }

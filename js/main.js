@@ -30,7 +30,7 @@ const store = {
 const DEF = {
   tab: 'gen', tool: 'rotulador', preset: 'fino', fill: '', color: '#1d1d1f', persona: 'adulta', version: 'a', mode: 'mayus', textMode: 'importancia', repaso: 'auto', legib: 70,
   grosor: 0, tinta: 55, pulso: 40, repasado: 50, follow: 'auto', locura: 50, prisa: 15, tight: 0,
-  contraste: 50, inter: 100, llenar: 30, margen: 5, align: 'center', kind: 'imagen', colorMode: 'uno', colorVar: 45, tupido: 60, goteo: 45, nube: 50, relieve: 35, deriva: 50, gsub: 'a',
+  contraste: 50, inter: 100, llenar: 30, margen: 5, align: 'center', kind: 'imagen', colorMode: 'uno', colorVar: 45, tupido: 60, goteo: 45, nube: 50, relieve: 50, deriva: 50, gsub: 'a',
   text: 'Nadie había cerrado\nla puerta del sótano', levels: [0, 2, 1, 0, 0, -1, 0], marks: []
 };
 const st = Object.assign({}, DEF, store.get('settings2', {}));
@@ -95,7 +95,7 @@ const docKey = doc => String((doc && (doc.title || doc.id)) || '');
 // ------------------------------------------------------------------ parámetros
 function chaos() { return Math.max(0, 1 - st.legib / 100); }
 // relieve de la pintura (solo graffiti): 0..1; con él, las franjas se pintan con margen (RELIEF_M) para que casen
-function relieve() { return isGraf() ? Math.max(0, Math.min(1, (st.relieve == null ? 35 : st.relieve) / 100)) : 0; }
+function relieve() { return isGraf() ? Math.max(0, Math.min(1, (st.relieve == null ? 50 : st.relieve) / 100)) : 0; }
 const RELIEF_M = 24;
 function genParams() {
   return {

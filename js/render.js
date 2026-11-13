@@ -85,7 +85,7 @@ function compositePigment(canvas, dens, bx, by, bw, bh, rgb, mode, alphaMul, hb)
   const am = alphaMul == null ? 1 : alphaMul;
   const T = [Math.max(0.02, rgb[0] / 255), Math.max(0.02, rgb[1] / 255), Math.max(0.02, rgb[2] / 255)];
   const L = [Math.log(T[0]), Math.log(T[1]), Math.log(T[2])];
-  const over = mode === 'over';
+  const paint = mode === 'paint', stain = mode === 'stain', over = mode === 'over' || stain;
   for (let y = 0; y < bh; y++) {
     const cy = by + y - canvas.y0;
     if (cy < 0 || cy >= CH) continue;
@@ -96,8 +96,15 @@ function compositePigment(canvas, dens, bx, by, bw, bh, rgb, mode, alphaMul, hb)
       const cx = bx + x - canvas.x0;
       if (cx < 0 || cx >= CW) continue;
       const k = cy * CW + cx, i = k * 3;
-      if (Hb) { const hv = hb[row + x], h0 = Hb[k]; Hb[k] = Math.min(1, (hv > h0 ? hv : h0) + 0.22 * (hv > h0 ? h0 : hv)); }
-      if (over) {
+      if (Hb) { const hv = hb[row + x]; if (hv > Hb[k]) Hb[k] = hv; }
+      if (paint) {
+        // pintura de bote: cada gotita es del color entero (poca pintura = menos puntos, no un color más pálido) y
+        // todo lo que se junta es UNA película: una pasada sobre otra del mismo color solo puede tapar más, nunca
+        // deja cerco claro
+        const a = 1 - Math.exp(-3.4 * d);
+        Wb[i] += (T[0] - Wb[i]) * a; Wb[i + 1] += (T[1] - Wb[i + 1]) * a; Wb[i + 2] += (T[2] - Wb[i + 2]) * a;
+        Ab[k] = 1 - (1 - Ab[k]) * (1 - a);
+      } else if (over) {
         // pintura opaca: tapa según la carga; el tono va de lavado (poca) a profundo (mucha)
         const a = 1 - Math.exp(-3.4 * d);
         const e = 0.2 + 0.8 * Math.min(2.2, d);
@@ -107,7 +114,7 @@ function compositePigment(canvas, dens, bx, by, bw, bh, rgb, mode, alphaMul, hb)
         for (let c = 0; c < 3; c++) {
           const t = Math.exp(L[c] * e), w0 = Wb[i + c];
           let w = w0 + (t - w0) * a;
-          if (w > w0) w = w0 + (w - w0) * kl;
+          if (w > w0) w = stain ? w0 : w0 + (w - w0) * kl;      // (tinta que cala: solo oscurece)
           Wb[i + c] = w;
         }
         Ab[k] = 1 - (1 - Ab[k]) * (1 - a);
@@ -139,45 +146,42 @@ function finalize(canvas) {
   return canvas;
 }
 
-// BRILLO (solo graffiti). La pintura de bote queda PLANA: es una película de esmalte, lisa y brillante, no una
-// letra con volumen. Lo único que sobresale es la pintura que se acumuló de más —el punto donde la mano apretó
-// parada, un cruce de dos pasadas, el cordón de un chorretón y su gota— y eso es lo que coge la luz: un brillo
-// suave y corto en esos puntos, nada más; el resto, liso, con el satinado apenas desigual del esmalte.
+// TEXTURA DE LA PINTURA (solo graffiti). El interior de una letra de bote es PLANO —una película de esmalte, sin
+// volumen ni destellos de canto— pero no es un color de ordenador:
+//  · donde cayó pintura de más (el punto en que la mano apretó parada, un giro lento, el cordón de un chorretón
+//    y su gota) el color queda algo más hondo y mojado, en manchas suaves, sin contorno;
+//  · el esmalte brilla: la luz resbala en bandas anchas y blandas que cruzan las letras enteras (dependen del
+//    sitio del documento, no de cada trazo: en las uniones no se nota nada);
+//  · de cerca tiene piel: un granillo fino y alguna pompita.
 // canvas.Hh (lo apunta compositePigment): 0,5 = película normal; hasta 1 = pintura acumulada.
 // canvas.relief = { amount 0..1, size: escala en px (según el grosor del trazo) }
 function applyRelief(canvas) {
   const w = canvas.w, h = canvas.h, D = canvas.data, H0 = canvas.Hh, n = w * h;
   const amount = Math.max(0, Math.min(1, canvas.relief.amount || 0)), s = Math.max(1.5, canvas.relief.size || 3);
   if (amount <= 0) return;
-  const blur = (src, times) => {       // binomial 3x3
-    let a = src, b = new Float32Array(n);
-    for (let t = 0; t < times; t++) {
-      for (let y = 0; y < h; y++) { const r = y * w; for (let x = 0; x < w; x++) { const l = x > 0 ? a[r + x - 1] : a[r + x], rr = x < w - 1 ? a[r + x + 1] : a[r + x]; b[r + x] = (l + 2 * a[r + x] + rr) * 0.25; } }
-      const c = a === src ? new Float32Array(n) : a;
-      for (let y = 0; y < h; y++) { const r = y * w, ru = y > 0 ? r - w : r, rd = y < h - 1 ? r + w : r; for (let x = 0; x < w; x++) c[r + x] = (b[ru + x] + 2 * b[r + x] + b[rd + x]) * 0.25; }
-      a = c;
-    }
-    return a;
-  };
-  const Hs = blur(H0, s > 6 ? 3 : s > 3 ? 2 : 1);
-  // altura: la película apenas levanta (0,1); lo acumulado, sí
-  const depth = s * 0.34, Z = new Float32Array(n);
-  for (let k = 0; k < n; k++) { const v = Hs[k]; if (v > 0) Z[k] = depth * (0.1 * Math.min(1, v * 2) + 2 * Math.max(0, v - 0.5)); }
-  const norm = v => { const l = Math.hypot(v[0], v[1], v[2]); return [v[0] / l, v[1] / l, v[2] / l]; };
-  const L = norm([-0.5, -0.66, 0.62]), Hv = norm([L[0], L[1], L[2] + 1]);
-  const flatD = L[2], flatS = Math.pow(Hv[2], 12);
-  const kd = 0.5 * amount, ks = 0.55 * amount, nf = 1 / Math.max(3, s * 2.2);
+  // (la carga, suavizada: manchas, no perfiles)
+  let a = H0, b = new Float32Array(n);
+  for (let t = 0, T = s > 6 ? 4 : s > 3 ? 3 : 2; t < T; t++) {
+    for (let y = 0; y < h; y++) { const r = y * w; for (let x = 0; x < w; x++) { const l = x > 0 ? a[r + x - 1] : a[r + x], rr = x < w - 1 ? a[r + x + 1] : a[r + x]; b[r + x] = (l + 2 * a[r + x] + rr) * 0.25; } }
+    const c = a === H0 ? new Float32Array(n) : a;
+    for (let y = 0; y < h; y++) { const r = y * w, ru = y > 0 ? r - w : r, rd = y < h - 1 ? r + w : r; for (let x = 0; x < w; x++) c[r + x] = (b[ru + x] + 2 * b[r + x] + b[rd + x]) * 0.25; }
+    a = c;
+  }
+  const f1 = 1 / (s * 15), f2 = 1 / (s * 5.5), f3 = 1 / Math.max(1.5, s * 0.5), cell = Math.max(3, Math.round(s * 2.2));
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-    const k = y * w + x, v = Hs[k], i = k * 4;
-    if (v < 0.2 || !D[i + 3]) continue;
-    const m = v >= 0.45 ? 1 : (v - 0.2) / 0.25;                // solo la película con cuerpo brilla (la nube de motas, no)
-    const gx = (Z[x < w - 1 ? k + 1 : k] - Z[x > 0 ? k - 1 : k]) * 0.5, gy = (Z[y < h - 1 ? k + w : k] - Z[y > 0 ? k - w : k]) * 0.5;
-    const il = 1 / Math.sqrt(gx * gx + gy * gy + 1), nx = -gx * il, ny = -gy * il, nz = il;
-    const dif = Math.max(0, nx * L[0] + ny * L[1] + nz * L[2]), nh = Math.max(0, nx * Hv[0] + ny * Hv[1] + nz * Hv[2]);
-    // satinado: el esmalte no refleja igual en todas partes (muy poco)
-    const X = canvas.x0 + x, Y = canvas.y0 + y, sat = 0.022 * amount * (R2.noise2(X * nf, Y * nf, 913) + 0.5 * R2.noise2(X * nf * 3.1, Y * nf * 3.1, 917));
-    const sh = 1 + kd * (dif - flatD) * m, li = (ks * (Math.pow(nh, 12) - flatS) + sat) * m;
-    for (let c = 0; c < 3; c++) { let u = D[i + c] * sh; u += li > 0 ? (255 - u) * li : u * li; D[i + c] = u < 0 ? 0 : u > 255 ? 255 : u; }
+    const k = y * w + x, v = H0[k], i = k * 4;
+    if (v < 0.3 || !D[i + 3]) continue;
+    const m = v >= 0.48 ? 1 : (v - 0.3) / 0.18;                  // solo la película con cuerpo (la nube de motas, no)
+    const X = canvas.x0 + x, Y = canvas.y0 + y;
+    const acc = Math.max(0, Math.min(1, (a[k] - 0.52) * 2.6));     // pintura de más
+    // brillo: bandas anchas (inclinadas, como la luz que resbala) + un aguado más corto
+    const sheen = 0.6 * R2.noise2((X + Y * 0.6) * f1, (Y - X * 0.25) * f1 * 1.9, 913) + 0.4 * R2.noise2(X * f2, Y * f2, 915);
+    // piel del esmalte y pompitas (muy pocas: un puntito claro con su sombra)
+    let li = amount * (0.2 * sheen + 0.07 * R2.noise2(X * f3, Y * f3, 917) + 0.04 * (R2.hash2(X, Y, 919) - 0.5));
+    const cx = Math.floor(X / cell), cy = Math.floor(Y / cell);
+    if (R2.hash2(cx, cy, 921) < 0.035) { const px = (cx + 0.25 + 0.5 * R2.hash2(cx, cy, 923)) * cell, py = (cy + 0.25 + 0.5 * R2.hash2(cx, cy, 925)) * cell, dd = Math.hypot(X - px, Y - py); if (dd < 1.1) li += amount * 0.22; else if (dd < 2.1 && Y > py) li -= amount * 0.1; }
+    li = (li - amount * 0.32 * acc) * m;
+    for (let c = 0; c < 3; c++) { let u = D[i + c]; u += li > 0 ? (255 - u) * li : u * li; D[i + c] = u < 0 ? 0 : u > 255 ? 255 : u; }
   }
 }
 
