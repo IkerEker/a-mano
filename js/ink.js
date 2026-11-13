@@ -529,7 +529,7 @@ function drawDrips(buf, bx0, by0, bx1, by1, bw, drips, dens, hb) {
         const dx = Math.abs(X + 0.5 - xc), al = Math.max(0, Math.min(1, hw - dx + 0.5)) * dens, k = (Y - by0) * bw + (X - bx0);
         if (al > buf[k]) buf[k] = al;
         // (el chorretón es un cordón de pintura: sobresale, redondo, y más su gota)
-        if (hb && al > 0) { const u = dx / (hw + 0.5), hv = 0.5 + (yy > lenT - lB ? 0.42 : 0.3) * Math.sqrt(Math.max(0, 1 - u * u)); if (hv > hb[k]) hb[k] = hv; }
+        if (hb && al > 0) { const u = dx / (hw + 0.5), hv = 0.5 + (yy > lenT - lB * 0.6 ? 0.5 : 0.32) * Math.sqrt(Math.max(0, 1 - u * u)); if (hv > hb[k]) hb[k] = hv; }
       }
     }
   }

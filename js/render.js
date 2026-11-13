@@ -167,11 +167,26 @@ function applyRelief(canvas) {
     for (let y = 0; y < h; y++) { const r = y * w, ru = y > 0 ? r - w : r, rd = y < h - 1 ? r + w : r; for (let x = 0; x < w; x++) c[r + x] = (b[ru + x] + 2 * b[r + x] + b[rd + x]) * 0.25; }
     a = c;
   }
+  // un poco de relieve: la película tiene su grosor (poco), lo acumulado abulta, el chorretón es un cordón y su
+  // gota una pompa. Se ilumina desde arriba a la izquierda: claro en lo que mira a la luz, oscuro al otro lado
+  const blurN = (src, times) => {
+    let q = src, t = new Float32Array(n);
+    for (let k = 0; k < times; k++) {
+      for (let y = 0; y < h; y++) { const r = y * w; for (let x = 0; x < w; x++) { const l = x > 0 ? q[r + x - 1] : q[r + x], rr = x < w - 1 ? q[r + x + 1] : q[r + x]; t[r + x] = (l + 2 * q[r + x] + rr) * 0.25; } }
+      const c = q === src ? new Float32Array(n) : q;
+      for (let y = 0; y < h; y++) { const r = y * w, ru = y > 0 ? r - w : r, rd = y < h - 1 ? r + w : r; for (let x = 0; x < w; x++) c[r + x] = (t[ru + x] + 2 * t[r + x] + t[rd + x]) * 0.25; }
+      q = c;
+    }
+    return q;
+  };
+  const Hs1 = blurN(H0, 2), depth = s * 0.3, Z = new Float32Array(n);
+  for (let k = 0; k < n; k++) { const v = Hs1[k]; if (v > 0) Z[k] = depth * (0.95 * Math.min(1, v * 2) + 2.2 * Math.max(0, v - 0.5) + 4 * Math.max(0, a[k] - 0.5)); }
+  const dl = Math.max(1, Math.round(s * 0.22));        // paso del gradiente hacia la luz
   const f1 = 1 / (s * 15), f2 = 1 / (s * 5.5), f3 = 1 / Math.max(1.5, s * 0.5), cell = Math.max(3, Math.round(s * 2.2));
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
     const k = y * w + x, v = H0[k], i = k * 4;
-    if (v < 0.3 || !D[i + 3]) continue;
-    const m = v >= 0.48 ? 1 : (v - 0.3) / 0.18;                  // solo la película con cuerpo (la nube de motas, no)
+    if ((v < 0.3 && Hs1[k] < 0.2) || !D[i + 3]) continue;
+    const m = v >= 0.48 ? 1 : Math.max(0, Math.min(1, (Math.max(v, Hs1[k] * 1.3) - 0.2) / 0.28));
     const X = canvas.x0 + x, Y = canvas.y0 + y;
     const acc = Math.max(0, Math.min(1, (a[k] - 0.52) * 2.6));     // pintura de más
     // brillo: bandas anchas (inclinadas, como la luz que resbala) + un aguado más corto
@@ -181,6 +196,13 @@ function applyRelief(canvas) {
     const cx = Math.floor(X / cell), cy = Math.floor(Y / cell);
     if (R2.hash2(cx, cy, 921) < 0.035) { const px = (cx + 0.25 + 0.5 * R2.hash2(cx, cy, 923)) * cell, py = (cy + 0.25 + 0.5 * R2.hash2(cx, cy, 925)) * cell, dd = Math.hypot(X - px, Y - py); if (dd < 1.1) li += amount * 0.22; else if (dd < 2.1 && Y > py) li -= amount * 0.1; }
     li = (li - amount * 0.32 * acc) * m;
+    // la luz: lo que mira arriba-izquierda aclara, lo de enfrente oscurece; más donde la pintura está cargada y
+    // mojada (y a rachas: no brilla igual en todas partes)
+    { const xa = x >= dl ? x - dl : 0, ya = y >= dl ? y - dl : 0, xb = x + dl < w ? x + dl : w - 1, yb = y + dl < h ? y + dl : h - 1;
+      const e = Math.max(-1, Math.min(1, (Z[yb * w + xb] - Z[ya * w + xa]) / (dl * 2.83) * 4));     // >0: sube hacia abajo-derecha = mira a la luz
+      const wet = Math.max(0.5, Math.min(1.5, 0.55 + 1.1 * acc + 0.55 * sheen + 1.3 * Math.max(0, v - 0.5)));
+      // (y el destello: un punto de luz neto donde el cordón o la gota miran de lleno a la luz)
+      li += amount * (e > 0 ? 0.8 * wet * e + 0.7 * wet * Math.max(0, e - 0.5) * Math.max(0, e - 0.5) : 0.5 * e); }
     for (let c = 0; c < 3; c++) { let u = D[i + c]; u += li > 0 ? (255 - u) * li : u * li; D[i + c] = u < 0 ? 0 : u > 255 ? 255 : u; }
   }
 }
