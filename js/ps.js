@@ -162,7 +162,7 @@ async function putInto(doc, layer, img, blend) {
 
 // Dibuja por franjas (memoria contenida aunque el documento sea enorme) y crea una capa de píxeles.
 // draw(canvas) pinta en la franja; bounds en píxeles del documento.
-async function putBands(doc, name, bounds, draw, progress) {
+async function putBands(doc, name, bounds, draw, progress, margin) {
   const x0 = Math.max(0, Math.floor(bounds.left)), y0 = Math.max(0, Math.floor(bounds.top));
   const x1 = Math.min(doc.width, Math.ceil(bounds.right)), y1 = Math.min(doc.height, Math.ceil(bounds.bottom));
   if (x1 <= x0 || y1 <= y0) return null;
@@ -172,8 +172,10 @@ async function putBands(doc, name, bounds, draw, progress) {
   let layer = null, k = 0;
   for (let y = y0; y < y1; y += bandH, k++) {
     if (progress) progress(k, nb);
-    const canvas = RD.makeCanvas(x0, y, W, Math.min(bandH, y1 - y));
+    const hB = Math.min(bandH, y1 - y), mT = margin ? Math.min(margin, y - y0) : 0, mB = margin ? Math.min(margin, y1 - y - hB) : 0;
+    let canvas = RD.makeCanvas(x0, y - mT, W, hB + mT + mB);
     draw(canvas);
+    if (mT || mB) { RD.finalize(canvas); canvas = { x0, y0: y, w: canvas.w, h: hB, data: canvas.data.subarray(mT * canvas.w * 4, (mT + hB) * canvas.w * 4), W: null, A: null }; }
     const img = RD.trimCanvas(canvas);
     if (!img) continue;
     if (!layer) layer = typeof doc.createPixelLayer === 'function' ? await doc.createPixelLayer({ name }) : await doc.createLayer({ name });

@@ -61,7 +61,7 @@
     <!-- ---------------- compartido: estilo ---------------- -->
     <div class="sec"><span class="num" id="numStyle">3</span>ESTILO <span class="sub">con qué se escribe</span></div>
     <div class="seg" id="toolSeg">
-      <div class="segb" data-v="lapiz">Lápiz</div><div class="segb" data-v="carbon">Carbón</div><div class="segb" data-v="cera">Cera</div><div class="segb" data-v="boli">Boli</div><div class="segb" data-v="rotulador">Rotu</div><div class="segb" data-v="pincel">Pincel</div><div class="segb f-gra" data-v="spray" title="Graffiti: técnica propia, con sus puntas (bote, mop, punta plana, empapado) y sus firmas">Graffiti</div>
+      <div class="segb" data-v="lapiz">Lápiz</div><div class="segb" data-v="carbon">Carbón</div><div class="segb" data-v="cera">Cera</div><div class="segb" data-v="boli">Boli</div><div class="segb" data-v="rotulador">Rotu</div><div class="segb" data-v="pincel">Pincel</div><div class="segb f-gra" data-v="spray" title="Graffiti: técnica propia, con sus boquillas (bote gordo, fino y seco, mop, boquilla plana, extintor, empapado, rodillo) y sus firmas">Graffiti</div>
     </div>
     <div class="seg mt4" id="presetSeg"></div>
     <div class="row" id="colorRow">
@@ -81,6 +81,7 @@
     <div id="sprayBox" class="hidden">
       <sp-slider id="slGoteo" min="0" max="100" value="45" show-value="true"><sp-label slot="label">Goteo (seco ↔ chorreando)</sp-label></sp-slider>
       <sp-slider id="slNube" min="0" max="100" value="50" show-value="true"><sp-label slot="label">Nube de spray y salpicaduras</sp-label></sp-slider>
+      <sp-slider id="slRelieve" min="0" max="100" value="35" show-value="true"><sp-label slot="label">Brillo del esmalte (mate ↔ brillante, con la pintura acumulada a la vista)</sp-label></sp-slider>
     </div>
     <div class="row hidden" id="fillRow">
       <div class="lbl">Relleno</div>
@@ -129,8 +130,10 @@
     <sp-slider id="slTinta" min="0" max="100" value="55" show-value="true"><sp-label slot="label">Tinta (carga, sequedad, textura)</sp-label></sp-slider>
     <sp-slider id="slPulso" min="0" max="100" value="40" show-value="true"><sp-label slot="label">Pulso (temblor de la mano)</sp-label></sp-slider>
     <sp-slider id="slRepasado" min="0" max="100" value="50" show-value="true"><sp-label slot="label">Repasado de las palabras importantes</sp-label></sp-slider>
+    <div id="repasoBox">
     <div class="label">Repasado</div>
     <div class="seg" id="repasoSeg"><div class="segb" data-v="auto" title="Según la herramienta">Auto</div><div class="segb" data-v="fundido" title="Más pigmento, sin líneas sueltas">Fundido</div><div class="segb" data-v="visible" title="Alguna pasada se separa un poco">Visible</div></div>
+    </div>
     <div class="row hidden" id="followRow"><div class="lbl">Grosor</div>
       <div class="seg grow" id="followSeg"><div class="segb" data-v="auto">Auto</div><div class="segb" data-v="herramienta">De la herramienta</div><div class="segb" data-v="letra">De la letra</div></div>
     </div>

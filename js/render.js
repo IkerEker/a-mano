@@ -4,6 +4,7 @@
 
 const { Raster } = require('./raster.js');
 const G = require('./geom.js');
+const R2 = require('./rng.js');
 
 function hexToRgb(hex) {
   const h = String(hex || '#000').replace('#', '');
@@ -76,8 +77,10 @@ function composite(canvas, cov, bx, by, bw, bh, rgb, alphaMul) {
 
 // pigmento (Float32 bw*bh, cantidad: 1 = el color tal cual, <1 más claro, >1 más oscuro y saturado)
 // mode 'multiply': tinta transparente (veladura); 'over': pintura que tapa (guache, óleo)
-function compositePigment(canvas, dens, bx, by, bw, bh, rgb, mode, alphaMul) {
+function compositePigment(canvas, dens, bx, by, bw, bh, rgb, mode, alphaMul, hb) {
   pig(canvas);
+  // (brillo: el spray apunta además cuánta pintura hay en cada punto —hb, 0,5 = película normal—; ver applyRelief)
+  const Hb = hb && canvas.relief ? (canvas.Hh || (canvas.Hh = new Float32Array(canvas.w * canvas.h))) : null;
   const Wb = canvas.W, Ab = canvas.A, CW = canvas.w, CH = canvas.h;
   const am = alphaMul == null ? 1 : alphaMul;
   const T = [Math.max(0.02, rgb[0] / 255), Math.max(0.02, rgb[1] / 255), Math.max(0.02, rgb[2] / 255)];
@@ -93,6 +96,7 @@ function compositePigment(canvas, dens, bx, by, bw, bh, rgb, mode, alphaMul) {
       const cx = bx + x - canvas.x0;
       if (cx < 0 || cx >= CW) continue;
       const k = cy * CW + cx, i = k * 3;
+      if (Hb) { const hv = hb[row + x], h0 = Hb[k]; Hb[k] = Math.min(1, (hv > h0 ? hv : h0) + 0.22 * (hv > h0 ? h0 : hv)); }
       if (over) {
         // pintura opaca: tapa según la carga; el tono va de lavado (poca) a profundo (mucha)
         const a = 1 - Math.exp(-3.4 * d);
@@ -131,7 +135,50 @@ function finalize(canvas) {
     D[4 * k + 3] = a * 255;
   }
   canvas.W = null; canvas.A = null;
+  if (canvas.Hh) { applyRelief(canvas); canvas.Hh = null; }
   return canvas;
+}
+
+// BRILLO (solo graffiti). La pintura de bote queda PLANA: es una película de esmalte, lisa y brillante, no una
+// letra con volumen. Lo único que sobresale es la pintura que se acumuló de más —el punto donde la mano apretó
+// parada, un cruce de dos pasadas, el cordón de un chorretón y su gota— y eso es lo que coge la luz: un brillo
+// suave y corto en esos puntos, nada más; el resto, liso, con el satinado apenas desigual del esmalte.
+// canvas.Hh (lo apunta compositePigment): 0,5 = película normal; hasta 1 = pintura acumulada.
+// canvas.relief = { amount 0..1, size: escala en px (según el grosor del trazo) }
+function applyRelief(canvas) {
+  const w = canvas.w, h = canvas.h, D = canvas.data, H0 = canvas.Hh, n = w * h;
+  const amount = Math.max(0, Math.min(1, canvas.relief.amount || 0)), s = Math.max(1.5, canvas.relief.size || 3);
+  if (amount <= 0) return;
+  const blur = (src, times) => {       // binomial 3x3
+    let a = src, b = new Float32Array(n);
+    for (let t = 0; t < times; t++) {
+      for (let y = 0; y < h; y++) { const r = y * w; for (let x = 0; x < w; x++) { const l = x > 0 ? a[r + x - 1] : a[r + x], rr = x < w - 1 ? a[r + x + 1] : a[r + x]; b[r + x] = (l + 2 * a[r + x] + rr) * 0.25; } }
+      const c = a === src ? new Float32Array(n) : a;
+      for (let y = 0; y < h; y++) { const r = y * w, ru = y > 0 ? r - w : r, rd = y < h - 1 ? r + w : r; for (let x = 0; x < w; x++) c[r + x] = (b[ru + x] + 2 * b[r + x] + b[rd + x]) * 0.25; }
+      a = c;
+    }
+    return a;
+  };
+  const Hs = blur(H0, s > 6 ? 3 : s > 3 ? 2 : 1);
+  // altura: la película apenas levanta (0,1); lo acumulado, sí
+  const depth = s * 0.34, Z = new Float32Array(n);
+  for (let k = 0; k < n; k++) { const v = Hs[k]; if (v > 0) Z[k] = depth * (0.1 * Math.min(1, v * 2) + 2 * Math.max(0, v - 0.5)); }
+  const norm = v => { const l = Math.hypot(v[0], v[1], v[2]); return [v[0] / l, v[1] / l, v[2] / l]; };
+  const L = norm([-0.5, -0.66, 0.62]), Hv = norm([L[0], L[1], L[2] + 1]);
+  const flatD = L[2], flatS = Math.pow(Hv[2], 12);
+  const kd = 0.5 * amount, ks = 0.55 * amount, nf = 1 / Math.max(3, s * 2.2);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const k = y * w + x, v = Hs[k], i = k * 4;
+    if (v < 0.2 || !D[i + 3]) continue;
+    const m = v >= 0.45 ? 1 : (v - 0.2) / 0.25;                // solo la película con cuerpo brilla (la nube de motas, no)
+    const gx = (Z[x < w - 1 ? k + 1 : k] - Z[x > 0 ? k - 1 : k]) * 0.5, gy = (Z[y < h - 1 ? k + w : k] - Z[y > 0 ? k - w : k]) * 0.5;
+    const il = 1 / Math.sqrt(gx * gx + gy * gy + 1), nx = -gx * il, ny = -gy * il, nz = il;
+    const dif = Math.max(0, nx * L[0] + ny * L[1] + nz * L[2]), nh = Math.max(0, nx * Hv[0] + ny * Hv[1] + nz * Hv[2]);
+    // satinado: el esmalte no refleja igual en todas partes (muy poco)
+    const X = canvas.x0 + x, Y = canvas.y0 + y, sat = 0.022 * amount * (R2.noise2(X * nf, Y * nf, 913) + 0.5 * R2.noise2(X * nf * 3.1, Y * nf * 3.1, 917));
+    const sh = 1 + kd * (dif - flatD) * m, li = (ks * (Math.pow(nh, 12) - flatS) + sat) * m;
+    for (let c = 0; c < 3; c++) { let u = D[i + c] * sh; u += li > 0 ? (255 - u) * li : u * li; D[i + c] = u < 0 ? 0 : u > 255 ? 255 : u; }
+  }
 }
 
 function polysBBox(polys) {

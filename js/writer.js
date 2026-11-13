@@ -458,7 +458,7 @@ function plan(lay, p, seed) {
         // los dos lados llegan afilados al pico (en vez de una curva o un codo redondeado)
         // (rotulador y boli no se afilan: en las esquinas cerradas se paran y la tinta se carga en el punto)
         const blunt = !!P.proc;
-        const pieces = s.fill ? [fin] : splitAtPeaks(fin, P.band ? r * 0.3 : r, blunt ? 1.15 : 1.95, !blunt, P.band ? r * 1.6 : 0);   // (rodillo: solo se parte en las esquinas de verdad, y las bandas se cruzan allí)
+        const pieces = s.fill ? [fin] : splitAtPeaks(fin, P.band ? r * 0.3 : r, blunt ? 1.15 : 1.95, !blunt, P.band ? r * 1.1 : 0);   // (rodillo: solo se parte en las esquinas de verdad, y las bandas se cruzan allí)
         // la mano suelta el trazo al final (sobre todo en letra rabiosa): la punta se afila
         if (flick && !s.fill && !blunt) for (const pc of pieces) taperEnds(pc, r, flick, rs);
         let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
@@ -489,6 +489,10 @@ function paint(canvas, strokes, p) {
   const rgb0 = RD.hexToRgb(p.color || '#1b1b1b');
   const ink = p.tinta == null ? 0.55 : p.tinta;
   let n = 0;
+  if (p.relieve > 0 && p.tool === 'spray' && !canvas.relief) {
+    if (strokes._rMed == null) { const rs = strokes.filter(s => !s.fill).map(s => s.r).sort((a, b) => a - b); strokes._rMed = rs.length ? rs[rs.length >> 1] : 4; }
+    canvas.relief = { amount: p.relieve, size: Math.max(1.6, Math.min(14, strokes._rMed * 0.42)) };
+  }
   for (const s of strokes) {
     const b = s.box;
     if (b.right < canvas.x0 || b.left > canvas.x0 + canvas.w || b.bottom < canvas.y0 || b.top > canvas.y0 + canvas.h) continue;

@@ -30,7 +30,7 @@ const store = {
 const DEF = {
   tab: 'gen', tool: 'rotulador', preset: 'fino', fill: '', color: '#1d1d1f', persona: 'adulta', version: 'a', mode: 'mayus', textMode: 'importancia', repaso: 'auto', legib: 70,
   grosor: 0, tinta: 55, pulso: 40, repasado: 50, follow: 'auto', locura: 50, prisa: 15, tight: 0,
-  contraste: 50, inter: 100, llenar: 30, margen: 5, align: 'center', kind: 'imagen', colorMode: 'uno', colorVar: 45, tupido: 60, goteo: 45, nube: 50, gsub: 'a',
+  contraste: 50, inter: 100, llenar: 30, margen: 5, align: 'center', kind: 'imagen', colorMode: 'uno', colorVar: 45, tupido: 60, goteo: 45, nube: 50, relieve: 35, gsub: 'a',
   text: 'Nadie había cerrado\nla puerta del sótano', levels: [0, 2, 1, 0, 0, -1, 0], marks: []
 };
 const st = Object.assign({}, DEF, store.get('settings2', {}));
@@ -94,9 +94,12 @@ const docKey = doc => String((doc && (doc.title || doc.id)) || '');
 
 // ------------------------------------------------------------------ parámetros
 function chaos() { return Math.max(0, 1 - st.legib / 100); }
+// relieve de la pintura (solo graffiti): 0..1; con él, las franjas se pintan con margen (RELIEF_M) para que casen
+function relieve() { return isGraf() ? Math.max(0, Math.min(1, (st.relieve == null ? 35 : st.relieve) / 100)) : 0; }
+const RELIEF_M = 24;
 function genParams() {
   return {
-    persona: styleKey(), mode: curMode(), goteo: st.goteo / 100, nube: st.nube / 100, tool: st.tool, preset: st.preset, color: st.color,
+    persona: styleKey(), mode: curMode(), goteo: st.goteo / 100, nube: st.nube / 100, relieve: relieve(), tool: st.tool, preset: st.preset, color: st.color,
     colorVar: st.colorMode === 'letras' ? Math.max(0.02, st.colorVar / 100) : 0, tupido: st.tupido / 100,
     auto: st.textMode === 'auto', repaso: st.repaso, marks: st.marks || [],
     legib: st.legib / 100, locura: st.locura / 50, pulso: st.pulso / 100, prisa: st.prisa / 100,
@@ -110,7 +113,7 @@ function genParams() {
 function handParams() {
   // la legibilidad manda; «locura» la escala (50 = normal)
   const loc = Math.min(1.4, chaos() * 1.8 * (st.locura / 50));
-  return { goteo: st.goteo / 100, nube: st.nube / 100, tupido: st.tupido / 100, colorVar: st.colorMode === 'letras' ? Math.max(0.02, st.colorVar / 100) : 0, tool: st.tool, preset: st.preset, fill: st.fill || '', follow: st.follow, repaso: st.repaso, width: Math.pow(2, st.grosor / 50), locura: loc, pulso: st.pulso / 100, prisa: st.prisa / 100, tight: st.tight / 150, ink: st.tinta / 100 };
+  return { goteo: st.goteo / 100, nube: st.nube / 100, relieve: relieve(), tupido: st.tupido / 100, colorVar: st.colorMode === 'letras' ? Math.max(0.02, st.colorVar / 100) : 0, tool: st.tool, preset: st.preset, fill: st.fill || '', follow: st.follow, repaso: st.repaso, width: Math.pow(2, st.grosor / 50), locura: loc, pulso: st.pulso / 100, prisa: st.prisa / 100, tight: st.tight / 150, ink: st.tinta / 100 };
 }
 
 // ------------------------------------------------------------------ segmentados
@@ -254,7 +257,7 @@ async function refreshCtx() {
     else { ctxC.textContent = 'Selecciona en Capas las capas de texto que quieras pasar a mano (o un grupo que las contenga).'; ctxC.className = 'ctx'; }
   }
 }
-const SAVED_KEYS = ['text', 'levels', 'marks', 'tupido', 'persona', 'version', 'mode', 'textMode', 'tool', 'preset', 'color', 'colorMode', 'colorVar', 'legib', 'gsub', 'goteo', 'nube'];
+const SAVED_KEYS = ['text', 'levels', 'marks', 'tupido', 'persona', 'version', 'mode', 'textMode', 'tool', 'preset', 'color', 'colorMode', 'colorVar', 'legib', 'gsub', 'goteo', 'nube', 'relieve'];
 function loadSaved(saved) {
   for (const k of SAVED_KEYS) if (saved[k] != null) st[k] = Array.isArray(saved[k]) ? saved[k].slice() : saved[k];
   save(); syncControls();
@@ -324,7 +327,7 @@ async function doWrite(fresh) {
       try { await P.selectLayer(target.shape.id); } catch (e) { /* nada */ }
       status('Pintando…', '');
       const name = P.HAND_PREFIX + snippet(st.text);
-      const layer = await P.putBands(doc, name, bb, c => WR.paint(c, strokes, gp), (k, n) => { if (n > 1) { try { ctx.reportProgress({ value: k / n, commandName: 'A mano' }); } catch (e) { /* nada */ } } });
+      const layer = await P.putBands(doc, name, bb, c => WR.paint(c, strokes, gp), (k, n) => { if (n > 1) { try { ctx.reportProgress({ value: k / n, commandName: 'A mano' }); } catch (e) { /* nada */ } } }, gp.relieve > 0 ? RELIEF_M : 0);
       if (!layer) throw new P.UserError('No ha salido nada visible.');
       let group = target.group;
       if (!group) group = await doc.createLayerGroup({ name: P.GROUP_PREFIX + snippet(st.text), fromLayers: [target.shape] });
@@ -371,8 +374,8 @@ async function handImage(doc, ctx, insts, hp, seed, name, say) {
     const neg = NG.fromInstances(HD, GEO, insts, hp, seed);
     const bb = WR.bounds(neg.strokes);
     if (!bb) throw new P.UserError('No ha salido nada visible.');
-    const gp = { color: insts[0].color, tinta: hp.ink, colorVar: hp.colorVar, colorSeed: seed };
-    const layerN = await P.putBands(doc, name, bb, c => WR.paint(c, neg.strokes, gp), progressFor(ctx, 'A mano'));
+    const gp = { color: insts[0].color, tinta: hp.ink, colorVar: hp.colorVar, colorSeed: seed, tool: hp.tool, relieve: hp.relieve };
+    const layerN = await P.putBands(doc, name, bb, c => WR.paint(c, neg.strokes, gp), progressFor(ctx, 'A mano'), hp.relieve > 0 ? RELIEF_M : 0);
     if (!layerN) throw new P.UserError('No ha salido nada visible.');
     return layerN;
   }
@@ -380,7 +383,7 @@ async function handImage(doc, ctx, insts, hp, seed, name, say) {
   const boxes = insts.map(it => { const b = IN.docBounds([it]); return padBox(b, 0.45 * Math.max(b.right - b.left, b.bottom - b.top) + 3); });
   let all = boxes[0];
   for (const b of boxes) all = { left: Math.min(all.left, b.left), top: Math.min(all.top, b.top), right: Math.max(all.right, b.right), bottom: Math.max(all.bottom, b.bottom) };
-  const layer = await P.putBands(doc, name, all, c => HD.renderHand(c, insts, hp, seed, i => meets(boxes[i], c), pv), progressFor(ctx, 'A mano'));
+  const layer = await P.putBands(doc, name, all, c => { if (hp.relieve > 0) c.relief = { amount: hp.relieve, size: 0 }; return HD.renderHand(c, insts, hp, seed, i => meets(boxes[i], c), pv); }, progressFor(ctx, 'A mano'), hp.relieve > 0 ? RELIEF_M : 0);
   if (!layer) throw new P.UserError('No ha salido nada visible.');
   return layer;
 }
@@ -463,19 +466,25 @@ function setTab(t) {
   const go = $('btnGo'); if (go) go.textContent = t === 'gen' ? 'Escribir en la forma' : 'Aplicar a lo seleccionado';
   lastShapeKey = null;
   syncNeg();
+  syncGraf();
   scheduleRefresh();
 }
 function setColor(hex) {
   st.color = hex; save();
   const sw = $('swColor'); if (sw) sw.style.backgroundColor = hex;
 }
-const SLIDERS = { slGoteo: 'goteo', slNube: 'nube', slTupido: 'tupido', slColorVar: 'colorVar', slLegib: 'legib', slGrosor: 'grosor', slTinta: 'tinta', slPulso: 'pulso', slRepasado: 'repasado', slLocura: 'locura', slPrisa: 'prisa', slTight: 'tight', slContraste: 'contraste', slInter: 'inter', slLlenar: 'llenar', slMargen: 'margen' };
+const SLIDERS = { slGoteo: 'goteo', slNube: 'nube', slRelieve: 'relieve', slTupido: 'tupido', slColorVar: 'colorVar', slLegib: 'legib', slGrosor: 'grosor', slTinta: 'tinta', slPulso: 'pulso', slRepasado: 'repasado', slLocura: 'locura', slPrisa: 'prisa', slTight: 'tight', slContraste: 'contraste', slInter: 'inter', slLlenar: 'llenar', slMargen: 'margen' };
 // graffiti: la interfaz cambia. En vez de A/B y de MAYÚSCULAS/minúsculas/cursiva salen sus firmas; el panel se
-// pone de amarillo; y con el spray aparecen el goteo y la nube
+// pone de amarillo; aparecen el goteo, la nube y el relieve; y se esconde lo que con un bote no pinta nada: la tinta
+// (carga, sequedad), el modo de repasado y, al calcar, el relleno de brocha o sello y el grosor «de la letra»
 function syncGraf() {
   const g = isGraf();
   show($('fontSeg'), !g); show($('versionRow'), !g); show($('caseSeg'), !g); show($('grafSeg'), g); show($('grafHint'), g);
-  show($('sprayBox'), st.tool === 'spray');
+  show($('sprayBox'), g);
+  show($('slTinta'), !g); show($('repasoBox'), !g);
+  show($('fillRow'), st.tab === 'calc' && !g); show($('followRow'), st.tab === 'calc' && !g);
+  // (la tela se bebe la pintura y el tóner es mate: ahí no hay relieve que valga)
+  { const pr = INK.preset(st.tool, st.preset); show($('slRelieve'), g && !pr.matte); }
   const el = $('grafSeg');
   if (el && !el.firstChild) {
     for (const k of Object.keys(FN.STYLES)) {
@@ -517,7 +526,7 @@ function bind() {
     save(); syncControls(); status('Ajustes avanzados restablecidos.', 'ok');
   });
   segBind('toolSeg', v => { st.tool = v; st.preset = v === 'spray' ? (FN.styleOf('graffiti_' + st.gsub).pre || 'gordo') : Object.keys(INK.TOOLS[v].presets)[0]; save(); segSet('toolSeg', v); renderPresets(); syncGraf(); syncText(); });
-  segBind('presetSeg', v => { st.preset = v; save(); segSet('presetSeg', v); });
+  segBind('presetSeg', v => { st.preset = v; save(); segSet('presetSeg', v); syncGraf(); });
   segBind('fillSeg', v => { st.fill = v; save(); segSet('fillSeg', v); syncNeg(); });
   segBind('colorModeSeg', v => { st.colorMode = v; save(); segSet('colorModeSeg', v); show($('multiBox'), v === 'letras'); });
   segBind('fontSeg', v => { st.persona = v; save(); segSet('fontSeg', v); syncText(); });
