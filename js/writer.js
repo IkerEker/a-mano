@@ -59,7 +59,7 @@ function trimEnds(p, a, b) {
 }
 
 // parte un trazo (en px) en los vértices muy cerrados; cada lado llega afilado al pico
-function splitAtPeaks(pts, r, lim, sharp) {
+function splitAtPeaks(pts, r, lim, sharp, overR) {
   const n = pts.length;
   if (n < 5) return [pts];
   // dirección media a cada lado, en una ventana de ~1,2 anchos
@@ -88,7 +88,7 @@ function splitAtPeaks(pts, r, lim, sharp) {
   // cada lado sigue un poco más allá del pico (se montan: el pico queda lleno, nunca cortado) y sin adelgazar
   // en el corte (los extremos del corte no se afilan ni salen «al vuelo»: cont0/cont1)
   const out = [];
-  const over = r * 0.55;
+  const over = (overR || r) * 0.55;
   const extend = (seg, atEnd) => {
     const m = seg.length; if (m < 3) return seg;
     const e = atEnd ? seg[m - 1] : seg[0], b = atEnd ? seg[Math.max(0, m - 4)] : seg[Math.min(m - 1, 3)];
@@ -457,7 +457,7 @@ function plan(lay, p, seed) {
         // los dos lados llegan afilados al pico (en vez de una curva o un codo redondeado)
         // (rotulador y boli no se afilan: en las esquinas cerradas se paran y la tinta se carga en el punto)
         const blunt = !!P.proc;
-        const pieces = s.fill ? [fin] : splitAtPeaks(fin, r, blunt ? 1.15 : 1.95, !blunt);
+        const pieces = s.fill ? [fin] : splitAtPeaks(fin, P.band ? r * 0.3 : r, blunt ? 1.15 : 1.95, !blunt, P.band ? r * 1.6 : 0);   // (rodillo: solo se parte en las esquinas de verdad, y las bandas se cruzan allí)
         // la mano suelta el trazo al final (sobre todo en letra rabiosa): la punta se afila
         if (flick && !s.fill && !blunt) for (const pc of pieces) taperEnds(pc, r, flick, rs);
         let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
