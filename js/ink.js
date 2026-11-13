@@ -492,38 +492,46 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
 // del final. Las cortas son solo un colgajo redondo bajo el trazo. Nunca flotan: si en su sitio no hay pintura,
 // no hay gota.   drips: [{ x, xc, y (un punto del trazo), w (medio ancho del hilo), len, bead, taper, sd }]
 function dripExit(buf, bx0, by0, bw, bh, x, y, gap) {
+  // baja por la columna x desde y mientras haya pintura MACIZA; devuelve la fila por la que sale y cuánta pintura
+  // maciza tiene encima (para que la gota arranque dentro de ella, nunca fuera)
   const X = Math.floor(x) - bx0; let Y = Math.floor(y) - by0;
-  if (X < 0 || X >= bw || Y < 0 || Y >= bh || buf[Y * bw + X] < 0.4) return null;
+  const T = 0.85;
+  if (X < 0 || X >= bw || Y < 0 || Y >= bh || buf[Y * bw + X] < T) return null;
   let last = Y, miss = 0;
-  for (Y++; Y < bh; Y++) { if (buf[Y * bw + X] >= 0.4) { last = Y; miss = 0; } else if (++miss > gap) break; }
-  return Y >= bh && miss === 0 ? null : by0 + last + 1;     // (la pintura sigue fuera de la caja: no se sabe dónde acaba)
+  for (Y++; Y < bh; Y++) { if (buf[Y * bw + X] >= T) { last = Y; miss = 0; } else if (++miss > gap) break; }
+  if (Y >= bh && miss === 0) return null;                     // (la pintura sigue fuera de la caja: no se sabe dónde acaba)
+  let top = last; while (top > 0 && last - top < 400 && buf[(top - 1) * bw + X] >= T) top--;
+  return { ye: by0 + last + 1, depth: last - top + 1 };
 }
 function drawDrips(buf, bx0, by0, bx1, by1, bw, drips, dens, hb) {
   const bh = by1 - by0;
   // de dónde sale cada una (mirando la pintura ya puesta, antes de dibujar ninguna)
   const live = [];
   for (const d of drips) {
-    const gap = Math.max(2, Math.round(d.w * 1.5));
-    let x = d.x, ye = dripExit(buf, bx0, by0, bw, bh, x, d.y, gap);
-    if (ye == null && d.xc != null) { x = d.xc; ye = dripExit(buf, bx0, by0, bw, bh, x, d.y, gap); }
-    if (ye == null) continue;
-    live.push(Object.assign({}, d, { x, y0: ye - Math.max(1.5, d.w * 2.2) }));
+    const gap = Math.max(1, Math.round(d.w));
+    let x = d.x, ex = dripExit(buf, bx0, by0, bw, bh, x, d.y, gap);
+    if (!ex && d.xc != null) { x = d.xc; ex = dripExit(buf, bx0, by0, bw, bh, x, d.y, gap); }
+    if (!ex || ex.depth < 3) continue;
+    // arranca bien dentro de la pintura (todo lo hondo que haga falta, sin asomar por arriba)
+    const inL = Math.max(2, Math.min(ex.depth - 1, d.w * 6 + 3));
+    live.push(Object.assign({}, d, { x, y0: ex.ye - inL, inL }));
   }
   for (const d of live) {
-    const w = d.w, len = d.len + (d.y0 < d.y ? 0 : 0), tip = w * (d.bead || 1.3), taper = d.taper || 0, y0 = d.y0, lenT = len + Math.max(1.5, w * 2.2);
+    const w = d.w, tip = w * (d.bead || 1.3), taper = d.taper || 0, y0 = d.y0, inL = d.inL, lenT = d.len + inL;
     const yA = Math.max(by0, Math.floor(y0)), yB = Math.min(by1 - 1, Math.ceil(y0 + lenT + tip + 1));
-    const lB = Math.min(lenT * 0.6, tip * 5.5);                               // tramo en que engorda hacia la gota
+    const lB = Math.min(d.len * 0.6, tip * 5.5);                               // tramo en que engorda hacia la gota
     for (let Y = yA; Y <= yB; Y++) {
       const yy = Y + 0.5 - y0;
       let hw;
       if (yy <= lenT) {
-        const t = yy / lenT;
+        const t = Math.max(0, yy - inL) / Math.max(1, d.len);
         hw = w * (1 - taper * t) * (1 + 0.1 * R.noise1(yy / (w * 5 + 2), d.sd + 1));
-        hw *= 1 + 1.5 * Math.exp(-yy / (w * 2.4 + 0.5));                      // embudo de salida
+        hw *= 1 + 1.3 * Math.exp(-Math.abs(yy - inL) / (w * 2.4 + 0.5));       // la pintura que se junta al salir del borde
+        hw *= smooth01(0, inL, yy);                                            // nace en punta, dentro de la pintura: sin corte
         const tb = smooth01(lenT - lB, lenT, yy); if (tip > hw) hw += (tip - hw) * tb * tb;
       } else { const e = yy - lenT; hw = e < tip ? Math.sqrt(tip * tip - e * e) : 0; }
       if (hw <= 0.02) continue;
-      const xc = d.x + w * 0.45 * R.noise1(yy / (w * 16 + 4), d.sd) * Math.min(1, yy / (w * 4 + 1));
+      const xc = d.x + w * 0.45 * R.noise1(yy / (w * 16 + 4), d.sd) * Math.min(1, Math.max(0, yy - inL) / (w * 4 + 1));
       const xA = Math.max(bx0, Math.floor(xc - hw - 1)), xB = Math.min(bx1 - 1, Math.ceil(xc + hw + 1));
       for (let X = xA; X <= xB; X++) {
         const dx = Math.abs(X + 0.5 - xc), al = Math.max(0, Math.min(1, hw - dx + 0.5)) * dens, k = (Y - by0) * bw + (X - bx0);
