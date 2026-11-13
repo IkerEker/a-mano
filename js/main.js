@@ -40,7 +40,11 @@ if (st.tool === 'negativo') { st.tool = 'lapiz'; st.preset = 'blando'; }
 if (!/^[ab]$/.test(st.version)) st.version = 'a';
 if (!FN.STYLES['graffiti_' + st.gsub]) st.gsub = 'a';
 // estilo de letra en uso: las cuatro manos tienen versión A/B; el graffiti, sus firmas (una sola caja)
-function styleKey() { return st.persona === 'graffiti' ? 'graffiti_' + st.gsub : st.persona + '_' + st.version; }
+// GRAFFITI es una técnica propia: se elige en la fila de técnicas y trae sus puntas y sus firmas (no se mezcla con
+// lápiz, boli, cera... ni con las cuatro letras de mano)
+if (st.persona === 'graffiti') { st.persona = 'adulta'; st.tool = 'spray'; }
+function isGraf() { return st.tool === 'spray'; }
+function styleKey() { return isGraf() ? 'graffiti_' + st.gsub : st.persona + '_' + st.version; }
 function curMode() { return FN.styleOf(styleKey()).gmode || st.mode; }
 let saveTimer = null;
 function save() { clearTimeout(saveTimer); saveTimer = setTimeout(() => store.set('settings2', st), 250); }
@@ -469,8 +473,8 @@ const SLIDERS = { slGoteo: 'goteo', slNube: 'nube', slTupido: 'tupido', slColorV
 // graffiti: la interfaz cambia. En vez de A/B y de MAYÚSCULAS/minúsculas/cursiva salen sus firmas; el panel se
 // pone de amarillo; y con el spray aparecen el goteo y la nube
 function syncGraf() {
-  const g = st.persona === 'graffiti';
-  show($('versionRow'), !g); show($('caseSeg'), !g); show($('grafSeg'), g); show($('grafHint'), g);
+  const g = isGraf();
+  show($('fontSeg'), !g); show($('versionRow'), !g); show($('caseSeg'), !g); show($('grafSeg'), g); show($('grafHint'), g);
   show($('sprayBox'), st.tool === 'spray');
   const el = $('grafSeg');
   if (el && !el.firstChild) {
@@ -512,17 +516,11 @@ function bind() {
     for (const k of ['grosor', 'tinta', 'pulso', 'repasado', 'repaso', 'follow', 'locura', 'prisa', 'tight', 'contraste', 'inter', 'llenar', 'margen', 'align', 'kind']) st[k] = DEF[k];
     save(); syncControls(); status('Ajustes avanzados restablecidos.', 'ok');
   });
-  segBind('toolSeg', v => { st.tool = v; st.preset = Object.keys(INK.TOOLS[v].presets)[0]; save(); segSet('toolSeg', v); renderPresets(); syncGraf(); });
+  segBind('toolSeg', v => { st.tool = v; st.preset = v === 'spray' ? (FN.styleOf('graffiti_' + st.gsub).pre || 'gordo') : Object.keys(INK.TOOLS[v].presets)[0]; save(); segSet('toolSeg', v); renderPresets(); syncGraf(); syncText(); });
   segBind('presetSeg', v => { st.preset = v; save(); segSet('presetSeg', v); });
   segBind('fillSeg', v => { st.fill = v; save(); segSet('fillSeg', v); syncNeg(); });
   segBind('colorModeSeg', v => { st.colorMode = v; save(); segSet('colorModeSeg', v); show($('multiBox'), v === 'letras'); });
-  segBind('fontSeg', v => {
-    const was = st.persona; st.persona = v;
-    // al entrar en graffiti se coge el bote (y al salir se vuelve a lo que se tenía, si no se ha cambiado)
-    if (v === 'graffiti' && was !== 'graffiti') { if (st.tool !== 'spray') { st.toolBefore = st.tool + '|' + st.preset; st.tool = 'spray'; st.preset = FN.styleOf('graffiti_' + st.gsub).pre || 'gordo'; } }
-    else if (v !== 'graffiti' && was === 'graffiti' && st.tool === 'spray' && st.toolBefore) { const tb = String(st.toolBefore).split('|'); if (INK.TOOLS[tb[0]]) { st.tool = tb[0]; st.preset = tb[1]; } st.toolBefore = ''; }
-    save(); segSet('fontSeg', v); segSet('toolSeg', st.tool); renderPresets(); syncGraf(); syncText();
-  });
+  segBind('fontSeg', v => { st.persona = v; save(); segSet('fontSeg', v); syncText(); });
   // (cada firma trae su punta: la del Tag es plana, la Bomba va a bote gordo...; luego se puede cambiar)
   segBind('grafSeg', v => { st.gsub = v; if (st.tool === 'spray') { st.preset = FN.styleOf('graffiti_' + v).pre || st.preset; renderPresets(); } save(); syncGraf(); });
   segBind('versionSeg', v => { st.version = v; save(); segSet('versionSeg', v); syncText(); });

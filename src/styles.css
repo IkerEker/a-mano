@@ -148,3 +148,5 @@ body { display: flex; flex-direction: column; overflow: hidden; padding-bottom: 
 #viewMain .actions { flex: 0 0 auto; margin-top: 6px; padding-top: 4px; border-top: 1px solid var(--uxp-host-border-color); }
 #viewMain .status { flex: 0 0 auto; }
 #viewAdv { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+body.graf #presetSeg { flex-wrap: wrap; }
+body.graf #presetSeg .segb { min-width: 22%; }

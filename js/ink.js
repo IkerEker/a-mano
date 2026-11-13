@@ -82,7 +82,11 @@ TOOLS.spray = {
     mop: { label: 'Mop', proc: 'spray', mop: true, w: 0.055, dens: 1, core: 0.95, soft: 0.06, mist: 0, drip: 1.25, spit: 0.8, fill: 1, haze: 0, flare: 0, blend: 'over', tremor: 0.5, lift: 0, minR: 1 },
     // punta plana: rotulador biselado o brocha (la herramienta de las firmas); nib: ángulo del filo; thick: su grosor; dry: vetas
     plano: { label: 'Plano', proc: 'spray', flat: true, w: 0.085, dens: 1, nib: -0.62, thick: 0.2, dry: 0.5, drip: 0.5, blend: 'over', tremor: 0.4, lift: 0, minR: 1.2 },
-    rastro: { label: 'Barra', proc: 'spray', flat: true, w: 0.08, dens: 1, nib: -0.45, thick: 0.3, dry: 0.85, drip: 0, blend: 'over', tremor: 0.4, lift: 0, minR: 1.2 }
+    rastro: { label: 'Barra', proc: 'spray', flat: true, w: 0.08, dens: 1, nib: -0.45, thick: 0.3, dry: 0.85, drip: 0, blend: 'over', tremor: 0.4, lift: 0, minR: 1.2 },
+    // empapado: bote sobre tela o papel que chupa: la pintura cala y se corre, sin borde, con la trama a la vista
+    empapado: { label: 'Empapado', proc: 'spray', soak: true, w: 0.11, dens: 1, core: 0.42, soft: 1.15, mist: 0.6, drip: 0, spit: 1.6, spotK: 2.6, fill: 1, haze: 0, flare: 0.25, swell: 0.5, puls: 0.17, blend: 'over', tremor: 0.5, lift: 0, minR: 1.5 },
+    // rodillo de tóner: banda ancha, translúcida y rayada, con los cantos cargados (se suma al cruzarse)
+    rodillo: { label: 'Rodillo', proc: 'spray', band: true, w: 0.12, dens: 1, drip: 0, blend: 'multiply', tremor: 0.2, lift: 0, minR: 3 }
   }
 };
 TOOL_ORDER.push('spray');
@@ -495,6 +499,79 @@ function drawDrips(buf, bx0, by0, bx1, by1, bw, drips, dens) {
   }
 }
 
+// RODILLO (rodillo de tóner, rasqueta): una banda ancha que la mano arrastra de canto. Deja una aguada translúcida
+// rayada a lo largo (cientos de hilos), con el tóner amontonado en los dos cantos y una raya oscura donde arranca y
+// donde se levanta; donde va cargado, negro; donde dos bandas se cruzan, se suman (se pinta en multiplicar).
+function paintBand(canvas, pts, P, r, rgb, seed, opts) {
+  const rnd = R.mulberry32(((seed >>> 0) ^ 0x7f4a7c15) >>> 0);
+  r = Math.max(P.minR || 2, r);
+  const Q = resample(pts, Math.max(0.8, r * 0.12)), n = Q.length;
+  if (n < 2) return;
+  const Ls = Q[n - 1].s;
+  if (Ls < 0.5) return;
+  const hwK = Math.min(1, 0.4 + Ls / (r * 3.2));          // (puntos y tildes: un toque más estrecho)
+  const HW = new Float32Array(n);
+  for (let i = 0; i < n; i++) HW[i] = r * hwK * (0.97 + 0.05 * R.noise1(Q[i].s / (r * 9 + 1), seed + 9)) * (0.85 + 0.15 * (Q[i].w == null ? 1 : Q[i].w));
+  const pad = r * 1.1 + 3;
+  let bx0 = Infinity, by0 = Infinity, bx1 = -Infinity, by1 = -Infinity;
+  for (const q of Q) { if (q.x < bx0) bx0 = q.x; if (q.x > bx1) bx1 = q.x; if (q.y < by0) by0 = q.y; if (q.y > by1) by1 = q.y; }
+  bx0 = Math.max(canvas.x0, Math.floor(bx0 - pad)); by0 = Math.max(canvas.y0, Math.floor(by0 - pad));
+  bx1 = Math.min(canvas.x0 + canvas.w, Math.ceil(bx1 + pad)); by1 = Math.min(canvas.y0 + canvas.h, Math.ceil(by1 + pad));
+  const bw = bx1 - bx0, bh = by1 - by0;
+  if (bw <= 0 || bh <= 0 || bw * bh > 5e7) return;
+  // ---- coordenadas de la banda en cada píxel: u (a lo ancho, con signo) y s (a lo largo); extremos en corte recto
+  const U = new Float32Array(bw * bh).fill(9), S = new Float32Array(bw * bh);
+  for (let i = 0; i < n - 1; i++) {
+    const a = Q[i], b = Q[i + 1], hw = Math.max(HW[i], HW[i + 1]) + 1.5;
+    const dx = b.x - a.x, dy = b.y - a.y, l2 = dx * dx + dy * dy || 1e-9, dl = Math.sqrt(l2);
+    const x0 = Math.max(bx0, Math.floor(Math.min(a.x, b.x) - hw)), x1 = Math.min(bx1 - 1, Math.ceil(Math.max(a.x, b.x) + hw));
+    const y0 = Math.max(by0, Math.floor(Math.min(a.y, b.y) - hw)), y1 = Math.min(by1 - 1, Math.ceil(Math.max(a.y, b.y) + hw));
+    for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+      const px = x + 0.5 - a.x, py = y + 0.5 - a.y;
+      let t = (px * dx + py * dy) / l2;
+      if (t < 0) { if (i > 0) t = 0; else continue; } else if (t > 1) { if (i < n - 2) t = 1; else continue; }
+      const ex = px - dx * t, ey = py - dy * t, u = Math.hypot(ex, ey) / (HW[i] + (HW[i + 1] - HW[i]) * t);
+      const k = (y - by0) * bw + (x - bx0);
+      if (u < Math.abs(U[k])) { U[k] = dx * ey - dy * ex >= 0 ? u : -u; S[k] = a.s + t * dl; }
+    }
+  }
+  // ---- la pintura
+  const buf = new Float32Array(bw * bh);
+  const dens = Math.min(1, (P.dens || 1) * (opts.inkMul == null ? 1 : Math.max(0.85, opts.inkMul)));
+  const o1 = (seed % 613) * 0.71, o2 = (seed % 419) * 1.3, o3 = (seed % 241) * 2.1, hwPx = r * hwK;
+  const loadA = rnd() < 0.35 ? 0.5 + 0.8 * rnd() : 0.12 * rnd(), loadL = r * (1.5 + 5 * rnd()), base = 0.16 + 0.2 * rnd(), tilt = (rnd() - 0.5) * 2;
+  const chat0 = rnd() < 0.3 ? Ls * (0.15 + 0.6 * rnd()) : -1e9, chatL = r * (1 + 2 * rnd()), endK = rnd();
+  // (hilos: tantos como quepan en el ancho; con la banda pequeña, menos y más gordos)
+  const f1 = Math.min(34, hwPx * 0.5), f2 = Math.min(90, hwPx * 0.45), f3 = Math.min(230, hwPx * 0.4);
+  const A0 = Q[0], A1 = Q[Math.min(n - 1, 3)], E1 = Q[n - 1], E0 = Q[Math.max(0, n - 4)];
+  const l0 = Math.hypot(A1.x - A0.x, A1.y - A0.y) || 1, l1 = Math.hypot(E1.x - E0.x, E1.y - E0.y) || 1;
+  const t0x = (A1.x - A0.x) / l0, t0y = (A1.y - A0.y) / l0, t1x = (E1.x - E0.x) / l1, t1y = (E1.y - E0.y) / l1;
+  for (let y = 0; y < bh; y++) for (let x = 0; x < bw; x++) {
+    const k = y * bw + x, us = U[k], ua = Math.abs(us);
+    if (ua > 1 + 0.6 / hwPx) continue;
+    const s = S[k], X = bx0 + x + 0.5, Y = by0 + y + 0.5;
+    let aa = Math.max(0, Math.min(1, (1 - ua) * hwPx + 0.5));
+    // corte recto en los dos extremos (lo que queda detrás del arranque o más allá del final no se pinta)
+    if (s < hwPx * 1.6) aa = Math.min(aa, (X - A0.x) * t0x + (Y - A0.y) * t0y + 0.5);
+    if (Ls - s < hwPx * 1.6) aa = Math.min(aa, 0.5 - ((X - E1.x) * t1x + (Y - E1.y) * t1y));
+    if (aa <= 0) continue;
+    let u2 = us + 0.012 * R.noise1(s / (r * 2.5 + 1), seed + 51);
+    // (traqueteo: a ratos el rodillo salta y los hilos hacen zigzag)
+    if (s > chat0 && s < chat0 + chatL) u2 += 0.02 * (Math.abs(((s / (r * 0.07 + 1)) % 2) - 1) - 0.5);
+    const c = 0.5 + 0.5 * (0.45 * R.noise1(u2 * f1 + o1, seed + 31) + 0.33 * R.noise1(u2 * f2 + o2, seed + 37) + 0.22 * R.noise1(u2 * f3 + o3, seed + 39));
+    // carga de tóner a lo largo: mucha al arrancar, luego se va; a ratos vuelve. Y nunca apoya parejo: más de un lado
+    const L = base + loadA * Math.exp(-s / loadL) + 0.22 * Math.max(0, R.noise1(s / (r * 4 + 1), seed + 53));
+    let a = L * (0.35 + 1.25 * c * c) * (0.85 + 0.3 * tilt * us);
+    // el tóner se amontona en los cantos (una raya oscura a cada lado) y donde el rodillo arranca y se levanta
+    if (ua > 1 - Math.max(1.4 / hwPx, 0.035 + 0.025 * R.noise1(s / (r * 1.2 + 1), seed + (us > 0 ? 55 : 57)))) a = Math.max(a, 0.92);
+    const eS = Math.max(1.4, r * 0.07);
+    if (s < eS || Ls - s < eS * (0.5 + endK)) a = Math.max(a, 0.8);
+    buf[k] = Math.max(0, Math.min(1, a)) * Math.min(1, aa) * dens;
+  }
+  if (opts.mask) applyMask(buf, bx0, by0, bw, bh, opts.mask, seed);
+  RD.compositePigment(canvas, buf, bx0, by0, bw, bh, rgb, 'multiply', opts.alphaMul == null ? 1 : opts.alphaMul);
+}
+
 // PUNTA PLANA (rotulador biselado, brocha plana, barra): la herramienta de las firmas. La punta es un filo que la
 // mano lleva siempre con el mismo ángulo: el trazo sale gordo en una dirección y fino en la otra, y acaba en corte
 // recto; cuando la pintura escasea o la mano corre, los pelos se separan y dejan vetas a lo largo del trazo.
@@ -594,6 +671,7 @@ function paintFlat(canvas, pts, P, r, rgb, seed, opts) {
 // opts: { goteo 0..1, nube 0..1, mask, alphaMul, inkMul, contIn, contOut }
 function paintSpray(canvas, pts, P, r, rgb, seed, opts) {
   if (P.flat) return paintFlat(canvas, pts, P, r, rgb, seed, opts);
+  if (P.band) return paintBand(canvas, pts, P, r, rgb, seed, opts);
   const rnd = R.mulberry32(((seed >>> 0) ^ 0x9e3779b9) >>> 0);
   r = Math.max(P.minR || 1, r);
   const Q = resample(pts, Math.max(0.6, r * 0.3)), n = Q.length;
@@ -614,7 +692,7 @@ function paintSpray(canvas, pts, P, r, rgb, seed, opts) {
     if (lu > 1e-6 && lv > 1e-6) turn = Math.acos(Math.max(-1, Math.min(1, (ux * vx + uy * vy) / (lu * lv)))) / Math.PI;
     const d0 = dwell0 ? Math.exp(-q.s / (r * 1.6)) : 0, d1 = dwell1 ? Math.exp(-(Ls - q.s) / (r * 1.3)) : 0;
     const slow = Math.min(1, d0 + 0.7 * d1 + 0.8 * turn);
-    let k = (q.w == null ? 1 : q.w) * (1 + 0.16 * slow + 0.07 * R.noise1(q.s / (r * 7 + 1), seed + 3)), dn = 1;
+    let k = (q.w == null ? 1 : q.w) * (1 + (P.swell == null ? 0.16 : P.swell) * slow + (P.puls == null ? 0.07 : P.puls) * R.noise1(q.s / (r * 7 + 1), seed + 3)), dn = 1;
     if (flareOut) { const t = smooth01(0, Math.min(Ls * 0.4, r * 5), Ls - q.s); k *= 0.55 + 0.45 * t; dn *= 0.2 + 0.8 * t; }
     K[i] = k; Dn[i] = dn; Ld[i] = slow;
   }
@@ -650,7 +728,7 @@ function paintSpray(canvas, pts, P, r, rgb, seed, opts) {
     const i0 = rnd() < 0.7 ? 0 : Math.floor(rnd() * n);
     for (let k = 0; k < nS; k++) {
       const q = Q[Math.min(n - 1, Math.max(0, i0 + Math.floor((rnd() - 0.5) * 8)))], a = rnd() * 6.283, d = r * (1.3 + 2.8 * rnd() * rnd());
-      spots.push({ x: q.x + Math.cos(a) * d, y: q.y + Math.sin(a) * d, r: Math.max(0.5, r * (0.04 + 0.14 * rnd() * rnd())) });
+      spots.push({ x: q.x + Math.cos(a) * d * (P.soak ? 1.5 : 1), y: q.y + Math.sin(a) * d * (P.soak ? 1.5 : 1), r: Math.max(0.5, r * (0.04 + 0.14 * rnd() * rnd()) * (P.spotK || 1)), a: 0.4 + 0.6 * rnd() });
     }
   }
   // ---- caja
@@ -698,6 +776,19 @@ function paintSpray(canvas, pts, P, r, rgb, seed, opts) {
     const k = y * bw + x;
     if (U[k] >= e2) continue;
     const X = bx0 + x + 0.5, Y = by0 + y + 0.5, dd = DD[k];
+    if (P.soak) {
+      // EMPAPADO: la pintura cala en la tela y se corre. No hay borde: hay un degradado ancho que la trama de los
+      // hilos rompe en puntitos; por dentro, zonas más y menos cargadas (donde el bote paró, negro del todo)
+      const uu = U[k] * (1 + 0.16 * R.noise2(X / (r * 2.4 + 1), Y / (r * 2.4 + 1), hs + 21) + 0.07 * R.noise2(X / (r * 0.6 + 1), Y / (r * 0.6 + 1), hs + 22));
+      const g0 = uu <= core ? 1 : Math.exp(-2.6 * Math.pow((uu - core) / (e1 - core), 2));
+      const t = g0 * dd * fillP * (0.82 + 0.3 * R.noise2(X / (r * 3 + 1), Y / (r * 3 + 1), hs + 23));
+      const wf = 6.2832 / Math.max(2.6, r * 0.1);
+      const wv = 0.5 + 0.25 * (Math.sin((X * 0.94 + Y * 0.34) * wf) + Math.sin((Y * 0.94 - X * 0.34) * wf));
+      const T = 0.12 + 0.62 * (0.72 * wv + 0.28 * R.hash2(bx0 + x, by0 + y, hs + 24));
+      const a = t >= 0.97 ? 1 : 0.4 * Math.pow(Math.max(0, t), 1.3) + 0.6 * smooth01(T - 0.1, T + 0.1, t) * Math.min(1, t * 1.6);
+      buf[k] = Math.min(1, a) * dens;
+      continue;
+    }
     let u = U[k] * (1 + 0.09 * R.noise2(X / (r * 1.7 + 1), Y / (r * 1.7 + 1), hs + 21) + 0.05 * R.noise2(X / (r * 0.45 + 1), Y / (r * 0.45 + 1), hs + 22));
     if (dd < 0.97) u /= 0.5 + 0.5 * dd;
     let c = 0;
@@ -720,7 +811,7 @@ function paintSpray(canvas, pts, P, r, rgb, seed, opts) {
   drawDrips(buf, bx0, by0, bx1, by1, bw, drips, dens);
   for (const p of spots) {
     const xA = Math.max(bx0, Math.floor(p.x - p.r - 1)), xB = Math.min(bx1 - 1, Math.ceil(p.x + p.r + 1)), yA = Math.max(by0, Math.floor(p.y - p.r - 1)), yB = Math.min(by1 - 1, Math.ceil(p.y + p.r + 1));
-    for (let Y = yA; Y <= yB; Y++) for (let X = xA; X <= xB; X++) { const al = Math.max(0, Math.min(1, p.r - Math.hypot(X + 0.5 - p.x, Y + 0.5 - p.y) + 0.5)) * dens, k = (Y - by0) * bw + (X - bx0); if (al > buf[k]) buf[k] = al; }
+    for (let Y = yA; Y <= yB; Y++) for (let X = xA; X <= xB; X++) { const dS = Math.hypot(X + 0.5 - p.x, Y + 0.5 - p.y), al = (P.soak ? (1 - smooth01(p.r * 0.35, p.r + 1, dS)) * (p.a || 1) : Math.max(0, Math.min(1, p.r - dS + 0.5))) * dens, k = (Y - by0) * bw + (X - bx0); if (al > buf[k]) buf[k] = al; }
   }
   if (opts.mask) applyMask(buf, bx0, by0, bw, bh, opts.mask, seed);
   RD.compositePigment(canvas, buf, bx0, by0, bw, bh, rgb, 'over', opts.alphaMul == null ? 1 : opts.alphaMul);

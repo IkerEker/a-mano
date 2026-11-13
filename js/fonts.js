@@ -56,6 +56,8 @@ STYLES.graffiti_a = Object.assign({}, GRAF, { label: 'Graffiti · Tag', sub: 'Ta
 STYLES.graffiti_b = Object.assign({}, GRAF, { label: 'Graffiti · Rabia', sub: 'Rabia', hint: 'a zarpazos: angulosa, desigual, los trazos se pasan de largo', pre: 'rastro', forms: ['capsRabia'], wide: 0.55, slant: 0.05, slantVar: 0.13, hVar: 0.15, wVar: 0.14, wob: 0.02, angular: 1, os: 0.04, osVar: 0.04, stem: 0.12, cb: 0.1, open: 0, overlap: -0.05, weight: 1, bounce: 2.4, sizeVar: 1.9 });
 STYLES.graffiti_c = Object.assign({}, GRAF, { label: 'Graffiti · Bomba', sub: 'Bomba', hint: 'mayúsculas gordas y torpes, pegadas, hechas para chorrear', pre: 'gordo', wide: 0.95, slant: 0.02, slantVar: 0.1, hVar: 0.15, wVar: 0.1, wob: 0.035, round: 0.7, os: 0.02, open: 0.3, overlap: -0.06, weight: 1.35, bounce: 1.8, sizeVar: 1.5 });
 STYLES.graffiti_d = Object.assign({}, GRAF, { label: 'Graffiti · De un trazo', sub: 'De un trazo', hint: 'todo ligado, sin levantar la mano, con lazos y un rasgo final', pre: 'mop', gmode: 'cursiva', lowerAll: true, xhS: 0.62, slantS: 0.34, slantVarS: 0.05, scriptW: 1.25, ascS: 0.85, peakS: 0.4, lead: 0.12, loopVar: 1.4, loopW: 1.2, scriptSmooth: 0.03, bounce: 1.4, weightS: 0.72, trackS: 0.03 });
+STYLES.graffiti_f = Object.assign({}, GRAF, { label: 'Graffiti · Rodillo', sub: 'Rodillo', hint: 'geométrica, de banda ancha y translúcida (rodillo de tóner); las bandas se cruzan y se suman', pre: 'rodillo', wide: 1.2, slant: 0, slantVar: 0.015, hVar: 0.03, wVar: 0.03, wob: 0.004, round: 1, roundR: 0.34, os: 0, osVar: 0, stem: 0, cb: 0.03, open: 0, overlap: 0.02, weight: 1, bounce: 0.5, sizeVar: 0.5 });
+STYLES.graffiti_e = Object.assign({}, GRAF, { label: 'Graffiti · Borrón', sub: 'Borrón', hint: 'gordas y blandas, empapadas en la tela; casi sin huecos', pre: 'empapado', forms: ['capsBlob'], wide: 1.12, slant: 0, slantVar: 0.07, hVar: 0.2, wVar: 0.14, wob: 0.04, round: 0.9, os: 0, osVar: 0.01, stem: 0, cb: 0.05, open: 0, overlap: -0.03, weight: 1, bounce: 2.2, sizeVar: 1.8 });
 // compatibilidad con ajustes guardados de la 2.0
 const ALIAS = { graffiti: 'graffiti_a', infantil: 'infantil_a', adulta: 'adulta_a', rabiosa: 'nerviosa_a', nerviosa: 'nerviosa_a', elegante: 'elegante_a' };
 const PERSONAS = new Proxy(STYLES, { get: (t, k) => t[k] || t[ALIAS[k]] || undefined });
@@ -361,7 +363,7 @@ function printGlyph(styleKey, ch, v, altIdx, cursive, capS) {
       const ax = A[0] - C[0], ay = A[1] - C[1], bx = B[0] - C[0], by = B[1] - C[1], la = Math.hypot(ax, ay), lb = Math.hypot(bx, by);
       const cs = (ax * bx + ay * by) / ((la * lb) || 1);
       if (la < 0.2 || lb < 0.2 || Math.abs(cs) > 0.5 || rnd() > st.round) { Q.push(C); continue; }
-      const r = Math.min(0.16, 0.4 * Math.min(la, lb));
+      const r = Math.min(st.roundR || 0.16, 0.45 * Math.min(la, lb));
       Q.push([C[0] + ax / la * r, C[1] + ay / la * r, false], [C[0] + bx / lb * r, C[1] + by / lb * r, false]);
     }
     Q.push(P[P.length - 1]); s.pts = Q;

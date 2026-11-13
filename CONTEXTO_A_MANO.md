@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.26)
+## 2. Cómo se usa (2.27)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -600,6 +600,24 @@ Qué se cambió:
 Fuentes: en.wikipedia.org/wiki/Handstyle; theartistblock.ink (5 tipos de tags; fundamentos del handstyle; guía de
 extensiones); machinestudio.com (control del bote); sprayplanet.com (boquillas).
 
+### 2.27 — Graffiti como técnica propia; firmas Borrón (empapado en tela) y Rodillo (rodillo de tóner)
+Pedido: «añade esta tipografía (mira cómo la letra se humedece y entra en la tela); te recuerdo que Graffiti es una
+técnica aparte, no está hecha de lápiz, boli, cera: es propia» y «añade también este graffiti: está escrito con el
+rollo de un tóner». Referencias en `referencias/tipos/graffiti_*.png`.
+- **Técnica propia**: Graffiti ya no es una «letra» que se combine con las técnicas. Es el último botón de la fila
+  de técnicas (`data-v="spray"`); `isGraf()` = `st.tool === 'spray'`. Al elegirla: se ocultan las cuatro letras de
+  mano, A/B y la caja; salen las firmas (`grafSeg`) y las puntas (`presetSeg`); panel amarillo. Para salir, otra
+  técnica. Los ajustes guardados con `persona: 'graffiti'` se migran.
+- **Empapado** (`soak`, firma Borrón, `graffiti_e`, `capsBlob`): la pintura cala; no hay borde, sino un degradado
+  ancho que la trama de la tela (dos senos cruzados + grano) rompe en puntitos; zonas más y menos cargadas; el
+  trazo se hincha donde la mano para (`swell`, `puls`); gotas que calan como manchitas blandas (`spotK`). Sin
+  chorretones (la tela chupa).
+- **Rodillo** (`band`, `paintBand`, firma Rodillo, `graffiti_f`): banda perpendicular al camino (no punta de ángulo
+  fijo): aguada translúcida en multiplicar, hilos a lo largo que siguen las curvas, cantos cargados (raya oscura a
+  cada lado), raya donde arranca y donde se levanta, corte recto en los extremos, carga de tóner que se agota, a
+  veces traqueteo en zigzag; al cruzarse dos bandas se suman. Letra geométrica con vueltas anchas (`roundR`).
+- Pruebas: las 6 firmas en `tests/sim/harness.js` (66).
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -659,7 +677,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.26.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.27.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)

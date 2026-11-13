@@ -1,8 +1,8 @@
-A MANO 2.26 · plugin para Photoshop (2024 o posterior)
+A MANO 2.27 · plugin para Photoshop (2024 o posterior)
 =====================================================
 
 INSTALAR
-- Doble clic en A_mano_v2.26.0.ccx -> Creative Cloud avisa de que no viene del
+- Doble clic en A_mano_v2.27.0.ccx -> Creative Cloud avisa de que no viene del
   Marketplace -> "Instalar". Sustituye a las versiones anteriores. Es independiente de Cartelator.
 - En Photoshop: Plugins > A mano.
 
@@ -36,12 +36,14 @@ GENERAR, de arriba abajo
    base; el deslizador que aparece dice cuánto cambian tono, saturación y luz.
    (También en CALCAR, a partir del color de cada capa de texto.)
 
-   SPRAY (técnica de graffiti), con seis puntas: Gordo (bote con boquilla ancha: borde de motas, nube), Fino
-   (línea limpia), Seco (bote lejos o casi vacío: no tapa del todo), Mop (rotulador de goteo), Plano (rotulador
-   biselado o brocha plana: trazo gordo en una dirección y fino en la otra, corte recto, vetas) y Barra (punta
-   plana seca, muy rayada).
-   Con el spray aparecen dos deslizadores: «Goteo» (de seco a chorreando) y «Nube de spray y salpicaduras».
-   Los chorretones caen siempre hacia abajo del documento, aunque la forma esté girada.
+   GRAFFITI es una técnica propia: se elige en la fila de técnicas (último botón) y no se mezcla con lápiz, boli,
+   cera... Al elegirla el panel cambia: se pone amarillo, las técnicas dejan paso a sus PUNTAS y la letra a sus
+   FIRMAS (una sola caja, sin mayúsculas ni minúsculas). Para salir, elige cualquier otra técnica.
+   Puntas: Gordo (bote ancho: borde de motas y nube), Fino, Seco (no tapa del todo), Mop (rotulador de goteo),
+   Plano (punta biselada: gordo/fino, corte recto, vetas), Barra (plana y seca), Empapado (bote sobre tela o
+   papel que chupa: la pintura cala y se corre, sin borde, con la trama a la vista) y Rodillo (rodillo de tóner:
+   banda ancha y translúcida, rayada, con los cantos cargados; al cruzarse se suma).
+   Con Graffiti aparecen «Goteo» y «Nube de spray y salpicaduras». Los chorretones caen hacia abajo del documento.
 
 4. LETRA: infantil, adulta, nerviosa o elegante, cada una en versión A o B;
    MAYÚSCULAS, minúsculas o cursiva. Las letras salen de escritura real (los
@@ -54,15 +56,10 @@ GENERAR, de arriba abajo
    · Nerviosa B: a lo loco: hacia atrás, desigual y saltona; cursiva angulosa.
    · Elegante A: la más «correcta», fina y tranquila.
    · Elegante B: de cartel: redonda y regular, con «a» de imprenta; cursiva de invitación, menuda, con rasgos largos.
-   GRAFFITI (quinta letra): al elegirla el panel cambia: se pone amarillo, coge el spray y, en vez de A/B y de
-   MAYÚSCULAS/minúsculas/cursiva, salen sus firmas (una sola caja, sin mayúsculas ni minúsculas):
-   Cada firma trae su punta (se puede cambiar después):
-   · Tag: firma alta, estrecha e inclinada, a punta plana; las letras se tocan.
-   · Rabia: a zarpazos, angulosa y desigual.
-   · Bomba: mayúsculas gordas y torpes, pegadas, hechas para chorrear.
-   · De un trazo: todo ligado, sin levantar la mano, con lazos y un rasgo final.
-   Al salir de Graffiti vuelven la técnica que tenías y los botones de siempre. El spray también se puede usar con
-   las otras letras, y el Graffiti con las otras técnicas.
+   FIRMAS de Graffiti (salen aquí cuando la técnica es Graffiti; cada una trae su punta, que luego se puede cambiar):
+   · Tag: alta, estrecha e inclinada, a punta plana.          · Rabia: a zarpazos, alta y angulosa, a barra seca.
+   · Bomba: mayúsculas gordas y torpes, a bote gordo.         · De un trazo: todo ligado, con lazos, a mop.
+   · Borrón: gordas y blandas, empapadas en la tela.          · Rodillo: geométrica, de banda ancha y translúcida.
 - LEGIBILIDAD: de garabato a muy legible.
 - "Escribir en la forma": crea un grupo "✍ A mano · ..." con lo escrito y la forma
   (invisible). Para cambiarlo, selecciona el grupo, deforma la forma o cambia
