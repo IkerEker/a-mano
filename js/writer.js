@@ -539,7 +539,7 @@ function snugUnder(strokes) {
   return strokes;
 }
 
-// DERIVA DEL BLOQUE (graffiti). Quien pinta en una pared no tiene pauta: mira lo que acaba de escribir, no el plan.
+// DERIVA DEL BLOQUE (toda escritura a mano; nació para el graffiti). Quien pinta en una pared no tiene pauta: mira lo que acaba de escribir, no el plan.
 // Con poco texto lo ve entero de un golpe y lo planta recto y regular. Con mucho, la mano va fallando —la línea
 // se tuerce, el tamaño se le va, el margen se corre, el final de línea se le echa encima— y cada línea nueva se
 // apoya en la de arriba (la sigue) mientras intenta arreglar lo que aquella hizo mal. El bloque acaba con forma.
@@ -554,7 +554,7 @@ function snugUnder(strokes) {
 // Todo es suave en (línea, u): se aplica como una deformación a los trazos ya planeados.
 function blockDrift(strokes, letters, p, seed, auto) {
   const k = p.deriva == null ? 0 : p.deriva;
-  if (!(k > 0) || p.tool !== 'spray' || auto || !strokes.length || strokes.some(s => s.mask)) return strokes;
+  if (!(k > 0) || auto || !strokes.length || strokes.some(s => s.mask)) return strokes;
   const N = letters.filter(L => !L.under).length, lam = (1 - Math.exp(-Math.max(0, N - 12) / 45)) * Math.min(2, k * 2);
   if (lam < 0.01) return strokes;
   // ---- las líneas, medidas sobre los trazos ya colocados en el documento (base: donde se apoyan las letras)
@@ -590,12 +590,15 @@ function blockDrift(strokes, letters, p, seed, auto) {
     const wl = Math.max(1, l.x1 - l.x0), many = Math.min(1.6, Math.sqrt(l.n / 9));     // (muchas letras en la línea: más ocasión de irse)
     const a = (i === 0 ? habit * 2 : habit - gain * A) + g() * 0.03 * many;            // pendiente (rad), ya corregida
     const b = g() * 0.1 * l.size * many, ns = (seed + i * 811) | 0;
+    const s3 = g() * 0.07 * l.size * many, ph = rnd() * 0.5;          // la ese: se hunde, lo nota y remonta (o al revés)
     l.a = a * lam; A = A * copy + l.a;
     l.D = new Float64Array(K);
     for (let j = 0; j < K; j++) {
       const xb = X0 + WB * j / (K - 1), u = (xb - l.x0) / wl;
-      const own = Math.tan(a) * (u - 0.5) * wl + b * 4 * Math.max(0, Math.min(1, u)) * (1 - Math.max(0, Math.min(1, u))) + 0.07 * l.size * many * R.noise1(u * 2.2, ns);
+      const own = Math.tan(a) * (u - 0.5) * wl + b * 4 * Math.max(0, Math.min(1, u)) * (1 - Math.max(0, Math.min(1, u))) + s3 * Math.sin(6.2832 * (Math.max(0, Math.min(1, u)) * (0.8 + ph) + ph)) + 0.07 * l.size * many * R.noise1(u * 2.2, ns);
       l.D[j] = copy * prev[j] + lam * own;
+      // (la línea ve la de arriba: puede acercarse o alejarse, pero no montarse en ella)
+      if (i > 0) { const pitch = Math.max(1, l.base - lines[i - 1].base); l.D[j] = Math.max(prev[j] - 0.22 * pitch, Math.min(prev[j] + 0.45 * pitch, l.D[j])); }
     }
     for (let j = 0; j < K; j++) prev[j] = l.D[j];
     // tamaño: si la de arriba acabó apretada, esta empieza más pequeña; si le sobró, se anima

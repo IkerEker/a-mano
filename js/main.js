@@ -32,7 +32,7 @@ const store = {
 const DEF = {
   tab: 'gen', tool: 'rotulador', preset: 'fino', fill: '', color: '#1d1d1f', persona: 'adulta', version: 'a', mode: 'mayus', textMode: 'importancia', repaso: 'auto', legib: 70,
   grosor: 0, tinta: 55, pulso: 40, repasado: 50, follow: 'auto', locura: 50, prisa: 15, tight: 0,
-  contraste: 50, inter: 100, llenar: 30, margen: 5, align: 'center', kind: 'imagen', colorMode: 'uno', colorVar: 45, tupido: 60, goteo: 45, nube: 50, relieve: 50, deriva: 50, gsub: 'a',
+  contraste: 50, inter: 100, llenar: 30, margen: 5, align: 'center', kind: 'imagen', colorMode: 'uno', colorVar: 45, tupido: 60, goteo: 45, nube: 50, relieve: 50, deriva: 40, gsub: 'a',
   text: 'Nadie había cerrado\nla puerta del sótano', levels: [0, 2, 1, 0, 0, -1, 0], marks: []
 };
 const st = Object.assign({}, DEF, store.get('settings2', {}));
@@ -115,7 +115,7 @@ function relieve() { return isGraf() ? Math.max(0, Math.min(1, (st.relieve == nu
 const RELIEF_M = 48;
 function genParams() {
   return {
-    persona: styleKey(), mode: curMode(), goteo: st.goteo / 100, nube: st.nube / 100, relieve: relieve(), deriva: isGraf() ? (st.deriva == null ? 50 : st.deriva) / 100 : 0, tool: st.tool, preset: st.preset, color: st.color,
+    persona: styleKey(), mode: curMode(), goteo: st.goteo / 100, nube: st.nube / 100, relieve: relieve(), deriva: (st.deriva == null ? 40 : st.deriva) / 100, tool: st.tool, preset: st.preset, color: st.color,
     colorVar: st.colorMode === 'letras' ? Math.max(0.02, st.colorVar / 100) : 0, tupido: st.tupido / 100,
     auto: st.textMode === 'auto', repaso: st.repaso, marks: st.marks || [],
     legib: st.legib / 100, locura: st.locura / 50, pulso: st.pulso / 100, prisa: st.prisa / 100,

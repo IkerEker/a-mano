@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.34)
+## 2. Cómo se usa (2.35)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -799,6 +799,14 @@ Sin ver en Photoshop real (en especial: que `change` del deslizador salte al sol
 - **Pincel (y toda pintura `over`)**: el borde fino de una pincelada ya no aclara lo de debajo (cerco claro); solo
   aclara una pintura claramente más clara, y solo donde va cargada.
 
+### 2.35 — deriva del bloque para toda la escritura a mano
+`writer.blockDrift` ya no es solo de graffiti: actúa con cualquier técnica (no en autoencajar ni con negativos).
+Deslizador «Deriva del bloque (a pauta ↔ escritura real)» bajo LETRA (`st.deriva`, 40). Añadidos: la ese (la línea
+se hunde, lo nota y remonta: `s3·sin`) y un tope para que una línea no se monte en la de arriba (se acerca como
+mucho 0,22 del paso de línea, se aleja 0,45). Prueba: `prueba_deriva.png`.
+PENDIENTE pedido el 14 nov: (1) rehacer el CALCO para que se adapte de verdad al texto que calca; (2) rediseñar la
+interfaz principal: más bonita y amable, menos texto y menos opciones a la vista (plegar, ocultar).
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -858,7 +866,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.34.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.35.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)
