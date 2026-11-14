@@ -471,7 +471,7 @@ function plan(lay, p, seed) {
         const blob = !!P.proc && pass === 0 && !s.fill && rs() < 0.04;
         pieces.forEach((pc, pi) => {
           if (pc.length < 2) return;
-          out.push({ under: !!s.under, blob: blob && pi === 0, pts: pc, cont0: !!pc.cont0, cont1: !!pc.cont1, r, fill: !!s.fill, seed: (seed + li * 7 + si * 131 + pass * 1777 + pi * 53) >>> 0, P, box: { left: x0 - m, top: y0 - m, right: x1 + m, bottom: y1 + m + mB }, alpha: pass > 0 ? 0.9 : 1, ink: fuse && extra > 0 ? 1 + 0.32 * Math.min(3, extra) : 1, letter: li, word: L.word == null ? 0 : L.word , sk: si, pass });
+          out.push({ under: !!s.under, blob: blob && pi === 0, pts: pc, cont0: !!pc.cont0, cont1: !!pc.cont1, r, fill: !!s.fill, seed: (seed + li * 7 + si * 131 + pass * 1777 + pi * 53) >>> 0, P, box: { left: x0 - m, top: y0 - m, right: x1 + m, bottom: y1 + m + mB }, alpha: pass > 0 ? 0.9 : 1, ink: fuse && extra > 0 ? 1 + 0.32 * Math.min(3, extra) : 1, letter: li, line: L.line, word: L.word == null ? 0 : L.word , sk: si, pass });
         });
       }
     });
@@ -484,7 +484,59 @@ function plan(lay, p, seed) {
     for (const st of l.strokes) for (const q of st.pts) { if (q[0] < e.x0) e.x0 = q[0]; if (q[0] > e.x1) e.x1 = q[0]; if (q[1] < e.y0) e.y0 = q[1]; if (q[1] > e.y1) e.y1 = q[1]; }
     wordExt.set(l.word, e);
   }
-  return blockDrift(NG.planWords(lay, out, p, seed, wordExt), letters, p, seed, auto);
+  return snugUnder(blockDrift(NG.planWords(lay, out, p, seed, wordExt), letters, p, seed, auto));
+}
+
+// SUBRAYADOS PEGADOS A SU PALABRA. La raya se planea sobre la maqueta, pero luego cada letra baila, la línea se
+// inclina y el bloque deriva: al final se mira dónde han quedado de verdad las letras de la palabra (el pie de cada
+// una, sin contar las que cuelgan —g, j, p, q, y—) y la raya se lleva justo debajo, siguiendo su inclinación y
+// conservando su propia curva: tan cerca como dejan los dos grosores.
+function snugUnder(strokes) {
+  const unders = strokes.filter(s => s.under && !s.fill && s.pts && s.pts.length > 1);
+  if (!unders.length) return strokes;
+  const ink = new Map();        // palabra -> { pts: [[x, y]...], r }
+  for (const s of strokes) {
+    if (s.under || s.fill || s.mask || s.word == null) continue;
+    let e = ink.get(s.word); if (!e) { e = { pts: [], rs: [] }; ink.set(s.word, e); }
+    e.rs.push(s.r);
+    for (let i = 0; i < s.pts.length; i++) {
+      const q = s.pts[i]; e.pts.push([q.x, q.y]);
+      if (i) { const o = s.pts[i - 1], n = Math.min(40, Math.floor(Math.hypot(q.x - o.x, q.y - o.y) / 3)); for (let k = 1; k < n; k++) e.pts.push([o.x + (q.x - o.x) * k / n, o.y + (q.y - o.y) * k / n]); }
+    }
+  }
+  const med = a => a.slice().sort((x, y) => x - y)[a.length >> 1];
+  for (const u of unders) {
+    const w = ink.get(u.word); if (!w || w.pts.length < 2) continue;
+    let X0 = Infinity, X1 = -Infinity, Y0 = Infinity, Y1 = -Infinity;
+    for (const q of w.pts) { if (q[0] < X0) X0 = q[0]; if (q[0] > X1) X1 = q[0]; if (q[1] < Y0) Y0 = q[1]; if (q[1] > Y1) Y1 = q[1]; }
+    // el pie de la palabra, por tramos a lo ancho (da igual cómo estén repartidos los trazos: también vale en cursiva)
+    const nb = Math.max(2, Math.min(24, Math.round((X1 - X0) / Math.max(4, 0.4 * (Y1 - Y0))))), bw = (X1 - X0) / nb || 1;
+    let F = [];
+    for (let k = 0; k < nb; k++) F.push({ x0: X0 + k * bw, x1: X0 + (k + 1) * bw, bot: -Infinity, top: Y0, r: med(w.rs) });
+    for (const q of w.pts) { const e = F[Math.min(nb - 1, Math.max(0, Math.floor((q[0] - X0) / bw)))]; if (q[1] > e.bot) e.bot = q[1]; }
+    F = F.filter(e => isFinite(e.bot));
+    if (!F.length) continue;
+    const hgt = Y1 - Y0, b0 = med(F.map(e => e.bot));
+    // (fuera los tramos que cuelgan por debajo —g, j, p, q, y— y los que solo tienen algo que flota)
+    const base = F.filter(e => e.bot < b0 + 0.16 * hgt && e.bot > b0 - 0.25 * hgt);
+    if (base.length) F = base;
+    let mx = 0, my = 0; for (const e of F) { mx += (e.x0 + e.x1) / 2; my += e.bot; } mx /= F.length; my /= F.length;
+    let sxy = 0, sxx = 0; for (const e of F) { const dx = (e.x0 + e.x1) / 2 - mx; sxy += dx * (e.bot - my); sxx += dx * dx; }
+    const sl = sxx > 1e-6 && F.length > 2 ? Math.max(-0.2, Math.min(0.2, sxy / sxx)) : 0;
+    // la recta pasa por debajo del pie de todas (no se mete en ninguna) y se separa lo justo
+    let low = 0; for (const e of F) low = Math.max(low, e.bot - (my + ((e.x0 + e.x1) / 2 - mx) * sl));
+    const gap = med(F.map(e => e.r)) + u.r + Math.max(1, 0.05 * hgt);
+    // la raya, tal como venía: su propia recta (se le quita) y su curva (se le deja)
+    const P = u.pts, a = P[0], b = P[P.length - 1], us = Math.abs(b.x - a.x) > 1e-6 ? (b.y - a.y) / (b.x - a.x) : 0;
+    let dyMin = Infinity, dyMax = -Infinity;
+    for (const q of P) {
+      const own = a.y + (q.x - a.x) * us, ny = my + (q.x - mx) * sl + low + gap + (q.y - own), d = ny - q.y;
+      if (d < dyMin) dyMin = d; if (d > dyMax) dyMax = d;
+      q.y = ny;
+    }
+    if (u.box) { u.box.top += Math.min(0, dyMin); u.box.bottom += Math.max(0, dyMax); }
+  }
+  return strokes;
 }
 
 // DERIVA DEL BLOQUE (graffiti). Quien pinta en una pared no tiene pauta: mira lo que acaba de escribir, no el plan.
@@ -519,6 +571,7 @@ function blockDrift(strokes, letters, p, seed, auto) {
   if (!lines.length) return strokes;
   const idx = new Map(lines.map((l, i) => [l.id, i]));
   const lineOf = s => {
+    if (s.line != null && idx.has(s.line)) return idx.get(s.line);
     if (s.letter != null && letters[s.letter] && idx.has(letters[s.letter].line)) return idx.get(letters[s.letter].line);
     let cy = 0; for (const q of s.pts) cy += q.y; cy /= s.pts.length;
     let best = 0, bd = Infinity; lines.forEach((l, i) => { const d = Math.abs(cy - (l.base - 0.4 * l.size)); if (d < bd) { bd = d; best = i; } });

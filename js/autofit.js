@@ -234,7 +234,10 @@ function autoFit(words, shape, space, o) {
       const sx = Math.max(0.7, Math.min(1.45, it.w / (l.bw * size)));  // ancho propio
       const inkPx = l.ink * size;
       // origen: el cuerpo empieza en x; la base deja el descendente por debajo
-      letters.push({ g, x: it.x + inkPx / 2 * sx - bd.left * size * sx, base: it.top + it.H - inkPx / 2 - l.desc * size, size, sx, sy: 1, word: l.word, line: li, level: 0, lv: l.bold ? { passes: 3, w: 1.15 } : { passes: 1, w: 1 } });
+      // interlineado: en autoencajar las filas se tocan; más interlineado = letras algo más bajas dentro de su fila
+      // (queda aire entre filas); menos = un poco más altas (se montan un pelo)
+      const ky = Math.max(0.55, Math.min(1.18, 1 / (o.leading || 1))), cy = it.top + it.H / 2, b0 = it.top + it.H - inkPx / 2 - l.desc * size;
+      letters.push({ g, x: it.x + inkPx / 2 * sx - bd.left * size * sx, base: cy + (b0 - cy) * ky, size, sx, sy: ky, word: l.word, line: li, level: 0, lv: l.bold ? { passes: 3, w: 1.15 } : { passes: 1, w: 1 } });
     }
   });
   // a unidades de letra (como el resto de maquetas): K px por unidad

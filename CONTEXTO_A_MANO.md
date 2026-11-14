@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.33)
+## 2. Cómo se usa (2.34)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -787,6 +787,18 @@ Pruebas: sim 67/67, AE 19/19. Imágenes: `prueba_correcciones.png`, `prueba_text
   la izquierda del asta y asomaba un palito.
 Sin ver en Photoshop real (en especial: que `change` del deslizador salte al soltar en UXP).
 
+### 2.34 — subrayados pegados, T reconocible, interlineado en autoencajar, pincel sin cercos
+- **Subrayados** (`writer.snugUnder`, al final de `plan`): la raya se recoloca mirando dónde quedó de verdad la
+  palabra (su pie por tramos a lo ancho, sin los que cuelgan), con su inclinación, y a la distancia mínima que dejan
+  los dos grosores. Antes se quedaba en la maqueta mientras las letras bailaban y, con deriva, se iba a otra línea
+  (los trazos llevan ahora `line`; `blockDrift` lo usa).
+- **T / t**: `fonts.glyph` garantiza un travesaño mínimo (0,62 / 0,44 del alto) con las proporciones finales (la t de
+  Adulta B casi no tenía); en las firmas, un asta que arranca arriba no se alarga por encima (la T de Tag hacía cruz).
+- **Interlineado en autoencajar** (`autofit`): antes no hacía nada; ahora las letras se acortan o alargan dentro de
+  su fila (`sy`), dejando aire entre filas.
+- **Pincel (y toda pintura `over`)**: el borde fino de una pincelada ya no aclara lo de debajo (cerco claro); solo
+  aclara una pintura claramente más clara, y solo donde va cargada.
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -846,7 +858,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.33.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.34.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)

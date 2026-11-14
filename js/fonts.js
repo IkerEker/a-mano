@@ -352,6 +352,13 @@ function printGlyph(styleKey, ch, v, altIdx, cursive, capS) {
     else if (st.dotH) { s.pts[0][1] += st.dotH; s.pts[1][1] += st.dotH; }
   }
   // (cursiva: la raya de la t es una marca aparte; en la letra rápida sale larga y se escapa a la derecha)
+  // la T y la t se reconocen por su travesaño: que nunca quede tan corto que el grosor del trazo se lo coma
+  if (!cursive && (base === 't' || base === 'T')) {
+    let bar = null, bw = 0;
+    for (const s of strokes) { if (s.fill || s.dot) continue; let a = Infinity, b = -Infinity, c = Infinity, d = -Infinity; for (const q of s.pts) { a = Math.min(a, q[0]); b = Math.max(b, q[0]); c = Math.min(c, q[1]); d = Math.max(d, q[1]); } if ((b - a > 1.6 * (d - c) || d - c < 0.16) && b - a >= bw) { bw = b - a; bar = s; } }
+    const need = base === 'T' ? 0.52 : 0.42;
+    if (bar && bw < need) { let cx = 0; for (const q of bar.pts) cx += q[0]; cx /= bar.pts.length; const k = need / Math.max(0.05, bw); for (const q of bar.pts) q[0] = cx + (q[0] - cx) * k; }
+  }
   if (cursive && base === 't') for (const s of strokes) if (s.pts.length === 2 && Math.abs(s.pts[0][1] - s.pts[1][1]) < 0.15) { s.dot = true; if (st.tbar) { s.pts[0][0] += st.tbar * 0.4; s.pts[1][0] += st.tbar; s.pts[1][1] += st.tbar * 0.14; } }
   // (los puntitos de las formas propias son marcas: ni se recortan ni cuentan para los huecos)
   if (def.form && !cursive) for (const s of strokes) if (!s.fill && s.pts.length === 2 && Math.hypot(s.pts[1][0] - s.pts[0][0], s.pts[1][1] - s.pts[0][1]) < 0.13) s.dot = true;
@@ -388,7 +395,8 @@ function printGlyph(styleKey, ch, v, altIdx, cursive, capS) {
         for (const a of arrows) if (Math.hypot(a.pts[1][0] - P[i0][0], a.pts[1][1] - P[i0][1]) < 0.09) for (const q of a.pts) { q[0] += ex; q[1] += ey; }
         P[i0][0] += ex; P[i0][1] += ey;
       };
-      ext(0, 1, st.over * 0.9 * rnd() * rnd());
+      // (un asta que arranca arriba no se alarga por encima: la T se volvería una cruz)
+      { const k0 = st.over * 0.9 * rnd() * rnd(); if (!(P[0][1] > 0.8 && P[1][1] < P[0][1])) ext(0, 1, k0); }
       ext(n - 1, n - 2, st.over * (0.15 + 1.5 * rnd() * rnd()));
     }
     if (st.arrowK) for (const a of arrows) { const t = a.pts[1], k = st.arrowK * (0.8 + 0.4 * rnd()); for (const i of [0, 2]) { a.pts[i][0] = t[0] + (a.pts[i][0] - t[0]) * k; a.pts[i][1] = t[1] + (a.pts[i][1] - t[1]) * k; } }
@@ -575,6 +583,15 @@ function glyph(styleKey, mode, ch, v) {
   else if (mode === 'cursiva' && styleOf(styleKey).script === 'own') r = printGlyph(styleKey, ch, v, null, true) || printGlyph(styleKey, ch, v, null, false, true);
   else if (mode === 'cursiva') r = scriptGlyph(styleKey, ch, v) || printGlyph(styleKey, ch, v);
   else r = (styleOf(styleKey).print ? scriptGlyph(styleKey, ch, v, true) : null) || printGlyph(styleKey, ch, v) || scriptFallback(ch);
+  // la T y la t se reconocen por su travesaño: ya con sus proporciones finales, nunca más corto de lo que el
+  // grosor de un trazo gordo se comería (se ensancha desde su centro)
+  if (r && r.strokes && mode !== 'cursiva' && (ch === 't' || ch === 'T')) {
+    let bar = null, bw = 0, H = 0;
+    for (const s of r.strokes) { let a = Infinity, b = -Infinity, c = Infinity, d = -Infinity; for (const q of s.pts) { a = Math.min(a, q[0]); b = Math.max(b, q[0]); c = Math.min(c, q[1]); d = Math.max(d, q[1]); } H = Math.max(H, d - c); s._bb = [a, b, c, d]; }
+    for (const s of r.strokes) { const [a, b, c, d] = s._bb; if (!s.fill && d - c < 0.3 * H && d - c < (b - a) * 1.2 + 0.02 && b - a >= bw) { bw = b - a; bar = s; } delete s._bb; }
+    const need = (ch === 'T' ? 0.62 : 0.44) * H;
+    if (bar && bw < need && bw > 1e-4) { let cx = 0; for (const q of bar.pts) cx += q[0]; cx /= bar.pts.length; const k = need / bw; for (const q of bar.pts) q[0] = cx + (q[0] - cx) * k; }
+  }
   if (cache.size > 6000) cache.clear();
   cache.set(key, r);
   return r;

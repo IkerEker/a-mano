@@ -116,7 +116,9 @@ function compositePigment(canvas, dens, bx, by, bw, bh, rgb, mode, alphaMul, hb)
         for (let c = 0; c < 3; c++) {
           const t = Math.exp(L[c] * e), w0 = Wb[i + c];
           let w = w0 + (t - w0) * a;
-          if (w > w0) w = stain ? w0 : w0 + (w - w0) * kl;      // (tinta que cala: solo oscurece)
+          // (el borde fino de una pincelada no aclara lo que tiene debajo: sin cercos claros. Solo aclara una pintura
+          //  de verdad más clara que lo que tapa —otra letra de otro color—, y solo donde va cargada)
+          if (w > w0) w = stain || T[c] <= w0 + 0.08 ? w0 : w0 + (Math.min(w, T[c]) - w0) * kl * kl * a * a;
           Wb[i + c] = w;
         }
         Ab[k] = 1 - (1 - Ab[k]) * (1 - a);
