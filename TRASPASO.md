@@ -1,11 +1,11 @@
-# A mano · traspaso para seguir en un chat nuevo (13 nov 2026, versión 2.31.0)
+# A mano · traspaso para seguir en un chat nuevo (14 nov 2026, versión 2.32.0)
 
 Pega este archivo al empezar el chat nuevo. Todo lo demás está en el repositorio.
 
 ## Qué es
 «A mano»: plugin UXP para Photoshop (2024+) que escribe texto a mano dentro de una forma (pestaña GENERAR) o pinta a
 mano encima de capas de texto (CALCAR). Repositorio: **github.com/IkerEker/a-mano** (rama principal, último commit
-`2.31`). En el entorno de trabajo: `/home/claude/a-mano`.
+`2.32`). En el entorno de trabajo: `/home/claude/a-mano`.
 
 ## Cómo trabajar (reglas del usuario)
 - Todo en español (respuestas, interfaz, comentarios, commits).
@@ -64,11 +64,11 @@ botón «Escribir en la forma» fijo abajo.
 Panel CEP que escribe y borra el texto animado (secuencia PNG + marcadores «entrada»/«salida»). Ver la sección 6
 de `CONTEXTO_A_MANO.md`. `python3 tools/build_ae.py`, `node tests/ae/harness.js` (19/19). La 0.1.0 cargó y pintó en After real; la 0.2.0 (tempo por golpes, punta redonda con textura) está sin ver allí.
 
-## 2.32 EN CURSO (sin .ccx: el usuario pidió no empaquetar todavía)
+## 2.32: correcciones de graffiti y grumos
 Correcciones de graffiti tras la 2.31: una sola película de pintura (sin cercos en las uniones), repasar = cargar,
 Seco y Empapado rehechos, chorretones que nacen dentro de la pintura y solo abultan en la gota, textura con algo
 de brillo y relieve, y GRUMOS recortados de fotos (`tools/grumos.py` → `js/grumosdata.js`) que se estampan solo
-donde la pintura va más densa. El .ccx de `dist/` sigue siendo el 2.31.0 de antes de estas correcciones. Detalle:
+donde la pintura va más densa. Empaquetada el 14 nov. Detalle:
 sección 2.32 de CONTEXTO_A_MANO.md.
 
 ## 2.31: deriva del bloque (prueba)

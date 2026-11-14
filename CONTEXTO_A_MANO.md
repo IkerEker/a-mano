@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.31)
+## 2. Cómo se usa (2.32)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -745,7 +745,7 @@ Prueba: `tests/node/letras/drift.js` (6, 18, 54 y 168 letras; con y sin deriva; 
 Sin hacer: que el texto se parta de otra manera al quedarse sin sitio (palabra que baja o se corta), líneas que
 esquivan los chorretones y astas de la de arriba, límite duro contra el borde de la forma.
 
-### 2.32 (en curso, SIN EMPAQUETAR: el usuario pidió no hacer el .ccx todavía) — correcciones de graffiti y grumos
+### 2.32 — correcciones de graffiti (una sola película, textura, chorretones) y grumos
 Tanda de correcciones sobre capturas en verde (13 nov): «esto no es un graffiti realista» (Seco), «la unión entre
 las pinceladas es malísima, en todas», «donde unen no puede haber claro», «nada legible» (Empapado), «los repintes
 quedan falsísimos» (Rodillo), «la textura del interior de las letras no está», luego «un poquito de brillo y un
@@ -774,7 +774,7 @@ aplícalos en las áreas con grumos o más densidad de pintura (no en todo el gr
 - Con textura, `ps.putBands` pinta franjas más bajas con 48 px de margen; comprobado que sale idéntico por franjas
   que de una vez (`tests/node/letras/bandtest.js`).
 Pruebas: sim 67/67, AE 19/19. Imágenes: `prueba_correcciones.png`, `prueba_textura*.png`, `prueba_gotas.png`,
-`prueba_grumos*.png`. Falta: empaquetar (subir versión a 2.32.0) cuando el usuario lo pida y ver todo en Photoshop real.
+`prueba_grumos*.png`. Empaquetada el 14 nov a petición del usuario («dame el ccx»). Falta verla en Photoshop real.
 
 ---
 
@@ -835,7 +835,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.31.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.32.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)
