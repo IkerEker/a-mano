@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.37)
+## 2. Cómo se usa (2.38)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -824,6 +824,21 @@ Pedido: «le falla la tipo, más alargada y furiosa; la textura está toda igual
   tóner hacia el final (`runOut`), calvas deshilachadas en seco (`dryTh`), cantos desiguales por lado (`eS`); las
   repasadas, cargadas pero con calvas suaves.
 
+### 2.38 — solo la imagen en el documento; piel nueva del panel
+Pedido: «¿me lo generas en una carpeta, con la forma y el texto? No: genérame la imagen del texto sin más» y «revisa
+solo la interfaz: colores, tipografías, botones… más amable y bonita; cómo represento los colores, se ven muy pequeños».
+- **Solo la imagen** (`main.resolveGen`, `doWrite`): tras pintar, la capa ocupa el sitio de la forma y la forma se
+  borra; no hay grupo. En los ajustes del plugin se guarda `img|doc|idCapa` = { comps (la forma leída), type, seed,
+  b (esquina de la capa) }. Con la capa «✍» seleccionada, `resolveGen` devuelve esa forma (desplazada si la capa se
+  movió) y se reescribe sustituyéndola (hereda opacidad y fusión). La semilla viaja en ese registro. Los grupos de
+  versiones anteriores se siguen respetando. Se pierde deformar la forma después de escribir.
+- **Piel** (bloque «PIEL 2.38» al final de `styles.css`): un acento suave (#8ea2ff; amarillo apagado en graffiti),
+  segmentados como pastillas con velo en lo elegido, títulos pequeños sin números, avisos de una línea, sin tipos de
+  letra de adorno. Plegable «Destacar palabras» (`lvlHead`/`lvlFold`, `st.lvlOpen`). Color: barra grande con su código
+  (`colorbar`) y paleta real de 9 muestras cuando cada letra va de un color (`syncPalette`).
+- Pruebas sim adaptadas (la forma se transforma antes de escribir; G4b comprueba que solo quedan imágenes).
+Sigue PENDIENTE el calco.
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -883,7 +898,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.37.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.38.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)

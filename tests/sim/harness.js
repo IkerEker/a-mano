@@ -133,19 +133,26 @@ const { open } = require('./setup.js');
   await click('btnGo'); await waitDone();
   const blend = await run(() => { const l = SIM.byName('^✍ (?!A mano)').map(SIM.layer)[0]; return l && l.blendMode; });
   await rec('G4a capa de rotulador en Multiplicar (' + blend + ')', { text: String(blend), cls: blend === 'multiply' ? 'ok' : 'err' });
+  // (desde la 2.38 en el documento solo queda la imagen: la forma se gira, voltea o deforma ANTES de escribir)
   for (const [name, op] of [['girada', 'rot'], ['volteada en vertical', 'flipv'], ['deformada', 'warp']]) {
+    await shape('arco');
     await run(op => {
-      const id = SIM.byName('^◇ ')[0];
+      const ids = SIM.byName('^◇ '), id = ids[ids.length - 1];
       if (op === 'rot') SIM.rotateShape(id, -20); else if (op === 'flipv') SIM.flipShape(id, 'v'); else SIM.warpShape(id, 60, 120);
-      SIM.select(SIM.byName('^✍ A mano')[0]);
+      SIM.select(id);
     }, op);
     await refresh();
     await click('btnGo');
-    await rec('G4 forma ' + name + ' y reescrita', await waitDone());
+    await rec('G4 forma ' + name + ' y escrita', await waitDone());
     await snap('g_arco_' + op);
   }
-  const nInGroup = await run(() => SIM.tree().split('\n').filter(l => /\[pixel\]/.test(l)).length);
-  await rec('G4b solo queda un resultado (' + nInGroup + ')', { text: 'capas de píxeles: ' + nInGroup, cls: nInGroup === 1 ? 'ok' : 'err' });
+  // reescribir con la imagen seleccionada: se sustituye (ni formas ni grupos en el documento)
+  await run(() => { const ids = SIM.byName('^✍ '); SIM.select(ids[ids.length - 1]); });
+  await refresh();
+  await click('btnGo'); await waitDone();
+  const tree4 = await run(() => SIM.tree());
+  const nPix = tree4.split('\n').filter(l => /\[pixel\]/.test(l)).length, nOther = tree4.split('\n').filter(l => /◇|\[group\]|A mano ·/.test(l)).length;
+  await rec('G4b solo quedan las imágenes (' + nPix + ' de píxeles, ' + nOther + ' formas o grupos)', { text: tree4, cls: nPix === 4 && nOther === 0 ? 'ok' : 'err' });
 
   // 5. otra variación
   await click('btnNew');
@@ -177,7 +184,7 @@ const { open } = require('./setup.js');
     await run(t => T.seg('toolSeg', t), tool);
     const presets = await run(() => Array.from(document.querySelectorAll('#presetSeg .segb')).map(b => b.getAttribute('data-v')));
     for (const pk of presets) {
-      await run(pk => { T.seg('presetSeg', pk); SIM.select(SIM.byName('^✍ A mano|^◇ ')[0]); }, pk);
+      await run(pk => { T.seg('presetSeg', pk); { const q = SIM.byName('^✍ |^◇ '); SIM.select(q[q.length - 1]); } }, pk);
       await click('btnGo');
       const s = await waitDone();
       if (!/ok/.test(s.cls)) await rec('G7 ' + tool + ' ' + pk, s);

@@ -1,10 +1,18 @@
-A MANO 2.37 · plugin para Photoshop (2024 o posterior)
+A MANO 2.38 · plugin para Photoshop (2024 o posterior)
 =====================================================
 
 INSTALAR
-- Doble clic en A_mano_v2.37.0.ccx -> Creative Cloud avisa de que no viene del
+- Doble clic en A_mano_v2.38.0.ccx -> Creative Cloud avisa de que no viene del
   Marketplace -> "Instalar". Sustituye a las versiones anteriores. Es independiente de Cartelator.
 - En Photoshop: Plugins > A mano.
+
+SOLO LA IMAGEN (2.38)
+- Al escribir ya no se crea un grupo ni se guarda la forma en el documento: queda una sola capa, «✍ texto», con la
+  imagen. La forma con que se escribió la recuerda el plugin: con esa capa seleccionada, cualquier cambio del
+  panel la rehace en su sitio (si la has movido, va con ella). Girar, escalar o deformar se hace ANTES de escribir,
+  sobre la forma; después, sobre la imagen como cualquier capa (pero al rehacerla vuelve a su forma original).
+- Panel nuevo: mismos controles, piel más tranquila; «Destacar palabras» y «Párrafo» plegados; el color es una barra
+  grande con su código y, si cada letra va de un color, se ve la paleta real.
 
 EN VIVO (2.33)
 - Ya no hace falta pulsar el botón a cada cambio: al soltar el ratón en un deslizador, al pulsar una opción o al

@@ -17,7 +17,8 @@ const NG = require('./negativo.js');
 const GEO = require('./geom.js');
 const FN = require('./fonts.js');
 // (los grumos de pintura del graffiti: se entregan al dibujo una vez)
-require('./render.js').setLumps(require('./grumosdata.js'));
+const RDm = require('./render.js');
+RDm.setLumps(require('./grumosdata.js'));
 const { app, action, constants } = require('photoshop');
 
 const $ = id => document.getElementById(id);
@@ -101,7 +102,7 @@ async function runLive() {
   try {
     const doc = app.activeDocument; if (!doc) return;
     const sel = Array.from(doc.activeLayers || []);
-    if (st.tab === 'gen') { if (!st.text.trim() || !(await P.resolveShape(doc, sel))) return; await doWrite(false); }
+    if (st.tab === 'gen') { if (!st.text.trim() || !(await resolveGen(doc, sel))) return; await doWrite(false); }
     else { if (!sel.some(P.isHandCopy)) return; await doHand(false); }
   } catch (e) { /* sin documento o sin destino: nada que aplicar */ }
 }
@@ -249,14 +250,17 @@ async function refreshCtx() {
   if (!doc) { ctxG.textContent = ctxC.textContent = 'Abre un documento para empezar.'; ctxG.className = ctxC.className = 'ctx'; return; }
   if (st.tab === 'gen') {
     let t = null;
-    try { t = await P.resolveShape(doc, Array.from(doc.activeLayers || [])); } catch (e) { t = null; }
+    try { t = await resolveGen(doc, Array.from(doc.activeLayers || [])); } catch (e) { t = null; }
     if (t) {
-      const type = SH.typeFromName(t.shape.name);
-      const label = type ? SH.SHAPES[type].label : 'tu forma «' + t.shape.name + '»';
-      ctxG.textContent = t.group ? 'Seleccionado: ' + label + ' ya escrita. «Escribir» la rehace con los ajustes de ahora.' : 'Forma: ' + label + '. Muévela, gírala, voltéala o defórmala (Edición › Transformar › Deformar) y pulsa «Escribir».';
+      if (t.img) ctxG.textContent = 'Texto ya escrito: cualquier cambio lo rehace.';
+      else {
+        const type = SH.typeFromName(t.shape.name);
+        const label = type ? SH.SHAPES[type].label : 'tu forma «' + t.shape.name + '»';
+        ctxG.textContent = t.group ? 'Seleccionado: ' + label + ' ya escrita. «Escribir» la rehace con los ajustes de ahora.' : 'Forma: ' + label + '. Colócala o defórmala y escribe.';
+      }
       ctxG.className = 'ctx on';
-      // si esta forma ya se escribió, el panel recupera su texto
-      const key = docKey(doc) + '|' + t.shape.id;
+      // si esto ya se escribió, el panel recupera su texto
+      const key = t.key;
       if (key !== lastShapeKey) {
         lastShapeKey = key;
         const saved = store.get('shape|' + key, null);
@@ -264,7 +268,7 @@ async function refreshCtx() {
       }
     } else {
       lastShapeKey = null;
-      ctxG.textContent = 'Elige una forma: aparece en el documento y la puedes mover, girar, voltear o deformar. «Selección» usa la selección que tengas hecha (lazo, marco…).';
+      ctxG.textContent = 'Elige una forma para empezar.';
       ctxG.className = 'ctx';
     }
   } else {
@@ -318,22 +322,41 @@ async function doMakeShape(type) {
   });
 }
 
+// DESTINO DE «GENERAR». Lo que queda en el documento es solo la imagen del texto (una capa «✍ …»): ni grupo ni
+// forma. La forma con que se escribió se guarda en los ajustes del plugin, ligada a esa capa; al seleccionarla,
+// se puede reescribir (ajustes nuevos, otra variación) y, si la imagen se ha movido, la forma va con ella.
+// También vale una capa de forma sin escribir todavía, o un grupo «✍ A mano» de versiones anteriores.
+async function resolveGen(doc, sel) {
+  for (const l of sel) {
+    if (!P.isHandCopy(l)) continue;
+    const m = store.get('img|' + docKey(doc) + '|' + l.id, null);
+    if (!m || !m.comps) continue;
+    let dx = 0, dy = 0;
+    try { const b = l.bounds; dx = Number(b.left) - m.b[0]; dy = Number(b.top) - m.b[1]; } catch (e) { dx = dy = 0; }
+    const mv = q => [q[0] + dx, q[1] + dy];
+    const comps = Math.abs(dx) + Math.abs(dy) < 0.5 || !isFinite(dx + dy) ? m.comps : m.comps.map(c => ({ op: c.op, subpaths: c.subpaths.map(sp => ({ closed: sp.closed, pts: sp.pts.map(q => ({ a: mv(q.a), f: mv(q.f), b: mv(q.b), smooth: q.smooth })) })) }));
+    return { img: l, comps, type: m.type, seed: m.seed, key: docKey(doc) + '|' + l.id };
+  }
+  const t = await P.resolveShape(doc, sel);
+  return t ? Object.assign(t, { key: docKey(doc) + '|' + t.shape.id }) : null;
+}
 async function doWrite(fresh) {
   await work('Escribiendo…', async (t0) => {
     if (!st.text.trim()) throw new P.UserError('Escribe el texto en la casilla.');
     const gp = genParams();
     await P.runModal('A mano: escribir', async (ctx, doc) => {
-      const target = await P.resolveShape(doc, Array.from(doc.activeLayers || []));
-      if (!target) throw new P.UserError('Crea una forma arriba (o selecciona en Capas una capa de forma o su grupo «✍ A mano»).');
-      const comps = await P.vectorMaskOf(doc, target.shape);
+      const target = await resolveGen(doc, Array.from(doc.activeLayers || []));
+      if (!target) throw new P.UserError('Crea una forma arriba (o selecciona en Capas una forma o un texto ya escrito «✍»).');
+      const comps = target.img ? target.comps : await P.vectorMaskOf(doc, target.shape);
       if (!comps) throw new P.UserError('«' + target.shape.name + '» no tiene una forma vectorial que se pueda leer.');
-      const shape = SH.readShape(comps, SH.typeFromName(target.shape.name));
+      const shType = target.img ? target.type : SH.typeFromName(target.shape.name);
+      const shape = SH.readShape(comps, shType);
       if (!shape) throw new P.UserError('No se ha podido leer la forma.');
       status('Colocando el texto…', '');
       const lay = LY.layoutInShape(st.text, st.levels, shape, gp);
       if (!lay || !lay.letters.length) throw new P.UserError('El texto no cabe en la forma. Prueba con una forma más grande o menos texto.');
-      const key = docKey(doc) + '|' + target.shape.id;
-      const seed = seedFor('g|' + key, fresh);
+      let key = target.key;
+      const seed = fresh ? R.newSeed() : target.seed != null ? target.seed : seedFor('g|' + key, false);
       gp.colorSeed = seed;
       // negativos: se pinta alrededor de las letras (las letras quedan libres)
       const strokes = WR.plan(lay, gp, seed);
@@ -341,25 +364,37 @@ async function doWrite(fresh) {
       if (!bb) throw new P.UserError('No hay nada que escribir.');
       // lo escrito antes con esta forma se sustituye
       if (target.group) for (const l of Array.from(target.group.layers || [])) if (l.id !== target.shape.id && P.isHandCopy(l) && l.kind !== constants.LayerKind.GROUP) l.delete();
-      try { await P.selectLayer(target.shape.id); } catch (e) { /* nada */ }
+      try { await P.selectLayer(target.img ? target.img.id : target.shape.id); } catch (e) { /* nada */ }
       status('Pintando…', '');
       const name = P.HAND_PREFIX + snippet(st.text);
       const layer = await P.putBands(doc, name, bb, c => WR.paint(c, strokes, gp), (k, n) => { if (n > 1) { try { ctx.reportProgress({ value: k / n, commandName: 'A mano' }); } catch (e) { /* nada */ } } }, gp.relieve > 0 ? RELIEF_M : 0);
       if (!layer) throw new P.UserError('No ha salido nada visible.');
-      let group = target.group;
-      if (!group) group = await doc.createLayerGroup({ name: P.GROUP_PREFIX + snippet(st.text), fromLayers: [target.shape] });
-      else group.name = P.GROUP_PREFIX + snippet(st.text);
-      layer.move(target.shape, constants.ElementPlacement.PLACEBEFORE);
+      const multiply = INK.preset(st.tool, st.preset).blend === 'multiply';
       // tinta transparente: la capa multiplica (sobre un fondo de color se ve como tinta de verdad)
-      if (INK.preset(st.tool, st.preset).blend === 'multiply') { try { layer.blendMode = constants.BlendMode.MULTIPLY; } catch (e) { /* nada */ } }
-      // la forma se queda (para moverla o deformarla y volver a escribir), pero sin verse
-      try { target.shape.opacity = 0; } catch (e) { /* nada */ }
-      try { await P.selectLayer(group.id); } catch (e) { /* nada */ }
+      if (multiply) { try { layer.blendMode = constants.BlendMode.MULTIPLY; } catch (e) { /* nada */ } }
+      if (target.group) {
+        // (documentos de versiones anteriores: el grupo con su forma invisible se respeta)
+        target.group.name = P.GROUP_PREFIX + snippet(st.text);
+        layer.move(target.shape, constants.ElementPlacement.PLACEBEFORE);
+        try { target.shape.opacity = 0; } catch (e) { /* nada */ }
+        try { await P.selectLayer(target.group.id); } catch (e) { /* nada */ }
+      } else {
+        // solo la imagen: ocupa el sitio de la forma (o de la imagen anterior), que se quita
+        const old = target.img || target.shape;
+        try { layer.move(old, constants.ElementPlacement.PLACEBEFORE); } catch (e) { /* nada */ }
+        if (target.img) { try { layer.opacity = old.opacity; if (!multiply) layer.blendMode = old.blendMode; } catch (e) { /* nada */ } }
+        try { old.delete(); } catch (e) { /* nada */ }
+        store.set('img|' + key, null);
+        key = docKey(doc) + '|' + layer.id;
+        let lb = [0, 0]; try { const q = layer.bounds; lb = [Number(q.left), Number(q.top)]; } catch (e) { /* nada */ }
+        store.set('img|' + key, { comps, type: shType || null, seed, b: lb });
+        try { await P.selectLayer(layer.id); } catch (e) { /* nada */ }
+      }
       const saved = {}; for (const k of SAVED_KEYS) saved[k] = st[k];
       store.set('shape|' + key, saved);
       lastShapeKey = key;
     });
-    status('Escrito en ' + secs(t0) + '. Para cambiarlo: deforma la forma (está en el grupo, invisible) o cambia ajustes y vuelve a pulsar «Escribir».', 'ok');
+    status('Escrito en ' + secs(t0) + '. Con la capa seleccionada, cualquier cambio del panel la rehace.', 'ok');
   });
 }
 
@@ -490,7 +525,15 @@ function setTab(t) {
 }
 function setColor(hex) {
   st.color = hex; save();
-  const sw = $('swColor'); if (sw) sw.style.backgroundColor = hex;
+  const sw = $('swColor');
+  if (sw) {
+    sw.style.backgroundColor = hex;
+    // (el código se lee sobre cualquier color: letra clara u oscura según lo que haya debajo)
+    const c = RDm.hexToRgb(hex), dark = 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2] < 140;
+    sw.style.color = dark ? '#ffffff' : '#1d1d1f';
+    const hx = $('swHex'); if (hx) hx.textContent = String(hex).toUpperCase();
+  }
+  syncPalette();
 }
 const SLIDERS = { slGoteo: 'goteo', slNube: 'nube', slRelieve: 'relieve', slDeriva: 'deriva', slTupido: 'tupido', slColorVar: 'colorVar', slLegib: 'legib', slGrosor: 'grosor', slTinta: 'tinta', slPulso: 'pulso', slRepasado: 'repasado', slLocura: 'locura', slPrisa: 'prisa', slTight: 'tight', slContraste: 'contraste', slInter: 'inter', slLlenar: 'llenar', slMargen: 'margen' };
 // graffiti: la interfaz cambia. En vez de A/B y de MAYÚSCULAS/minúsculas/cursiva salen sus firmas; el panel se
@@ -518,6 +561,19 @@ function syncGraf() {
   const b = document.body;
   if (b && b.classList) { if (g) b.classList.add('graf'); else b.classList.remove('graf'); }
 }
+// la paleta: cómo saldrán los colores cuando cada letra va de uno (muestras grandes, las de verdad)
+function syncPalette() {
+  const el = $('colorStrip'); if (!el) return;
+  while (el.firstChild) el.removeChild(el.firstChild);
+  const base = RDm.hexToRgb(st.color), cv = Math.max(0.02, st.colorVar / 100);
+  for (let i = 0; i < 9; i++) {
+    const c = RDm.letterColor(base, i * 7 + 1, cv, 1), d = document.createElement('div');
+    d.style.backgroundColor = 'rgb(' + Math.round(c[0]) + ',' + Math.round(c[1]) + ',' + Math.round(c[2]) + ')';
+    el.appendChild(d);
+  }
+}
+// destacar palabras (plegable)
+function syncLvl() { show($('lvlFold'), !!st.lvlOpen); const a = $('lvlArrow'); if (a) a.textContent = st.lvlOpen ? '▾' : '▸'; }
 // párrafo (plegable): al cerrarlo, la cabecera resume cómo está
 function syncPar() {
   const open = !!st.parOpen, al = { left: 'izquierda', center: 'centro', right: 'derecha', justify: 'llenar líneas' }[st.align] || '';
@@ -527,7 +583,7 @@ function syncPar() {
   const sm = $('parSum'); if (sm) sm.textContent = open ? '' : (st.tab === 'gen' ? '· ' + al + ' · interlineado ' + st.inter : '') + ' · letras ' + (st.tight > 0 ? '+' : '') + st.tight;
 }
 function syncControls() {
-  syncPar();
+  syncPar(); syncLvl();
   segSet('toolSeg', st.tool); renderPresets(); segSet('fillSeg', st.fill || ''); segSet('fontSeg', st.persona); segSet('caseSeg', st.mode);
   segSet('versionSeg', st.version); segSet('colorModeSeg', st.colorMode); show($('multiBox'), st.colorMode === 'letras'); segSet('textModeSeg', st.textMode); segSet('repasoSeg', st.repaso); syncText();
   segSet('alignSeg', st.align); segSet('kindSeg', st.kind); segSet('followSeg', st.follow);
@@ -566,12 +622,13 @@ function bind() {
   segBind('caseSeg', v => { st.mode = v; save(); segSet('caseSeg', v); });
   segBind('alignSeg', v => { st.align = v; save(); segSet('alignSeg', v); });
   $('parHead').addEventListener('click', () => { st.parOpen = !st.parOpen; save(); syncPar(); });
+  $('lvlHead').addEventListener('click', () => { st.lvlOpen = !st.lvlOpen; save(); syncLvl(); });
   segBind('kindSeg', v => { st.kind = v; save(); segSet('kindSeg', v); });
   segBind('followSeg', v => { st.follow = v; save(); segSet('followSeg', v); });
   for (const [id, k] of Object.entries(SLIDERS)) {
     const el = $(id); if (!el) continue;
     const h = () => { const v = Number(el.value); if (!isNaN(v)) { st[k] = v; save(); } };
-    el.addEventListener('input', () => { h(); live(900); }); el.addEventListener('change', () => { h(); live(80); });
+    el.addEventListener('input', () => { h(); live(900); }); el.addEventListener('change', () => { h(); if (k === 'colorVar') syncPalette(); live(80); });
   }
   // formas
   $('shapeGrid').addEventListener('click', ev => {

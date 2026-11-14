@@ -2,7 +2,7 @@
   "manifestVersion": 5,
   "id": "com.amano.handlettering",
   "name": "A mano",
-  "version": "2.37.0",
+  "version": "2.38.0",
   "main": "index.html",
   "host": {
     "app": "PS",
