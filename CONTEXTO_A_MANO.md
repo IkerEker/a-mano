@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.32)
+## 2. Cómo se usa (2.33)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -776,6 +776,17 @@ aplícalos en las áreas con grumos o más densidad de pintura (no en todo el gr
 Pruebas: sim 67/67, AE 19/19. Imágenes: `prueba_correcciones.png`, `prueba_textura*.png`, `prueba_gotas.png`,
 `prueba_grumos*.png`. Empaquetada el 14 nov a petición del usuario («dame el ccx»). Falta verla en Photoshop real.
 
+### 2.33 — en vivo, párrafo a mano y R sin palito
+- **En vivo** (`main.live`/`runLive`): todo cambio del panel (segmentados, deslizadores al soltar —`change`; `input`
+  con 900 ms de respaldo—, texto con 900 ms, importancias y marcas, color, restablecer) rehace solo. Generar: si hay
+  forma resuelta y texto. Calcar: solo si la selección incluye una copia «✍» (no convierte por su cuenta). Si está
+  ocupado, `livePending` y se aplica al acabar (`work`). Misma semilla: no cambia la variación.
+- **Párrafo plegable** (`parHead`/`parBox`, `st.parOpen`): alineación, interlineado, espacio entre letras y margen
+  pasan de «Avanzado» a la vista principal; cerrado, la cabecera lo resume. Al calcar solo queda el espacio entre letras.
+- **R de las firmas** (Tag, Bisel, Flechas, Bomba): de un solo trazo (asta, panza, pata); antes la panza arrancaba a
+  la izquierda del asta y asomaba un palito.
+Sin ver en Photoshop real (en especial: que `change` del deslizador salte al soltar en UXP).
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -835,7 +846,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.32.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.33.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)

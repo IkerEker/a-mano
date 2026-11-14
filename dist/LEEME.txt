@@ -1,10 +1,18 @@
-A MANO 2.32 · plugin para Photoshop (2024 o posterior)
+A MANO 2.33 · plugin para Photoshop (2024 o posterior)
 =====================================================
 
 INSTALAR
-- Doble clic en A_mano_v2.32.0.ccx -> Creative Cloud avisa de que no viene del
+- Doble clic en A_mano_v2.33.0.ccx -> Creative Cloud avisa de que no viene del
   Marketplace -> "Instalar". Sustituye a las versiones anteriores. Es independiente de Cartelator.
 - En Photoshop: Plugins > A mano.
+
+EN VIVO (2.33)
+- Ya no hace falta pulsar el botón a cada cambio: al soltar el ratón en un deslizador, al pulsar una opción o al
+  dejar de teclear, el texto se rehace solo con los ajustes nuevos (misma variación; «Otra variación» da otra).
+  En GENERAR, basta con tener seleccionada la forma (o su grupo). En CALCAR solo actúa si lo seleccionado ya
+  está pasado a mano: no convierte capas por su cuenta. El botón sigue ahí para la primera vez.
+- PÁRRAFO (plegado, bajo LETRA): alineación, interlineado, espacio entre letras y margen. Se abre al pulsar; cerrado,
+  la cabecera resume cómo está. (Antes estaban en «Avanzado».)
 
 DOS PESTAÑAS
 - GENERAR: escribe a mano, desde cero, el texto que pongas, dentro de una forma.

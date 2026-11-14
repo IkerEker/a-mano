@@ -89,7 +89,21 @@ async function work(msg, fn) {
   const t0 = Date.now();
   try { await fn(t0); }
   catch (e) { status(e instanceof P.UserError ? e.message : friendlyError(e), 'err'); try { console.error(e); } catch (x) { /* nada */ } }
-  finally { setBusy(false); scheduleRefresh(); }
+  finally { setBusy(false); scheduleRefresh(); if (livePending) { livePending = false; live(60); } }
+}
+// EN VIVO: cualquier cambio del panel se aplica solo (al soltar el ratón; al dejar de teclear), sin pulsar el
+// botón. En «Generar», si hay una forma seleccionada y texto; en «Calcar», solo si lo seleccionado ya está pasado
+// a mano (no convierte capas por su cuenta). Si pilla a Photoshop pintando, espera y aplica lo último.
+let liveTimer = null, livePending = false;
+function live(ms) { clearTimeout(liveTimer); liveTimer = setTimeout(runLive, ms == null ? 150 : ms); }
+async function runLive() {
+  if (busy) { livePending = true; return; }
+  try {
+    const doc = app.activeDocument; if (!doc) return;
+    const sel = Array.from(doc.activeLayers || []);
+    if (st.tab === 'gen') { if (!st.text.trim() || !(await P.resolveShape(doc, sel))) return; await doWrite(false); }
+    else { if (!sel.some(P.isHandCopy)) return; await doHand(false); }
+  } catch (e) { /* sin documento o sin destino: nada que aplicar */ }
 }
 const secs = t0 => ((Date.now() - t0) / 1000).toFixed(1) + ' s';
 const docKey = doc => String((doc && (doc.title || doc.id)) || '');
@@ -126,6 +140,7 @@ function segSet(id, v) {
 function segBind(id, fn) {
   const el = $(id); if (!el) return;
   el.addEventListener('click', ev => {
+    live(150);
     let t = ev.target;
     while (t && t !== el && !(t.classList && t.classList.contains('segb'))) t = t.parentNode;
     if (t && t !== el) fn(t.getAttribute('data-v'));
@@ -178,7 +193,7 @@ function onText() {
   st.marks = relevel(old, st.marks || [], nt).map(m => m || '');
   st.levels = relevel(old, st.levels, nt);
   chipSel = new Set();
-  save(); renderBoard();
+  save(); renderBoard(); live(900);
 }
 // palabras que toca la selección de la casilla
 function wordsInSelection() {
@@ -210,7 +225,7 @@ function applyMark(kind) {
   }
   for (let i = 0; i < st.marks.length; i++) if (st.marks[i] == null) st.marks[i] = '';
   chipSel = new Set();
-  save(); renderBoard();
+  save(); renderBoard(); live(150);
   status('', '');
 }
 function applyLevel(lv) {
@@ -219,7 +234,7 @@ function applyLevel(lv) {
   if (!idx.length) { status('Toca antes una o varias palabras (abajo) o selecciónalas en la casilla.', ''); return; }
   for (const i of idx) st.levels[i] = lv;
   chipSel = new Set();
-  save(); renderBoard();
+  save(); renderBoard(); live(150);
   status('', '');
 }
 
@@ -470,6 +485,7 @@ function setTab(t) {
   lastShapeKey = null;
   syncNeg();
   syncGraf();
+  syncPar();
   scheduleRefresh();
 }
 function setColor(hex) {
@@ -502,7 +518,16 @@ function syncGraf() {
   const b = document.body;
   if (b && b.classList) { if (g) b.classList.add('graf'); else b.classList.remove('graf'); }
 }
+// párrafo (plegable): al cerrarlo, la cabecera resume cómo está
+function syncPar() {
+  const open = !!st.parOpen, al = { left: 'izquierda', center: 'centro', right: 'derecha', justify: 'llenar líneas' }[st.align] || '';
+  show($('parBox'), open);
+  { const g = st.tab === 'gen'; show($('alignSeg'), g); show($('slInter'), g); show($('slMargen'), g); }      // (al calcar manda la capa de texto: solo vale el espacio entre letras)
+  const a = $('parArrow'); if (a) a.textContent = open ? '▾' : '▸';
+  const sm = $('parSum'); if (sm) sm.textContent = open ? '' : (st.tab === 'gen' ? '· ' + al + ' · interlineado ' + st.inter : '') + ' · letras ' + (st.tight > 0 ? '+' : '') + st.tight;
+}
 function syncControls() {
+  syncPar();
   segSet('toolSeg', st.tool); renderPresets(); segSet('fillSeg', st.fill || ''); segSet('fontSeg', st.persona); segSet('caseSeg', st.mode);
   segSet('versionSeg', st.version); segSet('colorModeSeg', st.colorMode); show($('multiBox'), st.colorMode === 'letras'); segSet('textModeSeg', st.textMode); segSet('repasoSeg', st.repaso); syncText();
   segSet('alignSeg', st.align); segSet('kindSeg', st.kind); segSet('followSeg', st.follow);
@@ -526,7 +551,7 @@ function bind() {
   $('btnBack').addEventListener('click', () => showAdv(false));
   $('btnReset').addEventListener('click', () => {
     for (const k of ['grosor', 'tinta', 'pulso', 'repasado', 'repaso', 'follow', 'locura', 'prisa', 'tight', 'contraste', 'inter', 'llenar', 'margen', 'align', 'kind']) st[k] = DEF[k];
-    save(); syncControls(); status('Ajustes avanzados restablecidos.', 'ok');
+    save(); syncControls(); status('Ajustes avanzados restablecidos.', 'ok'); live(150);
   });
   segBind('toolSeg', v => { st.tool = v; st.preset = v === 'spray' ? (FN.styleOf('graffiti_' + st.gsub).pre || 'gordo') : Object.keys(INK.TOOLS[v].presets)[0]; save(); segSet('toolSeg', v); renderPresets(); syncGraf(); syncText(); });
   segBind('presetSeg', v => { st.preset = v; save(); segSet('presetSeg', v); syncGraf(); });
@@ -540,12 +565,13 @@ function bind() {
   segBind('repasoSeg', v => { st.repaso = v; save(); segSet('repasoSeg', v); });
   segBind('caseSeg', v => { st.mode = v; save(); segSet('caseSeg', v); });
   segBind('alignSeg', v => { st.align = v; save(); segSet('alignSeg', v); });
+  $('parHead').addEventListener('click', () => { st.parOpen = !st.parOpen; save(); syncPar(); });
   segBind('kindSeg', v => { st.kind = v; save(); segSet('kindSeg', v); });
   segBind('followSeg', v => { st.follow = v; save(); segSet('followSeg', v); });
   for (const [id, k] of Object.entries(SLIDERS)) {
     const el = $(id); if (!el) continue;
     const h = () => { const v = Number(el.value); if (!isNaN(v)) { st[k] = v; save(); } };
-    el.addEventListener('input', h); el.addEventListener('change', h);
+    el.addEventListener('input', () => { h(); live(900); }); el.addEventListener('change', () => { h(); live(80); });
   }
   // formas
   $('shapeGrid').addEventListener('click', ev => {
@@ -573,6 +599,7 @@ function bind() {
   $('stClean').addEventListener('click', () => applyMark(''));
   // color
   $('swColor').addEventListener('click', () => {
+    live(150);
     try { const fg = app.foregroundColor; const hx = fg && fg.rgb && fg.rgb.hexValue; if (hx) { setColor('#' + String(hx).replace('#', '').toLowerCase()); status('Color tomado del color frontal.', 'ok'); } }
     catch (e) { status('No se ha podido leer el color frontal.', 'err'); }
   });

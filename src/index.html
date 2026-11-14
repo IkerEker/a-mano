@@ -109,6 +109,14 @@
       <div class="hint hidden" id="grafHint"></div>
     </div>
 
+    <!-- párrafo: plegado para no alargar el panel; se abre al pulsar y recuerda cómo lo dejaste -->
+    <div class="fold" id="parHead" title="Alineación, interlineado, espacio entre letras y margen"><span id="parArrow">▸</span> PÁRRAFO <span class="sub" id="parSum"></span></div>
+    <div id="parBox" class="hidden">
+      <div class="seg" id="alignSeg"><div class="segb" data-v="left">Izquierda</div><div class="segb" data-v="center">Centro</div><div class="segb" data-v="right">Derecha</div><div class="segb" data-v="justify">Llenar líneas</div></div>
+      <sp-slider id="slInter" min="70" max="150" value="100" show-value="true"><sp-label slot="label">Interlineado</sp-label></sp-slider>
+      <sp-slider id="slTight" min="-50" max="50" value="0" show-value="true"><sp-label slot="label">Espacio entre letras (apretadas ↔ sueltas)</sp-label></sp-slider>
+      <sp-slider id="slMargen" min="0" max="25" value="5" show-value="true"><sp-label slot="label">Margen dentro de la forma</sp-label></sp-slider>
+    </div>
     <sp-slider id="slLegib" min="0" max="100" value="70" show-value="true"><sp-label slot="label">Legibilidad</sp-label></sp-slider>
     <div class="legend"><span>garabato</span><span>muy legible</span></div>
 
@@ -142,16 +150,11 @@
     <div class="sec">LETRAS</div>
     <sp-slider id="slLocura" min="0" max="100" value="50" show-value="true"><sp-label slot="label">Locura (cuánto varía cada letra y palabra)</sp-label></sp-slider>
     <sp-slider id="slPrisa" min="0" max="100" value="15" show-value="true"><sp-label slot="label">Prisa (inclinación)</sp-label></sp-slider>
-    <sp-slider id="slTight" min="-50" max="50" value="0" show-value="true"><sp-label slot="label">Letras apretadas ↔ sueltas</sp-label></sp-slider>
 
     <div id="advGen">
       <div class="sec">MAQUETA</div>
       <sp-slider id="slContraste" min="0" max="100" value="50" show-value="true"><sp-label slot="label">Diferencia de tamaño entre importancias</sp-label></sp-slider>
-      <sp-slider id="slInter" min="70" max="150" value="100" show-value="true"><sp-label slot="label">Interlineado</sp-label></sp-slider>
       <sp-slider id="slLlenar" min="0" max="60" value="30" show-value="true"><sp-label slot="label">Llenar la forma (estirar el texto)</sp-label></sp-slider>
-      <sp-slider id="slMargen" min="0" max="25" value="5" show-value="true"><sp-label slot="label">Margen dentro de la forma</sp-label></sp-slider>
-      <div class="label">Alineación</div>
-      <div class="seg" id="alignSeg"><div class="segb" data-v="left">Izquierda</div><div class="segb" data-v="center">Centro</div><div class="segb" data-v="right">Derecha</div><div class="segb" data-v="justify">Llenar líneas</div></div>
     </div>
     <div id="advCalc" class="hidden">
       <div class="sec">RESULTADO</div>
