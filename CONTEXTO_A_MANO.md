@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.36)
+## 2. Cómo se usa (2.37)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -816,6 +816,14 @@ interfaz principal: más bonita y amable, menos texto y menos opciones a la vist
   ya no dibujan crestas en línea a lo largo del trazo.
 Siguen PENDIENTES el calco y la interfaz principal (ver 2.35).
 
+### 2.37 — Rodillo: letra alta y furiosa, tóner irregular
+Pedido: «le falla la tipo, más alargada y furiosa; la textura está toda igual, mucho más irregular; le falta encanto».
+- Firma `graffiti_f`: `formW` 0,7 (parámetro nuevo: estrecha las formas propias), `over` 0,16, más baile de tamaño,
+  inclinación y altura; `nibMax` 0,058 para que la banda no ciegue las letras estrechas.
+- `ink.paintBand`: cada pasada sale distinta: ancho (0,8–1,14), carga (seca, media o cargada: `kind`), se queda sin
+  tóner hacia el final (`runOut`), calvas deshilachadas en seco (`dryTh`), cantos desiguales por lado (`eS`); las
+  repasadas, cargadas pero con calvas suaves.
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -875,7 +883,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.36.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.37.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)

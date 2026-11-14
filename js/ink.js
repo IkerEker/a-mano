@@ -717,7 +717,10 @@ function paintBand(canvas, pts, P, r, rgb, seed, opts) {
   if (n < 2) return;
   const Ls = Q[n - 1].s;
   if (Ls < 0.5) return;
-  const hw0 = r, HWm = hw0 * 1.07, W2 = 2 * hw0;
+  // (cada pasada es distinta: el rodillo se apoya más o menos —ancho—, va cargado, a medias o casi seco)
+  const hw0 = r * (0.8 + 0.34 * rnd()), HWm = hw0 * 1.07, W2 = 2 * hw0;
+  const kind = rnd(), dryTh = kind < 0.3 ? 0.05 + 0.5 * rnd() : kind < 0.6 ? -0.25 + 0.3 * rnd() : -2, runOut = rnd() < 0.4 ? 0.4 + 0.6 * rnd() : 0, oD = rnd() * 500;
+  const eS = [rnd() < 0.3 ? 0.35 + 0.3 * rnd() : 1, rnd() < 0.3 ? 0.35 + 0.3 * rnd() : 1];
   const pad = HWm + 3;
   let bx0 = Infinity, by0 = Infinity, bx1 = -Infinity, by1 = -Infinity;
   for (const q of Q) { if (q.x < bx0) bx0 = q.x; if (q.x > bx1) bx1 = q.x; if (q.y < by0) by0 = q.y; if (q.y > by1) by1 = q.y; }
@@ -728,7 +731,7 @@ function paintBand(canvas, pts, P, r, rgb, seed, opts) {
   const ink01 = opts.inkMul == null ? 0.5 : Math.max(0, Math.min(1.6, (opts.inkMul - 0.88) / 0.24));
   // (casi todos los trazos van con poco tóner: aguada clara con los hilos marcados; alguno sale cargado)
   const heavy = opts.inkMul != null && opts.inkMul > 1.25;
-  const tone = heavy ? 0.5 + 0.3 * rnd() : (rnd() < 0.045 ? 0.38 + 0.3 * rnd() : 0.04 + 0.15 * rnd() * rnd()) * (0.5 + Math.min(1, ink01));
+  const tone = heavy ? 0.5 + 0.3 * rnd() : (kind > 0.78 ? 0.3 + 0.4 * rnd() : kind > 0.6 ? 0.14 + 0.16 * rnd() : 0.03 + 0.12 * rnd() * rnd()) * (0.5 + Math.min(1, ink01));
   const T1 = Math.max(4, Math.min(190, W2 / 2.2)), px1 = W2 / T1, T2 = T1 * 2.7;
   const fine = smooth01(40, 110, W2), small = 1 - smooth01(14, 60, W2);
   const o1 = rnd() * 997, o2 = rnd() * 997, oB = rnd() * 97, tilt = (rnd() - 0.5) * 0.9;
@@ -806,13 +809,16 @@ function paintBand(canvas, pts, P, r, rgb, seed, opts) {
     const load = Math.max(0.03, tone * (1 + 0.5 * tilt * u) + pl * Math.exp(-sl / loadLen) + endLoad * smooth01(Ls - r * 5, Ls, s) + 0.08 * R.noise1(s / (r * 4 + 1), seed + 53));
     let a = load * (0.1 + 0.5 * B * B) + 0.012 + l1 * dj * (0.75 + 1.1 * load) * (0.55 + 0.8 * B) + l2 * 0.45 * (0.4 + load);
     // (repasada: el rodillo vuelve por su carril y lo deja casi tapado, con algún hilo seco)
-    if (heavy) a += (1 - a) * (0.66 - 0.5 * (h1 > 0.7 ? l1 : 0)) * (0.75 + 0.25 * B);
+    if (heavy) a += (1 - a) * (0.66 - 0.5 * (h1 > 0.7 ? l1 : 0)) * (0.75 + 0.25 * B) * (0.45 + 0.55 * smooth01(-0.35, 0.25, R.noise2(s / (r * 3 + 1) + oD, u * 1.2 + oD, seed + 95)));
     // zonas cargadas: negro, con hilos secos
     const th = 0.7 - 0.6 * (load - 0.25), patch = smooth01(th, th + 0.16, R.noise2(s / (r * 4.2 + 1) + o1, u * 1.2 + o2, seed + 71));
     if (patch > 0) a += (1 - a) * patch * (0.95 - 0.7 * (h1 > 0.72 ? l1 : 0) - 0.3 * l2);
+    // se va quedando sin tóner hacia el final, y en seco salta: calvas a lo largo, deshilachadas
+    if (runOut && !heavy) a *= 1 - runOut * 0.75 * smooth01(0.25, 1, s / Ls);
+    if (dryTh > -1 && !heavy) { const dn = R.noise2(s / (r * 2.6 + 1) + oD, u * 1.4 + oD, seed + 91) + 0.35 * R.noise2(s / (r * 0.5 + 1) + oD, u * 6, seed + 92); a *= 0.12 + 0.88 * smooth01(dryTh - 0.2, dryTh + 0.12, dn + 0.5 * (s / Ls > 0.5 ? 0 : 0.2)); }
     // cantos
     const te = Math.max(1.3, hw0 * (0.075 + 0.045 * R.noise1(s / (r * 1.1 + 1), seed + 63 + sd)));
-    if (dE < te) a = Math.max(a, 1);
+    if (dE < te) a = Math.max(a, eS[sd] * (dryTh > -1 && !heavy ? 0.55 + 0.45 * R.noise1(s / (r * 1.7 + 1), seed + 93 + sd) : 1));
     else {
       a += (1 - a) * 0.26 * Math.exp(-(dE - te) / (te * 1.5));
       const d2 = dE - te * (2.7 + 0.9 * R.noise1(s / (r * 2 + 1), seed + 67));

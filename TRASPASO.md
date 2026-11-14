@@ -1,11 +1,11 @@
-# A mano · traspaso para seguir en un chat nuevo (14 nov 2026, versión 2.36.0)
+# A mano · traspaso para seguir en un chat nuevo (14 nov 2026, versión 2.37.0)
 
 Pega este archivo al empezar el chat nuevo. Todo lo demás está en el repositorio.
 
 ## Qué es
 «A mano»: plugin UXP para Photoshop (2024+) que escribe texto a mano dentro de una forma (pestaña GENERAR) o pinta a
 mano encima de capas de texto (CALCAR). Repositorio: **github.com/IkerEker/a-mano** (rama principal, último commit
-`2.36`). En el entorno de trabajo: `/home/claude/a-mano`.
+`2.37`). En el entorno de trabajo: `/home/claude/a-mano`.
 
 ## Cómo trabajar (reglas del usuario)
 - Todo en español (respuestas, interfaz, comentarios, commits).
@@ -63,6 +63,9 @@ botón «Escribir en la forma» fijo abajo.
 ## A mano AE (After Effects) — 0.2.0
 Panel CEP que escribe y borra el texto animado (secuencia PNG + marcadores «entrada»/«salida»). Ver la sección 6
 de `CONTEXTO_A_MANO.md`. `python3 tools/build_ae.py`, `node tests/ae/harness.js` (19/19). La 0.1.0 cargó y pintó en After real; la 0.2.0 (tempo por golpes, punta redonda con textura) está sin ver allí.
+
+## 2.37
+Rodillo: firma alta y furiosa (`formW`, `over`), tóner irregular por pasada. Siguen pendientes calco e interfaz.
 
 ## 2.36
 Las líneas no se montan (`writer.clearLines`); relieve de la pintura más sutil. Siguen pendientes calco e interfaz.
