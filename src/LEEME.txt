@@ -1,8 +1,8 @@
-A MANO 2.35 · plugin para Photoshop (2024 o posterior)
+A MANO 2.36 · plugin para Photoshop (2024 o posterior)
 =====================================================
 
 INSTALAR
-- Doble clic en A_mano_v2.35.0.ccx -> Creative Cloud avisa de que no viene del
+- Doble clic en A_mano_v2.36.0.ccx -> Creative Cloud avisa de que no viene del
   Marketplace -> "Instalar". Sustituye a las versiones anteriores. Es independiente de Cartelator.
 - En Photoshop: Plugins > A mano.
 

@@ -70,7 +70,7 @@ Este documento sirve para continuar el trabajo en una conversación nueva sin pe
 
 ---
 
-## 2. Cómo se usa (2.35)
+## 2. Cómo se usa (2.36)
 
 **GENERAR** (de arriba abajo):
 1. **Forma**: Recto, Arco, Bandera, Abanico, Círculo o Selección. Crea una capa de forma `◇ Forma · Arco`
@@ -807,6 +807,15 @@ mucho 0,22 del paso de línea, se aleja 0,45). Prueba: `prueba_deriva.png`.
 PENDIENTE pedido el 14 nov: (1) rehacer el CALCO para que se adapte de verdad al texto que calca; (2) rediseñar la
 interfaz principal: más bonita y amable, menos texto y menos opciones a la vista (plegar, ocultar).
 
+### 2.36 — las líneas no se montan; relieve de la pintura más sutil
+- `writer.clearLines` (tras `blockDrift`): con los trazos ya en su sitio, si la tinta de una línea se mete en la de
+  arriba (por columnas, con el grosor), esa línea y las siguientes bajan lo justo; se tolera un roce del 7 %. Caso:
+  «Nadie» pequeña sobre «HABÍA» enorme con interlineado apretado. No actúa en autoencajar ni con negativos; puede
+  sacar el bloque un poco de la forma.
+- `render.applyRelief`: los bultos de pintura acumulada se suavizan (altura desenfocada) y la luz baja (0,5/0,32):
+  ya no dibujan crestas en línea a lo largo del trazo.
+Siguen PENDIENTES el calco y la interfaz principal (ver 2.35).
+
 ---
 
 ## 3. Arquitectura (carpeta `js/`, se une en un solo `main.js` con `tools/build.py`)
@@ -866,7 +875,7 @@ Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y 
 (rutas en `tests/fakeText.js`).
 
 ```bash
-python3 tools/build.py              # dist/plugin y dist/A_mano_v2.35.0.ccx
+python3 tools/build.py              # dist/plugin y dist/A_mano_v2.36.0.ccx
 node tests/sim/buildsim.js          # tests/sim/sim.js (Photoshop simulado + fuentes)
 node tests/sim/harness.js           # panel real en Chromium + Photoshop simulado; imágenes en tests/sim/out/
 node tests/node/preview.js DIR      # vista previa sin Photoshop: todos los packs en una forma (PNG)

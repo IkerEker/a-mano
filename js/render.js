@@ -261,7 +261,9 @@ function applyRelief(canvas) {
     return q;
   };
   const Hs1 = blurN(H0, 2), depth = s * 0.3, Z = new Float32Array(n);
-  for (let k = 0; k < n; k++) { const v = Hs1[k]; if (v > 0) Z[k] = depth * (0.95 * Math.min(1, v * 2) + 2.2 * Math.max(0, v - 0.5) + 4 * Math.max(0, a[k] - 0.5)); }
+  for (let k = 0; k < n; k++) { const v = Hs1[k]; if (v > 0) Z[k] = depth * (0.95 * Math.min(1, v * 2) + 2.2 * Math.max(0, v - 0.5) + 2.2 * Math.max(0, a[k] - 0.5)); }
+  // (los bultos de pintura acumulada, redondos y suaves: nada de crestas en línea a lo largo del trazo)
+  { const Zs = blurN(Z, s > 6 ? 5 : 3); for (let k = 0; k < n; k++) Z[k] = 0.35 * Z[k] + 0.65 * Zs[k]; }
   const dl = Math.max(1, Math.round(s * 0.22)), dlx = Math.round(dl * 0.45);        // paso del gradiente hacia la luz (de arriba, algo a la izquierda)
   // grumos: carga de cada punto = pintura de más + doble capa (cruces, vértices), y solo a zonas
   let LU = null;
@@ -291,7 +293,7 @@ function applyRelief(canvas) {
     let li = amount * (0.2 * sheen + 0.07 * R2.noise2(X * f3, Y * f3, 917) + 0.04 * (R2.hash2(X, Y, 919) - 0.5));
     const cx = Math.floor(X / cell), cy = Math.floor(Y / cell);
     if (R2.hash2(cx, cy, 921) < 0.035) { const px = (cx + 0.25 + 0.5 * R2.hash2(cx, cy, 923)) * cell, py = (cy + 0.25 + 0.5 * R2.hash2(cx, cy, 925)) * cell, dd = Math.hypot(X - px, Y - py); if (dd < 1.1) li += amount * 0.22; else if (dd < 2.1 && Y > py) li -= amount * 0.1; }
-    li = (li - amount * 0.32 * acc) * m;
+    li = (li - amount * 0.2 * acc) * m;
     // la luz: lo que mira arriba (y algo a la izquierda) aclara, lo de enfrente oscurece; más donde la pintura está cargada y
     // mojada (y a rachas: no brilla igual en todas partes)
     { const xa = x >= dlx ? x - dlx : 0, ya = y >= dl ? y - dl : 0, xb = x + dlx < w ? x + dlx : w - 1, yb = y + dl < h ? y + dl : h - 1;
@@ -299,7 +301,7 @@ function applyRelief(canvas) {
       { const tr = Math.abs(v - 0.47); if (tr < 0.012) e *= 0.25 + 0.75 * tr / 0.012; }      // reguero de un chorretón: plano (el bulto está solo en la gota del final)
       const wet = Math.max(0.5, Math.min(1.5, 0.55 + 1.1 * acc + 0.55 * sheen + 1.3 * Math.max(0, v - 0.5)));
       // (y el destello: un punto de luz neto donde el cordón o la gota miran de lleno a la luz)
-      li += amount * (e > 0 ? 0.8 * wet * e + 0.7 * wet * Math.max(0, e - 0.5) * Math.max(0, e - 0.5) : 0.5 * e); }
+      li += amount * (e > 0 ? 0.5 * wet * e + 0.5 * wet * Math.max(0, e - 0.5) * Math.max(0, e - 0.5) : 0.32 * e); }
     // grumos: su propio claro y su propia sombra
     if (LU && LU[k]) { const lv = LU[k]; li += amount * m * (lv > 0 ? 1.5 * lv : 1.2 * lv); }
     for (let c = 0; c < 3; c++) { let u = D[i + c]; u += li > 0 ? (255 - u) * li : u * li; D[i + c] = u < 0 ? 0 : u > 255 ? 255 : u; }

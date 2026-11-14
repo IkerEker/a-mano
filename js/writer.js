@@ -484,7 +484,42 @@ function plan(lay, p, seed) {
     for (const st of l.strokes) for (const q of st.pts) { if (q[0] < e.x0) e.x0 = q[0]; if (q[0] > e.x1) e.x1 = q[0]; if (q[1] < e.y0) e.y0 = q[1]; if (q[1] > e.y1) e.y1 = q[1]; }
     wordExt.set(l.word, e);
   }
-  return snugUnder(blockDrift(NG.planWords(lay, out, p, seed, wordExt), letters, p, seed, auto));
+  return snugUnder(clearLines(blockDrift(NG.planWords(lay, out, p, seed, wordExt), letters, p, seed, auto), auto));
+}
+
+// LAS LÍNEAS NO SE MONTAN. Con todo ya en su sitio (tamaños distintos por importancia, letras que bailan, astas
+// que se pasan de largo, interlineado apretado, deriva), se mira de verdad: si la tinta de una línea se mete en la
+// de arriba —en las columnas donde coinciden—, esa línea y las que siguen bajan lo justo. Se tolera un roce
+// pequeño (una g que toca una l), no una palabra encima de otra.
+function clearLines(strokes, auto) {
+  if (auto || strokes.some(s => s.mask)) return strokes;
+  const by = new Map();
+  for (const s of strokes) { if (s.line == null || s.fill) continue; let a = by.get(s.line); if (!a) { a = []; by.set(s.line, a); } a.push(s); }
+  if (by.size < 2) return strokes;
+  let X0 = Infinity, X1 = -Infinity;
+  const L = Array.from(by.values()).map(ss => { let y0 = Infinity, y1 = -Infinity, base = []; for (const s of ss) { if (!s.under) { let b = -Infinity; for (const q of s.pts) if (q.y > b) b = q.y; base.push(b); } for (const q of s.pts) { if (q.x < X0) X0 = q.x; if (q.x > X1) X1 = q.x; if (q.y < y0) y0 = q.y; if (q.y > y1) y1 = q.y; } } base.sort((a, b) => a - b); return { ss, y0, y1, base: base.length ? base[base.length >> 1] : y1 }; }).sort((a, b) => a.base - b.base);
+  const NB = 48, bw = Math.max(1, (X1 - X0) / NB), bin = x => Math.max(0, Math.min(NB - 1, Math.floor((x - X0) / bw)));
+  const prof = (l, dy) => {      // por columna: lo más alto y lo más bajo de su tinta (con el grosor)
+    const top = new Float64Array(NB).fill(Infinity), bot = new Float64Array(NB).fill(-Infinity);
+    for (const s of l.ss) for (let i = 0; i < s.pts.length; i++) {
+      const q = s.pts[i], o = s.pts[i ? i - 1 : 0], n = Math.max(1, Math.min(30, Math.ceil(Math.abs(q.x - o.x) / bw)));
+      for (let k = 0; k <= n; k++) { const x = o.x + (q.x - o.x) * k / n, y = o.y + (q.y - o.y) * k / n + dy, b = bin(x); if (y - s.r < top[b]) top[b] = y - s.r; if (y + s.r > bot[b]) bot[b] = y + s.r; }
+    }
+    return { top, bot };
+  };
+  let shift = 0, floor = null;      // floor: lo más bajo de todo lo de arriba, por columna
+  for (let i = 0; i < L.length; i++) {
+    const l = L[i];
+    if (floor) {
+      const pr = prof(l, shift), tol = 0.07 * Math.max(4, l.y1 - l.y0);
+      let need = 0; for (let b = 0; b < NB; b++) if (isFinite(pr.top[b]) && isFinite(floor[b])) need = Math.max(need, floor[b] - pr.top[b] - tol);
+      shift += need;
+    }
+    if (shift > 0.01) for (const s of l.ss) { for (const q of s.pts) q.y += shift; if (s.box) { s.box.top += shift; s.box.bottom += shift; } }
+    const pf = prof(l, 0);
+    if (!floor) floor = pf.bot; else for (let b = 0; b < NB; b++) if (pf.bot[b] > floor[b]) floor[b] = pf.bot[b];
+  }
+  return strokes;
 }
 
 // SUBRAYADOS PEGADOS A SU PALABRA. La raya se planea sobre la maqueta, pero luego cada letra baila, la línea se
