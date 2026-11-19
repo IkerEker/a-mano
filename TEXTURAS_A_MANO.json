@@ -1,0 +1,3271 @@
+{
+ "plugin": "A mano",
+ "version": "2.38.0",
+ "commit_analizado": "8a8bf667e35094346a246f7aad10e9d71d86675f",
+ "assets": [
+  {
+   "fuente": "TRAZOS/AGUADAS/Gemini_Generated_Image_6lti5j6lti5j6lti.jpg",
+   "md5": "20ddea7c0fb3b440354ee377a7c7e34c",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "aguada",
+   "uso": "Pincel Húmedo",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 46 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.55,
+    "MH": 15,
+    "trazos_detectados": 3,
+    "cintas_validas": 3,
+    "cintas_incrustadas": 2,
+    "ids_cinta": [
+     0,
+     7
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/AGUADAS/Gemini_Generated_Image_6p6u0m6p6u0m6p6u.jpg",
+   "md5": "ac6b1c0c21c3685ebafd50b783f0b0b3",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "aguada",
+   "uso": "Pincel Húmedo",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 46 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.55,
+    "MH": 15,
+    "trazos_detectados": 3,
+    "cintas_validas": 3,
+    "cintas_incrustadas": 2,
+    "ids_cinta": [
+     1,
+     8
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/AGUADAS/Gemini_Generated_Image_bygjtubygjtubygj.jpg",
+   "md5": "2ebff079250c732bac3996e9cd79b633",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "aguada",
+   "uso": "Pincel Húmedo",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 46 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.55,
+    "MH": 15,
+    "trazos_detectados": 3,
+    "cintas_validas": 3,
+    "cintas_incrustadas": 2,
+    "ids_cinta": [
+     2,
+     9
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/AGUADAS/Gemini_Generated_Image_hbkpvbhbkpvbhbkp.jpg",
+   "md5": "ff9fd5a027b2672038d83ebb42259fd1",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "aguada",
+   "uso": "Pincel Húmedo",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 46 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.55,
+    "MH": 15,
+    "trazos_detectados": 3,
+    "cintas_validas": 3,
+    "cintas_incrustadas": 2,
+    "ids_cinta": [
+     3,
+     10
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/AGUADAS/Gemini_Generated_Image_nft1n4nft1n4nft1.jpg",
+   "md5": "4a0a9e9765717d23a03bf7bee0b529c6",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "aguada",
+   "uso": "Pincel Húmedo",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 46 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.55,
+    "MH": 15,
+    "trazos_detectados": 4,
+    "cintas_validas": 4,
+    "cintas_incrustadas": 2,
+    "ids_cinta": [
+     4,
+     11
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/AGUADAS/Gemini_Generated_Image_umv2e3umv2e3umv2.jpg",
+   "md5": "0c7d294c3416f7b24c426a5b7573a2e7",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "aguada",
+   "uso": "Pincel Húmedo",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 46 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.55,
+    "MH": 15,
+    "trazos_detectados": 3,
+    "cintas_validas": 3,
+    "cintas_incrustadas": 1,
+    "ids_cinta": [
+     5
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/AGUADAS/Gemini_Generated_Image_z82hx1z82hx1z82h.jpg",
+   "md5": "4d7017da88104ffd2d20291e4fb0148f",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "aguada",
+   "uso": "Pincel Húmedo",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 46 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.55,
+    "MH": 15,
+    "trazos_detectados": 3,
+    "cintas_validas": 3,
+    "cintas_incrustadas": 1,
+    "ids_cinta": [
+     6
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/CERAS/Gemini_Generated_Image_2an7ri2an7ri2an7.jpg",
+   "md5": "b39356083123b118262bc35200d62d4d",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "cera",
+   "uso": "Cera (Gruesa, Blanda, Fina)",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 58 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.45,
+    "MH": 20,
+    "trazos_detectados": 3,
+    "cintas_validas": 3,
+    "cintas_incrustadas": 3,
+    "ids_cinta": [
+     12,
+     17,
+     22
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/CERAS/Gemini_Generated_Image_56fr4h56fr4h56fr.jpg",
+   "md5": "53d0437a073d998a7895372b37008a97",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "cera",
+   "uso": "Cera (Gruesa, Blanda, Fina)",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 58 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.45,
+    "MH": 20,
+    "trazos_detectados": 3,
+    "cintas_validas": 3,
+    "cintas_incrustadas": 3,
+    "ids_cinta": [
+     13,
+     18,
+     23
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/CERAS/Gemini_Generated_Image_uh9z0xuh9z0xuh9z (1).jpg",
+   "md5": "f8bd0d98d712eee34c871a556b86192d",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "cera",
+   "uso": "Cera (Gruesa, Blanda, Fina)",
+   "estado": "USADA",
+   "duplicada_con": [
+    "TRAZOS/CERAS/Gemini_Generated_Image_uh9z0xuh9z0xuh9z.jpg"
+   ],
+   "formato_final": "cinta gris 8 bits 58 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.45,
+    "MH": 20,
+    "trazos_detectados": 3,
+    "cintas_validas": 3,
+    "cintas_incrustadas": 2,
+    "ids_cinta": [
+     14,
+     19
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/CERAS/Gemini_Generated_Image_uh9z0xuh9z0xuh9z.jpg",
+   "md5": "f8bd0d98d712eee34c871a556b86192d",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "cera",
+   "uso": "Cera (Gruesa, Blanda, Fina)",
+   "estado": "USADA",
+   "duplicada_con": [
+    "TRAZOS/CERAS/Gemini_Generated_Image_uh9z0xuh9z0xuh9z (1).jpg"
+   ],
+   "formato_final": "cinta gris 8 bits 58 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.45,
+    "MH": 20,
+    "trazos_detectados": 3,
+    "cintas_validas": 3,
+    "cintas_incrustadas": 2,
+    "ids_cinta": [
+     15,
+     20
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/CERAS/Gemini_Generated_Image_y7qljdy7qljdy7ql.jpg",
+   "md5": "e144d33708b20cfa07cdb172e936acce",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "cera",
+   "uso": "Cera (Gruesa, Blanda, Fina)",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 58 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.45,
+    "MH": 20,
+    "trazos_detectados": 3,
+    "cintas_validas": 3,
+    "cintas_incrustadas": 2,
+    "ids_cinta": [
+     16,
+     21
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/Cinco líneas azules dibujadas a mano.png",
+   "md5": "818a69b66f8108734cc8d93bb0615c12",
+   "px": [
+    1536,
+    1024
+   ],
+   "familia": "rotu",
+   "uso": "INCRUSTADA SIN USO (el rotulador es procedural)",
+   "estado": "incrustada sin uso",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 22 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "left",
+    "E": 1.6,
+    "MH": 7,
+    "trazos_detectados": 5,
+    "cintas_validas": 5,
+    "cintas_incrustadas": 1,
+    "ids_cinta": [
+     77
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/Cinco líneas azules sobre blanco.png",
+   "md5": "0561622b5e78218be9fb1c09ab07cb05",
+   "px": [
+    1536,
+    1024
+   ],
+   "familia": "boli",
+   "uso": "INCRUSTADA SIN USO (el boli es procedural desde hace versiones)",
+   "estado": "incrustada sin uso",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 13 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "left",
+    "E": 2.2,
+    "MH": 3,
+    "trazos_detectados": 6,
+    "cintas_validas": 6,
+    "cintas_incrustadas": 2,
+    "ids_cinta": [
+     80,
+     84
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/Cinco trazos azules sobre blanco.png",
+   "md5": "2bcd77b876fd57f6580a35b2bc1f6585",
+   "px": [
+    1536,
+    1024
+   ],
+   "familia": "gastado",
+   "uso": "NO SE EXTRAE (CAP = 0)",
+   "estado": "en SOURCES pero la familia tiene tope 0: no se procesa",
+   "duplicada_con": null,
+   "formato_final": null,
+   "parametros": {
+    "inicio": "left",
+    "E": 1.45,
+    "MH": 10,
+    "trazos_detectados": null,
+    "cintas_validas": null,
+    "cintas_incrustadas": 0,
+    "ids_cinta": []
+   }
+  },
+  {
+   "fuente": "TRAZOS/Cinco trazos rojos sobre blanco.png",
+   "md5": "783353d66f31e70cc44e7231723dd965",
+   "px": [
+    1536,
+    1024
+   ],
+   "familia": "gastado",
+   "uso": "NO SE EXTRAE (CAP = 0)",
+   "estado": "en SOURCES pero la familia tiene tope 0: no se procesa",
+   "duplicada_con": null,
+   "formato_final": null,
+   "parametros": {
+    "inicio": "left",
+    "E": 1.45,
+    "MH": 10,
+    "trazos_detectados": null,
+    "cintas_validas": null,
+    "cintas_incrustadas": 0,
+    "ids_cinta": []
+   }
+  },
+  {
+   "fuente": "TRAZOS/Composición minimalista de garabatos abstractos-2.png",
+   "md5": "27e823cf0f448308928b2779bf9bf1ac",
+   "px": [
+    1672,
+    941
+   ],
+   "familia": null,
+   "uso": "no usada",
+   "estado": "NO USADA (no está en SOURCES)",
+   "duplicada_con": null,
+   "formato_final": null,
+   "parametros": null
+  },
+  {
+   "fuente": "TRAZOS/Cuatro líneas rojas dibujadas a manoยิงปลา.png",
+   "md5": "bc3605424110366dd797a920be1bec06",
+   "px": [
+    1535,
+    1024
+   ],
+   "familia": "boli",
+   "uso": "INCRUSTADA SIN USO (el boli es procedural desde hace versiones)",
+   "estado": "incrustada sin uso",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 13 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "left",
+    "E": 2.2,
+    "MH": 3,
+    "trazos_detectados": 4,
+    "cintas_validas": 4,
+    "cintas_incrustadas": 2,
+    "ids_cinta": [
+     83,
+     87
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/Cuatro pinceladas rojas sobre blanco.png",
+   "md5": "99193ea91cf681edc1b1b5946c6cabb3",
+   "px": [
+    1536,
+    1024
+   ],
+   "familia": "pincel",
+   "uso": "Pincel Gordo y Seco; relleno de negativos a pincel",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 39 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "left",
+    "E": 1.4,
+    "MH": 14,
+    "trazos_detectados": 4,
+    "cintas_validas": 4,
+    "cintas_incrustadas": 1,
+    "ids_cinta": [
+     63
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/Cuatro trazos negros horizontales.png",
+   "md5": "2ccd16b4b8ef13017948403488dc78c2",
+   "px": [
+    1448,
+    1086
+   ],
+   "familia": "rotu",
+   "uso": "INCRUSTADA SIN USO (el rotulador es procedural)",
+   "estado": "incrustada sin uso",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 22 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "left",
+    "E": 1.6,
+    "MH": 7,
+    "trazos_detectados": 4,
+    "cintas_validas": 4,
+    "cintas_incrustadas": 1,
+    "ids_cinta": [
+     79
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/Cuatro trazos rojos texturizados.png",
+   "md5": "e50cdc4bb37912262f92e93de71dbb50",
+   "px": [
+    1536,
+    1024
+   ],
+   "familia": "gastado",
+   "uso": "NO SE EXTRAE (CAP = 0)",
+   "estado": "en SOURCES pero la familia tiene tope 0: no se procesa",
+   "duplicada_con": null,
+   "formato_final": null,
+   "parametros": {
+    "inicio": "left",
+    "E": 1.45,
+    "MH": 10,
+    "trazos_detectados": null,
+    "cintas_validas": null,
+    "cintas_incrustadas": 0,
+    "ids_cinta": []
+   }
+  },
+  {
+   "fuente": "TRAZOS/Doodles de grafito sobre blanco (1).png",
+   "md5": "0ef89bdf930e7280939d0a5629de709f",
+   "px": [
+    1672,
+    941
+   ],
+   "familia": null,
+   "uso": "no usada",
+   "estado": "NO USADA (no está en SOURCES)",
+   "duplicada_con": null,
+   "formato_final": null,
+   "parametros": null
+  },
+  {
+   "fuente": "TRAZOS/Doodles de grafito sobre blanco.png",
+   "md5": "a3c23305d2bd31814148a888a1d9bd2e",
+   "px": [
+    1672,
+    941
+   ],
+   "familia": null,
+   "uso": "no usada",
+   "estado": "NO USADA (no está en SOURCES)",
+   "duplicada_con": null,
+   "formato_final": null,
+   "parametros": null
+  },
+  {
+   "fuente": "TRAZOS/Franjas de pintura roja sobre blanco.png",
+   "md5": "69c2c2243bb9c323d644d2ad0eab2969",
+   "px": [
+    1536,
+    1024
+   ],
+   "familia": "pincel",
+   "uso": "Pincel Gordo y Seco; relleno de negativos a pincel",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 39 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "left",
+    "E": 1.4,
+    "MH": 14,
+    "trazos_detectados": 4,
+    "cintas_validas": 4,
+    "cintas_incrustadas": 1,
+    "ids_cinta": [
+     64
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/GUACHE/Gemini_Generated_Image_6l56yc6l56yc6l56.jpg",
+   "md5": "44adc9c64138f6cd1a55bed4cb5abd05",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "guache",
+   "uso": "Pincel Fino y Seco",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 39 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.4,
+    "MH": 14,
+    "trazos_detectados": 3,
+    "cintas_validas": 3,
+    "cintas_incrustadas": 2,
+    "ids_cinta": [
+     24,
+     33
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/GUACHE/Gemini_Generated_Image_8ypgc28ypgc28ypg.jpg",
+   "md5": "187140f5d0f9d9f90dbe3d6d4f41b521",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "guache",
+   "uso": "Pincel Fino y Seco",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 39 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.4,
+    "MH": 14,
+    "trazos_detectados": 3,
+    "cintas_validas": 3,
+    "cintas_incrustadas": 2,
+    "ids_cinta": [
+     25,
+     34
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/GUACHE/Gemini_Generated_Image_gz01rcgz01rcgz01.jpg",
+   "md5": "a5baef658ef09e772c1402b130c62c8a",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "guache",
+   "uso": "Pincel Fino y Seco",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 39 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.4,
+    "MH": 14,
+    "trazos_detectados": 3,
+    "cintas_validas": 3,
+    "cintas_incrustadas": 2,
+    "ids_cinta": [
+     26,
+     35
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/GUACHE/Gemini_Generated_Image_jfrkuyjfrkuyjfrk.jpg",
+   "md5": "0f00cb3e6dbeb43243962b2aad7ebc1f",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "guache",
+   "uso": "Pincel Fino y Seco",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 39 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.4,
+    "MH": 14,
+    "trazos_detectados": 3,
+    "cintas_validas": 3,
+    "cintas_incrustadas": 1,
+    "ids_cinta": [
+     27
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/GUACHE/Gemini_Generated_Image_ksbdqzksbdqzksbd.jpg",
+   "md5": "a8622af802d9a3c83c25bd60e891586d",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "guache",
+   "uso": "Pincel Fino y Seco",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 39 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.4,
+    "MH": 14,
+    "trazos_detectados": 3,
+    "cintas_validas": 3,
+    "cintas_incrustadas": 1,
+    "ids_cinta": [
+     28
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/GUACHE/Gemini_Generated_Image_omhgriomhgriomhg.jpg",
+   "md5": "fb33f7dda84a14d3434758806b5b5cfa",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "guache",
+   "uso": "Pincel Fino y Seco",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 39 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.4,
+    "MH": 14,
+    "trazos_detectados": 3,
+    "cintas_validas": 3,
+    "cintas_incrustadas": 1,
+    "ids_cinta": [
+     29
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/GUACHE/Gemini_Generated_Image_scmr90scmr90scmr.jpg",
+   "md5": "430ed44e661c68c0a1d7a4c760c61c12",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "guache",
+   "uso": "Pincel Fino y Seco",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 39 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.4,
+    "MH": 14,
+    "trazos_detectados": 3,
+    "cintas_validas": 3,
+    "cintas_incrustadas": 1,
+    "ids_cinta": [
+     30
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/GUACHE/Gemini_Generated_Image_t7kg8st7kg8st7kg (1).jpg",
+   "md5": "0877b4440f565bc67c81c2c19fa64d44",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "guache",
+   "uso": "Pincel Fino y Seco",
+   "estado": "USADA",
+   "duplicada_con": [
+    "TRAZOS/GUACHE/Gemini_Generated_Image_t7kg8st7kg8st7kg.jpg"
+   ],
+   "formato_final": "cinta gris 8 bits 39 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.4,
+    "MH": 14,
+    "trazos_detectados": 3,
+    "cintas_validas": 3,
+    "cintas_incrustadas": 1,
+    "ids_cinta": [
+     31
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/GUACHE/Gemini_Generated_Image_t7kg8st7kg8st7kg.jpg",
+   "md5": "0877b4440f565bc67c81c2c19fa64d44",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "guache",
+   "uso": "Pincel Fino y Seco",
+   "estado": "USADA",
+   "duplicada_con": [
+    "TRAZOS/GUACHE/Gemini_Generated_Image_t7kg8st7kg8st7kg (1).jpg"
+   ],
+   "formato_final": "cinta gris 8 bits 39 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.4,
+    "MH": 14,
+    "trazos_detectados": 3,
+    "cintas_validas": 3,
+    "cintas_incrustadas": 1,
+    "ids_cinta": [
+     32
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/Garabato de carbón en curva.png",
+   "md5": "4577ab799bee7c1b12bb895a8a8d61c2",
+   "px": [
+    1672,
+    941
+   ],
+   "familia": null,
+   "uso": "no usada",
+   "estado": "NO USADA (no está en SOURCES)",
+   "duplicada_con": null,
+   "formato_final": null,
+   "parametros": null
+  },
+  {
+   "fuente": "TRAZOS/Garabatos abstractos de grafito.png",
+   "md5": "09dff1bc625eed40d42070332e58982f",
+   "px": [
+    1672,
+    941
+   ],
+   "familia": null,
+   "uso": "no usada",
+   "estado": "NO USADA (no está en SOURCES)",
+   "duplicada_con": null,
+   "formato_final": null,
+   "parametros": null
+  },
+  {
+   "fuente": "TRAZOS/Garabatos abstractos en tinta negra.png",
+   "md5": "8643eb03406fa2e9fc578ec60614d7df",
+   "px": [
+    1672,
+    941
+   ],
+   "familia": null,
+   "uso": "no usada",
+   "estado": "NO USADA (no está en SOURCES)",
+   "duplicada_con": null,
+   "formato_final": null,
+   "parametros": null
+  },
+  {
+   "fuente": "TRAZOS/Garabatos de marcador negro sobre blanco.png",
+   "md5": "fade6f08c5b1066e60ed4a83a0dde801",
+   "px": [
+    1672,
+    941
+   ],
+   "familia": null,
+   "uso": "no usada",
+   "estado": "NO USADA (no está en SOURCES)",
+   "duplicada_con": null,
+   "formato_final": null,
+   "parametros": null
+  },
+  {
+   "fuente": "TRAZOS/Gemini_Generated_Image_1m2vhi1m2vhi1m2v.jpg",
+   "md5": "1fab4c773c1595efc5c71fa8ba5d003b",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "pincel",
+   "uso": "Pincel Gordo y Seco; relleno de negativos a pincel",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 39 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.4,
+    "MH": 14,
+    "trazos_detectados": 1,
+    "cintas_validas": 1,
+    "cintas_incrustadas": 1,
+    "ids_cinta": [
+     56
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/Gemini_Generated_Image_2tepo62tepo62tep.jpg",
+   "md5": "838415947966cceb4e5c32c175f66d01",
+   "px": [
+    2752,
+    1536
+   ],
+   "familia": null,
+   "uso": "no usada",
+   "estado": "NO USADA (no está en SOURCES)",
+   "duplicada_con": null,
+   "formato_final": null,
+   "parametros": null
+  },
+  {
+   "fuente": "TRAZOS/Gemini_Generated_Image_4k0x3g4k0x3g4k0x.jpg",
+   "md5": "4473e9c1d6f00ab84b4073cceaf19f51",
+   "px": [
+    2752,
+    1536
+   ],
+   "familia": "carbon",
+   "uso": "Carbón (Suave, Fuerte, Fino)",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 42 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "left",
+    "E": 1.9,
+    "MH": 11,
+    "trazos_detectados": 10,
+    "cintas_validas": 10,
+    "cintas_incrustadas": 2,
+    "ids_cinta": [
+     49,
+     53
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/Gemini_Generated_Image_dd9o77dd9o77dd9o.jpg",
+   "md5": "93b2c592d0844bb90bdb735019f8632f",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "pincel",
+   "uso": "Pincel Gordo y Seco; relleno de negativos a pincel",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 39 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.4,
+    "MH": 14,
+    "trazos_detectados": 1,
+    "cintas_validas": 1,
+    "cintas_incrustadas": 1,
+    "ids_cinta": [
+     57
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/Gemini_Generated_Image_fooa8gfooa8gfooa.jpg",
+   "md5": "8f83c88e63387f8ea7ef103928e1ed63",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "pincel",
+   "uso": "Pincel Gordo y Seco; relleno de negativos a pincel",
+   "estado": "procesada, ninguna cinta entra en el tope",
+   "duplicada_con": null,
+   "formato_final": null,
+   "parametros": {
+    "inicio": "top",
+    "E": 1.4,
+    "MH": 14,
+    "trazos_detectados": 1,
+    "cintas_validas": 0,
+    "cintas_incrustadas": 0,
+    "ids_cinta": []
+   }
+  },
+  {
+   "fuente": "TRAZOS/Gemini_Generated_Image_gtyi67gtyi67gtyi.jpg",
+   "md5": "f2a1c7dbb7402bd7f31a4c3631b1ce49",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "pincel",
+   "uso": "Pincel Gordo y Seco; relleno de negativos a pincel",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 39 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.4,
+    "MH": 14,
+    "trazos_detectados": 1,
+    "cintas_validas": 1,
+    "cintas_incrustadas": 1,
+    "ids_cinta": [
+     58
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/Gemini_Generated_Image_i9od48i9od48i9od.jpg",
+   "md5": "ea43656231d6b863d67eb6c169032e5b",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "pincel",
+   "uso": "Pincel Gordo y Seco; relleno de negativos a pincel",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 39 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.4,
+    "MH": 14,
+    "trazos_detectados": 1,
+    "cintas_validas": 1,
+    "cintas_incrustadas": 1,
+    "ids_cinta": [
+     59
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/Gemini_Generated_Image_ogccn5ogccn5ogcc.jpg",
+   "md5": "039431753bcad30873ec83cfd64ee744",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "pincel",
+   "uso": "Pincel Gordo y Seco; relleno de negativos a pincel",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 39 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.4,
+    "MH": 14,
+    "trazos_detectados": 1,
+    "cintas_validas": 1,
+    "cintas_incrustadas": 1,
+    "ids_cinta": [
+     60
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/Gemini_Generated_Image_uoqx5fuoqx5fuoqx.jpg",
+   "md5": "160a8c8a106c89a1bde10f3990e915d2",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "pincel",
+   "uso": "Pincel Gordo y Seco; relleno de negativos a pincel",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 39 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.4,
+    "MH": 14,
+    "trazos_detectados": 1,
+    "cintas_validas": 1,
+    "cintas_incrustadas": 1,
+    "ids_cinta": [
+     61
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/Gemini_Generated_Image_uy13atuy13atuy13.jpg",
+   "md5": "9e733a69d85f09cfcff0ba14c22956ad",
+   "px": [
+    2752,
+    1536
+   ],
+   "familia": null,
+   "uso": "no usada",
+   "estado": "NO USADA (no está en SOURCES)",
+   "duplicada_con": null,
+   "formato_final": null,
+   "parametros": null
+  },
+  {
+   "fuente": "TRAZOS/Gemini_Generated_Image_xw72ktxw72ktxw72.jpg",
+   "md5": "7b13ec84a1c7508de63bb6cf144d9b9e",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "pincel",
+   "uso": "Pincel Gordo y Seco; relleno de negativos a pincel",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 39 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.4,
+    "MH": 14,
+    "trazos_detectados": 1,
+    "cintas_validas": 1,
+    "cintas_incrustadas": 1,
+    "ids_cinta": [
+     62
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/Hoja de garabatos de grafito texturizado.png",
+   "md5": "4292e9785e8e8864442e2cf5218c600c",
+   "px": [
+    1672,
+    941
+   ],
+   "familia": null,
+   "uso": "no usada",
+   "estado": "NO USADA (no está en SOURCES)",
+   "duplicada_con": null,
+   "formato_final": null,
+   "parametros": null
+  },
+  {
+   "fuente": "TRAZOS/Hoja de garabatos en tinta negra.png",
+   "md5": "d3a9f4ea8f61eda0311f144520df5431",
+   "px": [
+    1672,
+    941
+   ],
+   "familia": null,
+   "uso": "no usada",
+   "estado": "NO USADA (no está en SOURCES)",
+   "duplicada_con": null,
+   "formato_final": null,
+   "parametros": null
+  },
+  {
+   "fuente": "TRAZOS/Hoja de pruebas de garabatos en tinta-1.png",
+   "md5": "e3b921410f5a34d000d9ff326b13d8fd",
+   "px": [
+    1672,
+    941
+   ],
+   "familia": null,
+   "uso": "no usada",
+   "estado": "NO USADA (no está en SOURCES)",
+   "duplicada_con": null,
+   "formato_final": null,
+   "parametros": null
+  },
+  {
+   "fuente": "TRAZOS/Hoja minimalista de garabatos en tinta.png",
+   "md5": "543528593844bbbeba90678eeec4402c",
+   "px": [
+    1672,
+    941
+   ],
+   "familia": null,
+   "uso": "no usada",
+   "estado": "NO USADA (no está en SOURCES)",
+   "duplicada_con": null,
+   "formato_final": null,
+   "parametros": null
+  },
+  {
+   "fuente": "TRAZOS/LAPIZ/Gemini_Generated_Image_4vfeh34vfeh34vfe.jpg",
+   "md5": "46afa9de8ecce9fc9ba79d3e9e6721b3",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "carbon",
+   "uso": "Carbón (Suave, Fuerte, Fino)",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 42 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.9,
+    "MH": 11,
+    "trazos_detectados": 4,
+    "cintas_validas": 3,
+    "cintas_incrustadas": 3,
+    "ids_cinta": [
+     46,
+     50,
+     54
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/LAPIZ/Gemini_Generated_Image_dgy3xxdgy3xxdgy3.jpg",
+   "md5": "80dad666f8311d6edb1754c362d75a5d",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "lapiz",
+   "uso": "Lápiz (HB, Blando 6B, Nervioso)",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 30 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.5,
+    "MH": 10,
+    "trazos_detectados": 3,
+    "cintas_validas": 3,
+    "cintas_incrustadas": 3,
+    "ids_cinta": [
+     36,
+     40,
+     44
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/LAPIZ/Gemini_Generated_Image_fd6so0fd6so0fd6s.jpg",
+   "md5": "d3a26863bf136a2b427559a680ae92bc",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "lapiz",
+   "uso": "Lápiz (HB, Blando 6B, Nervioso)",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 30 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.5,
+    "MH": 10,
+    "trazos_detectados": 7,
+    "cintas_validas": 2,
+    "cintas_incrustadas": 2,
+    "ids_cinta": [
+     37,
+     41
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/LAPIZ/Gemini_Generated_Image_i1m1v9i1m1v9i1m1.jpg",
+   "md5": "16105ce5cc4b1d2b200909510e32b70f",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "carbon",
+   "uso": "Carbón (Suave, Fuerte, Fino)",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 42 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.9,
+    "MH": 11,
+    "trazos_detectados": 3,
+    "cintas_validas": 3,
+    "cintas_incrustadas": 3,
+    "ids_cinta": [
+     47,
+     51,
+     55
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/LAPIZ/Gemini_Generated_Image_so6zmwso6zmwso6z.jpg",
+   "md5": "8b1330c2a986ae301ae99c56608fc9fe",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "lapiz",
+   "uso": "Lápiz (HB, Blando 6B, Nervioso)",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 30 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.5,
+    "MH": 10,
+    "trazos_detectados": 3,
+    "cintas_validas": 3,
+    "cintas_incrustadas": 3,
+    "ids_cinta": [
+     38,
+     42,
+     45
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/LAPIZ/Gemini_Generated_Image_u2c2txu2c2txu2c2.jpg",
+   "md5": "d3641f94f2fd796c41a4756940e836fb",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "lapiz",
+   "uso": "Lápiz (HB, Blando 6B, Nervioso)",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 30 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.5,
+    "MH": 10,
+    "trazos_detectados": 3,
+    "cintas_validas": 2,
+    "cintas_incrustadas": 2,
+    "ids_cinta": [
+     39,
+     43
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/LAPIZ/Gemini_Generated_Image_uvge2nuvge2nuvge.jpg",
+   "md5": "8b1caba32d3287fa9a08c5de574690c6",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "carbon",
+   "uso": "Carbón (Suave, Fuerte, Fino)",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 42 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.9,
+    "MH": 11,
+    "trazos_detectados": 3,
+    "cintas_validas": 3,
+    "cintas_incrustadas": 2,
+    "ids_cinta": [
+     48,
+     52
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/Líneas azules sobre fondo blanco.png",
+   "md5": "f59dfd6a89692ca182487365a11e774c",
+   "px": [
+    1536,
+    1024
+   ],
+   "familia": "rotu",
+   "uso": "INCRUSTADA SIN USO (el rotulador es procedural)",
+   "estado": "incrustada sin uso",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 22 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "left",
+    "E": 1.6,
+    "MH": 7,
+    "trazos_detectados": 4,
+    "cintas_validas": 4,
+    "cintas_incrustadas": 1,
+    "ids_cinta": [
+     78
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/Líneas azules sobre papel blanco.png",
+   "md5": "7b041383b2b1112cff24a78775d2e49d",
+   "px": [
+    1672,
+    941
+   ],
+   "familia": "boli",
+   "uso": "INCRUSTADA SIN USO (el boli es procedural desde hace versiones)",
+   "estado": "incrustada sin uso",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 13 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "left",
+    "E": 2.2,
+    "MH": 3,
+    "trazos_detectados": 5,
+    "cintas_validas": 5,
+    "cintas_incrustadas": 2,
+    "ids_cinta": [
+     81,
+     85
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/Líneas horizontales dibujadas a mano.png",
+   "md5": "14b0c42ba960ff6b03c8c91c0b1db7b2",
+   "px": [
+    1536,
+    1024
+   ],
+   "familia": "boli",
+   "uso": "INCRUSTADA SIN USO (el boli es procedural desde hace versiones)",
+   "estado": "procesada, ninguna cinta entra en el tope",
+   "duplicada_con": null,
+   "formato_final": null,
+   "parametros": {
+    "inicio": "left",
+    "E": 2.2,
+    "MH": 3,
+    "trazos_detectados": 0,
+    "cintas_validas": 0,
+    "cintas_incrustadas": 0,
+    "ids_cinta": []
+   }
+  },
+  {
+   "fuente": "TRAZOS/Líneas rojas sobre papel blanco.png",
+   "md5": "273a3106ba9c7dbacf9a67d4095f0739",
+   "px": [
+    1536,
+    1024
+   ],
+   "familia": "boli",
+   "uso": "INCRUSTADA SIN USO (el boli es procedural desde hace versiones)",
+   "estado": "incrustada sin uso",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 13 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "left",
+    "E": 2.2,
+    "MH": 3,
+    "trazos_detectados": 6,
+    "cintas_validas": 6,
+    "cintas_incrustadas": 2,
+    "ids_cinta": [
+     82,
+     86
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/Muestras abstractas de pincel seco en grises.png",
+   "md5": "fbf9018ebd9a09f86ce0bf279568f07e",
+   "px": [
+    1672,
+    941
+   ],
+   "familia": null,
+   "uso": "no usada",
+   "estado": "NO USADA (no está en SOURCES)",
+   "duplicada_con": null,
+   "formato_final": null,
+   "parametros": null
+  },
+  {
+   "fuente": "TRAZOS/Muestras de pinceladas azules en blanco.png",
+   "md5": "9f80ec4e19ffa2713ad247331ebb036f",
+   "px": [
+    1536,
+    1024
+   ],
+   "familia": "pincel",
+   "uso": "Pincel Gordo y Seco; relleno de negativos a pincel",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 39 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "left",
+    "E": 1.4,
+    "MH": 14,
+    "trazos_detectados": 4,
+    "cintas_validas": 4,
+    "cintas_incrustadas": 1,
+    "ids_cinta": [
+     68
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/OLEO/Gemini_Generated_Image_9d31iy9d31iy9d31.jpg",
+   "md5": "26c06c0b920161b7a6f75ac8bc51aec7",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "oleo",
+   "uso": "NO SE EXTRAE (CAP = 0)",
+   "estado": "en SOURCES pero la familia tiene tope 0: no se procesa",
+   "duplicada_con": null,
+   "formato_final": null,
+   "parametros": {
+    "inicio": "top",
+    "E": 1.4,
+    "MH": 16,
+    "trazos_detectados": null,
+    "cintas_validas": null,
+    "cintas_incrustadas": 0,
+    "ids_cinta": []
+   }
+  },
+  {
+   "fuente": "TRAZOS/OLEO/Gemini_Generated_Image_br79m9br79m9br79.jpg",
+   "md5": "fa7773c2e2908f4fe146ab0dffa43844",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "oleo",
+   "uso": "NO SE EXTRAE (CAP = 0)",
+   "estado": "en SOURCES pero la familia tiene tope 0: no se procesa",
+   "duplicada_con": null,
+   "formato_final": null,
+   "parametros": {
+    "inicio": "top",
+    "E": 1.4,
+    "MH": 16,
+    "trazos_detectados": null,
+    "cintas_validas": null,
+    "cintas_incrustadas": 0,
+    "ids_cinta": []
+   }
+  },
+  {
+   "fuente": "TRAZOS/OLEO/Gemini_Generated_Image_gscen4gscen4gsce.jpg",
+   "md5": "f0e4f581040ef0f237b0d8879d7c2e53",
+   "px": [
+    1536,
+    2752
+   ],
+   "familia": "oleo",
+   "uso": "NO SE EXTRAE (CAP = 0)",
+   "estado": "en SOURCES pero la familia tiene tope 0: no se procesa",
+   "duplicada_con": null,
+   "formato_final": null,
+   "parametros": {
+    "inicio": "top",
+    "E": 1.4,
+    "MH": 16,
+    "trazos_detectados": null,
+    "cintas_validas": null,
+    "cintas_incrustadas": 0,
+    "ids_cinta": []
+   }
+  },
+  {
+   "fuente": "TRAZOS/Ocho pinceladas azules sobre blanco.png",
+   "md5": "2b56822cc2af4b0551e9091d4cd41f2b",
+   "px": [
+    1536,
+    1024
+   ],
+   "familia": "pincel",
+   "uso": "Pincel Gordo y Seco; relleno de negativos a pincel",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 39 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "left",
+    "E": 1.4,
+    "MH": 14,
+    "trazos_detectados": 7,
+    "cintas_validas": 7,
+    "cintas_incrustadas": 1,
+    "ids_cinta": [
+     69
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/Pincelada gris sobre blanco.png",
+   "md5": "0e36d27811e2498679e00e8a3bb3a6f9",
+   "px": [
+    941,
+    1672
+   ],
+   "familia": "brocha",
+   "uso": "Pincel Seco; relleno de negativos a pincel",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 27 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.35,
+    "MH": 10,
+    "trazos_detectados": 1,
+    "cintas_validas": 1,
+    "cintas_incrustadas": 1,
+    "ids_cinta": [
+     70
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/Pincelada vertical gris sobre blanco.png",
+   "md5": "9af81d46749352e1f8119c5bc9358f0b",
+   "px": [
+    941,
+    1672
+   ],
+   "familia": "brocha",
+   "uso": "Pincel Seco; relleno de negativos a pincel",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 27 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "top",
+    "E": 1.35,
+    "MH": 10,
+    "trazos_detectados": 1,
+    "cintas_validas": 1,
+    "cintas_incrustadas": 1,
+    "ids_cinta": [
+     71
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/Pinceladas azules sobre blanco.png",
+   "md5": "0636e9a1be6f0583886c3571a0ea61af",
+   "px": [
+    1536,
+    1024
+   ],
+   "familia": "pincel",
+   "uso": "Pincel Gordo y Seco; relleno de negativos a pincel",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 39 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "left",
+    "E": 1.4,
+    "MH": 14,
+    "trazos_detectados": 6,
+    "cintas_validas": 6,
+    "cintas_incrustadas": 1,
+    "ids_cinta": [
+     66
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/Pinceladas rojas sobre blanco.png",
+   "md5": "aca488fbc8295f59772ed252ea43b671",
+   "px": [
+    1536,
+    1024
+   ],
+   "familia": "pincel",
+   "uso": "Pincel Gordo y Seco; relleno de negativos a pincel",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 39 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "left",
+    "E": 1.4,
+    "MH": 14,
+    "trazos_detectados": 4,
+    "cintas_validas": 4,
+    "cintas_incrustadas": 1,
+    "ids_cinta": [
+     65
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/Pruebas abstractas de rotulador seco (1).png",
+   "md5": "775202a00bc42c360c57992507165aa6",
+   "px": [
+    1672,
+    941
+   ],
+   "familia": null,
+   "uso": "no usada",
+   "estado": "NO USADA (no está en SOURCES)",
+   "duplicada_con": [
+    "TRAZOS/Pruebas abstractas de rotulador seco.png"
+   ],
+   "formato_final": null,
+   "parametros": null
+  },
+  {
+   "fuente": "TRAZOS/Pruebas abstractas de rotulador seco.png",
+   "md5": "775202a00bc42c360c57992507165aa6",
+   "px": [
+    1672,
+    941
+   ],
+   "familia": null,
+   "uso": "no usada",
+   "estado": "NO USADA (no está en SOURCES)",
+   "duplicada_con": [
+    "TRAZOS/Pruebas abstractas de rotulador seco (1).png"
+   ],
+   "formato_final": null,
+   "parametros": null
+  },
+  {
+   "fuente": "TRAZOS/Trazo serpenteante de carbón.png",
+   "md5": "c3fe876be3dc01ae739045ae74704df7",
+   "px": [
+    1672,
+    941
+   ],
+   "familia": null,
+   "uso": "no usada",
+   "estado": "NO USADA (no está en SOURCES)",
+   "duplicada_con": null,
+   "formato_final": null,
+   "parametros": null
+  },
+  {
+   "fuente": "TRAZOS/Trazos azules sobre fondo blanco (1).png",
+   "md5": "24e379b7698a72229e7fc58b276b3c58",
+   "px": [
+    1536,
+    1024
+   ],
+   "familia": "pincelfino",
+   "uso": "Pincel Fino",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 34 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "left",
+    "E": 1.4,
+    "MH": 12,
+    "trazos_detectados": 5,
+    "cintas_validas": 5,
+    "cintas_incrustadas": 5,
+    "ids_cinta": [
+     72,
+     73,
+     74,
+     75,
+     76
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/Trazos azules sobre fondo blanco.png",
+   "md5": "6b53b3ad9f34be43bd013cb4f2c5aba3",
+   "px": [
+    1536,
+    1024
+   ],
+   "familia": "pincel",
+   "uso": "Pincel Gordo y Seco; relleno de negativos a pincel",
+   "estado": "USADA",
+   "duplicada_con": null,
+   "formato_final": "cinta gris 8 bits 39 col × ≤520 filas, base64 en js/texdata.js",
+   "parametros": {
+    "inicio": "left",
+    "E": 1.4,
+    "MH": 14,
+    "trazos_detectados": 4,
+    "cintas_validas": 4,
+    "cintas_incrustadas": 1,
+    "ids_cinta": [
+     67
+    ]
+   }
+  },
+  {
+   "fuente": "TRAZOS/Tres líneas negras sobre fondo blanco.png",
+   "md5": "e0bd2d6160ceb11ef79a8c8eb480e313",
+   "px": [
+    1536,
+    1024
+   ],
+   "familia": "rotu",
+   "uso": "INCRUSTADA SIN USO (el rotulador es procedural)",
+   "estado": "procesada, ninguna cinta entra en el tope",
+   "duplicada_con": null,
+   "formato_final": null,
+   "parametros": {
+    "inicio": "left",
+    "E": 1.6,
+    "MH": 7,
+    "trazos_detectados": 3,
+    "cintas_validas": 3,
+    "cintas_incrustadas": 0,
+    "ids_cinta": []
+   }
+  },
+  {
+   "fuente": "TRAZOS/Tres trazos azules texturizados.png",
+   "md5": "618c499ea623d529c21ef45e511d478e",
+   "px": [
+    1536,
+    1024
+   ],
+   "familia": "gastado",
+   "uso": "NO SE EXTRAE (CAP = 0)",
+   "estado": "en SOURCES pero la familia tiene tope 0: no se procesa",
+   "duplicada_con": null,
+   "formato_final": null,
+   "parametros": {
+    "inicio": "left",
+    "E": 1.45,
+    "MH": 10,
+    "trazos_detectados": null,
+    "cintas_validas": null,
+    "cintas_incrustadas": 0,
+    "ids_cinta": []
+   }
+  },
+  {
+   "fuente": "referencias/texturas/pared_piel_4.jpg",
+   "md5": "831b99f6a72ed4b20a52af4e2c100d15",
+   "px": [
+    1254,
+    1254
+   ],
+   "familia": "grumo",
+   "uso": "sellos de sombreado de grumos de pintura (solo Graffiti con «Textura de la pintura» > 0)",
+   "estado": "USADA",
+   "formato_final": "sellos cuadrados 20/36/56 px, 1 byte/px con signo desplazado (128 = neutro), base64 en js/grumosdata.js",
+   "parametros": {
+    "plan": "S R=7 ×4, S R=20 ×3 (sin exigir bulto)",
+    "sellos": 7,
+    "por_clase": {
+     "S": 7
+    }
+   }
+  },
+  {
+   "fuente": "referencias/texturas/pintura_granos_2.jpg",
+   "md5": "b69ffc8930e616f15913986c9876474b",
+   "px": [
+    1254,
+    1254
+   ],
+   "familia": "grumo",
+   "uso": "sellos de sombreado de grumos de pintura (solo Graffiti con «Textura de la pintura» > 0)",
+   "estado": "USADA",
+   "formato_final": "sellos cuadrados 20/36/56 px, 1 byte/px con signo desplazado (128 = neutro), base64 en js/grumosdata.js",
+   "parametros": {
+    "plan": "S R=8 ×7, S R=12 ×6, M R=20 ×2 (0 válidos)",
+    "sellos": 13,
+    "por_clase": {
+     "S": 13
+    }
+   }
+  },
+  {
+   "fuente": "referencias/texturas/pintura_grumos_1.jpg",
+   "md5": "661b783872e168d3f343baaaa39ff703",
+   "px": [
+    2048,
+    2048
+   ],
+   "familia": "grumo",
+   "uso": "sellos de sombreado de grumos de pintura (solo Graffiti con «Textura de la pintura» > 0)",
+   "estado": "USADA",
+   "formato_final": "sellos cuadrados 20/36/56 px, 1 byte/px con signo desplazado (128 = neutro), base64 en js/grumosdata.js",
+   "parametros": {
+    "plan": "S R=11 ×4, M R=22 ×5, M R=32 ×5, L R=48 ×4, L R=68 ×4 (3 válidos)",
+    "sellos": 21,
+    "por_clase": {
+     "S": 4,
+     "M": 10,
+     "L": 7
+    }
+   }
+  },
+  {
+   "fuente": "referencias/texturas/pintura_grumos_3.jpg",
+   "md5": "93a7dba2d4bd0222f7d4055601acafe9",
+   "px": [
+    2048,
+    2048
+   ],
+   "familia": "grumo",
+   "uso": "sellos de sombreado de grumos de pintura (solo Graffiti con «Textura de la pintura» > 0)",
+   "estado": "USADA",
+   "formato_final": "sellos cuadrados 20/36/56 px, 1 byte/px con signo desplazado (128 = neutro), base64 en js/grumosdata.js",
+   "parametros": {
+    "plan": "M R=22 ×4, M R=32 ×4, L R=52 ×3 (1 válido), L R=76 ×3 (0 válidos)",
+    "sellos": 9,
+    "por_clase": {
+     "M": 8,
+     "L": 1
+    }
+   }
+  },
+  {
+   "fuente": null,
+   "md5": null,
+   "familia": "papel",
+   "uso": "grano de papel (lápiz, carbón, cera; moteado de rotulador y boli)",
+   "estado": "PROCEDURAL (ruido filtrado, semilla 11)",
+   "formato_final": "baldosa repetible 256×256, 1 byte/px, base64 en js/texdata.js (campo paper), md5 de los bytes 7592b4f48935c0923aff8118ada37f15",
+   "parametros": {
+    "funcion": "tools/extract_textures.py → paper_tile()",
+    "banda_px": "4–14",
+    "escala": "1 téxel = 1 px de documento"
+   }
+  }
+ ],
+ "cintas": [
+  {
+   "i": 0,
+   "f": "aguada",
+   "w": 46,
+   "h": 368,
+   "mh": 15.0,
+   "ar": 1.0,
+   "src": "AGUADAS/Gemini_Generated_Image_6lti5j6lti5j6lti.jpg",
+   "src_mh": 91.66,
+   "md5": "195de6a5b5207fa8041891789540f796",
+   "mean": 0.359
+  },
+  {
+   "i": 1,
+   "f": "aguada",
+   "w": 46,
+   "h": 184,
+   "mh": 15.0,
+   "ar": 1.0,
+   "src": "AGUADAS/Gemini_Generated_Image_6p6u0m6p6u0m6p6u.jpg",
+   "src_mh": 116.0,
+   "md5": "ea9d7fc32448fc61523193f37f893e88",
+   "mean": 0.308
+  },
+  {
+   "i": 2,
+   "f": "aguada",
+   "w": 46,
+   "h": 387,
+   "mh": 15.0,
+   "ar": 1.0,
+   "src": "AGUADAS/Gemini_Generated_Image_bygjtubygjtubygj.jpg",
+   "src_mh": 88.99,
+   "md5": "6a84b61fd84ff271ec65fd72823286b1",
+   "mean": 0.37
+  },
+  {
+   "i": 3,
+   "f": "aguada",
+   "w": 46,
+   "h": 294,
+   "mh": 15.0,
+   "ar": 1.0,
+   "src": "AGUADAS/Gemini_Generated_Image_hbkpvbhbkpvbhbkp.jpg",
+   "src_mh": 112.01,
+   "md5": "df0a6bb96dd0cf02e4cd251018a157c8",
+   "mean": 0.33
+  },
+  {
+   "i": 4,
+   "f": "aguada",
+   "w": 46,
+   "h": 270,
+   "mh": 15.0,
+   "ar": 1.0,
+   "src": "AGUADAS/Gemini_Generated_Image_nft1n4nft1n4nft1.jpg",
+   "src_mh": 130.98,
+   "md5": "2389e130e941aa9c52410f6534276fed",
+   "mean": 0.555
+  },
+  {
+   "i": 5,
+   "f": "aguada",
+   "w": 46,
+   "h": 288,
+   "mh": 15.0,
+   "ar": 1.0,
+   "src": "AGUADAS/Gemini_Generated_Image_umv2e3umv2e3umv2.jpg",
+   "src_mh": 119.15,
+   "md5": "713af0dfeecd7bc05c564641e9286fd0",
+   "mean": 0.449
+  },
+  {
+   "i": 6,
+   "f": "aguada",
+   "w": 46,
+   "h": 234,
+   "mh": 15.0,
+   "ar": 1.0,
+   "src": "AGUADAS/Gemini_Generated_Image_z82hx1z82hx1z82h.jpg",
+   "src_mh": 110.51,
+   "md5": "a6a8a6041e9d64ee704fa2aaf3aeb83f",
+   "mean": 0.355
+  },
+  {
+   "i": 7,
+   "f": "aguada",
+   "w": 46,
+   "h": 339,
+   "mh": 15.0,
+   "ar": 1.0,
+   "src": "AGUADAS/Gemini_Generated_Image_6lti5j6lti5j6lti.jpg",
+   "src_mh": 89.59,
+   "md5": "ee92b198460b216b749a25f044adacef",
+   "mean": 0.423
+  },
+  {
+   "i": 8,
+   "f": "aguada",
+   "w": 46,
+   "h": 199,
+   "mh": 15.0,
+   "ar": 1.0,
+   "src": "AGUADAS/Gemini_Generated_Image_6p6u0m6p6u0m6p6u.jpg",
+   "src_mh": 115.5,
+   "md5": "a30daedbed3012235b62a1d79d9149e4",
+   "mean": 0.379
+  },
+  {
+   "i": 9,
+   "f": "aguada",
+   "w": 46,
+   "h": 408,
+   "mh": 15.0,
+   "ar": 1.0,
+   "src": "AGUADAS/Gemini_Generated_Image_bygjtubygjtubygj.jpg",
+   "src_mh": 72.0,
+   "md5": "5346db5fb734875758a7bb170a46552f",
+   "mean": 0.433
+  },
+  {
+   "i": 10,
+   "f": "aguada",
+   "w": 46,
+   "h": 307,
+   "mh": 15.0,
+   "ar": 1.0,
+   "src": "AGUADAS/Gemini_Generated_Image_hbkpvbhbkpvbhbkp.jpg",
+   "src_mh": 108.0,
+   "md5": "7050dc8ecd44779c74736041c5055fbe",
+   "mean": 0.534
+  },
+  {
+   "i": 11,
+   "f": "aguada",
+   "w": 46,
+   "h": 320,
+   "mh": 15.0,
+   "ar": 1.0,
+   "src": "AGUADAS/Gemini_Generated_Image_nft1n4nft1n4nft1.jpg",
+   "src_mh": 103.03,
+   "md5": "9c200b6e7adf55a07f8b93ef0560290b",
+   "mean": 0.3
+  },
+  {
+   "i": 12,
+   "f": "cera",
+   "w": 58,
+   "h": 321,
+   "mh": 20.0,
+   "ar": 1.0,
+   "src": "CERAS/Gemini_Generated_Image_2an7ri2an7ri2an7.jpg",
+   "src_mh": 135.0,
+   "md5": "5b534ee259cb13bd970e7f2058da9d19",
+   "mean": 0.588
+  },
+  {
+   "i": 13,
+   "f": "cera",
+   "w": 58,
+   "h": 437,
+   "mh": 20.0,
+   "ar": 1.0,
+   "src": "CERAS/Gemini_Generated_Image_56fr4h56fr4h56fr.jpg",
+   "src_mh": 70.53,
+   "md5": "0abd244a9473aab16f3540b9393fb7b0",
+   "mean": 0.494
+  },
+  {
+   "i": 14,
+   "f": "cera",
+   "w": 58,
+   "h": 518,
+   "mh": 20.0,
+   "ar": 1.0981,
+   "src": "CERAS/Gemini_Generated_Image_uh9z0xuh9z0xuh9z (1).jpg",
+   "src_mh": 81.0,
+   "md5": "43c95d416726cf4a33228e4916e0f768",
+   "mean": 0.599
+  },
+  {
+   "i": 15,
+   "f": "cera",
+   "w": 58,
+   "h": 518,
+   "mh": 20.0,
+   "ar": 1.0981,
+   "src": "CERAS/Gemini_Generated_Image_uh9z0xuh9z0xuh9z.jpg",
+   "src_mh": 81.0,
+   "md5": "43c95d416726cf4a33228e4916e0f768",
+   "mean": 0.599
+  },
+  {
+   "i": 16,
+   "f": "cera",
+   "w": 58,
+   "h": 448,
+   "mh": 20.0,
+   "ar": 1.0,
+   "src": "CERAS/Gemini_Generated_Image_y7qljdy7qljdy7ql.jpg",
+   "src_mh": 107.5,
+   "md5": "f92985770782ee4cb437332f2eedbab5",
+   "mean": 0.617
+  },
+  {
+   "i": 17,
+   "f": "cera",
+   "w": 58,
+   "h": 316,
+   "mh": 20.0,
+   "ar": 1.0,
+   "src": "CERAS/Gemini_Generated_Image_2an7ri2an7ri2an7.jpg",
+   "src_mh": 141.02,
+   "md5": "00e5d19d72f1558dfe9509cd294a3553",
+   "mean": 0.639
+  },
+  {
+   "i": 18,
+   "f": "cera",
+   "w": 58,
+   "h": 394,
+   "mh": 20.0,
+   "ar": 1.0,
+   "src": "CERAS/Gemini_Generated_Image_56fr4h56fr4h56fr.jpg",
+   "src_mh": 73.45,
+   "md5": "58a34dfad5fdefda5a528009c8f68729",
+   "mean": 0.484
+  },
+  {
+   "i": 19,
+   "f": "cera",
+   "w": 58,
+   "h": 520,
+   "mh": 20.0,
+   "ar": 1.1038,
+   "src": "CERAS/Gemini_Generated_Image_uh9z0xuh9z0xuh9z (1).jpg",
+   "src_mh": 79.99,
+   "md5": "0b711291580589fce4450e7aec54286f",
+   "mean": 0.554
+  },
+  {
+   "i": 20,
+   "f": "cera",
+   "w": 58,
+   "h": 520,
+   "mh": 20.0,
+   "ar": 1.1038,
+   "src": "CERAS/Gemini_Generated_Image_uh9z0xuh9z0xuh9z.jpg",
+   "src_mh": 79.99,
+   "md5": "0b711291580589fce4450e7aec54286f",
+   "mean": 0.554
+  },
+  {
+   "i": 21,
+   "f": "cera",
+   "w": 58,
+   "h": 494,
+   "mh": 20.0,
+   "ar": 1.0,
+   "src": "CERAS/Gemini_Generated_Image_y7qljdy7qljdy7ql.jpg",
+   "src_mh": 96.99,
+   "md5": "a366e1db847c0c9d0ae2709c33c9835f",
+   "mean": 0.606
+  },
+  {
+   "i": 22,
+   "f": "cera",
+   "w": 58,
+   "h": 304,
+   "mh": 20.0,
+   "ar": 1.0,
+   "src": "CERAS/Gemini_Generated_Image_2an7ri2an7ri2an7.jpg",
+   "src_mh": 128.38,
+   "md5": "ce96dd380237a17b776c7ac747da0961",
+   "mean": 0.618
+  },
+  {
+   "i": 23,
+   "f": "cera",
+   "w": 58,
+   "h": 365,
+   "mh": 20.0,
+   "ar": 1.0,
+   "src": "CERAS/Gemini_Generated_Image_56fr4h56fr4h56fr.jpg",
+   "src_mh": 74.31,
+   "md5": "377e635f96cbbba7f6ee11390ea94344",
+   "mean": 0.509
+  },
+  {
+   "i": 24,
+   "f": "guache",
+   "w": 39,
+   "h": 240,
+   "mh": 14.0,
+   "ar": 1.0,
+   "src": "GUACHE/Gemini_Generated_Image_6l56yc6l56yc6l56.jpg",
+   "src_mh": 126.5,
+   "md5": "389dc991b9c1235d355a1ff67e39733b",
+   "mean": 0.504
+  },
+  {
+   "i": 25,
+   "f": "guache",
+   "w": 39,
+   "h": 241,
+   "mh": 14.0,
+   "ar": 1.0,
+   "src": "GUACHE/Gemini_Generated_Image_8ypgc28ypgc28ypg.jpg",
+   "src_mh": 108.98,
+   "md5": "4a5207875e7030428b33e3e648cc1a4a",
+   "mean": 0.451
+  },
+  {
+   "i": 26,
+   "f": "guache",
+   "w": 39,
+   "h": 241,
+   "mh": 14.0,
+   "ar": 1.0,
+   "src": "GUACHE/Gemini_Generated_Image_gz01rcgz01rcgz01.jpg",
+   "src_mh": 113.97,
+   "md5": "b785cb54db80d0ef9bc3fc2cf5c20405",
+   "mean": 0.582
+  },
+  {
+   "i": 27,
+   "f": "guache",
+   "w": 39,
+   "h": 249,
+   "mh": 14.0,
+   "ar": 1.0,
+   "src": "GUACHE/Gemini_Generated_Image_jfrkuyjfrkuyjfrk.jpg",
+   "src_mh": 110.46,
+   "md5": "b3cc150b1f1b405e0d2695608ca0aedf",
+   "mean": 0.555
+  },
+  {
+   "i": 28,
+   "f": "guache",
+   "w": 39,
+   "h": 231,
+   "mh": 14.0,
+   "ar": 1.0,
+   "src": "GUACHE/Gemini_Generated_Image_ksbdqzksbdqzksbd.jpg",
+   "src_mh": 121.55,
+   "md5": "65f5367eec5fd1703a5add938d3b3ff3",
+   "mean": 0.585
+  },
+  {
+   "i": 29,
+   "f": "guache",
+   "w": 39,
+   "h": 287,
+   "mh": 14.0,
+   "ar": 1.0,
+   "src": "GUACHE/Gemini_Generated_Image_omhgriomhgriomhg.jpg",
+   "src_mh": 112.43,
+   "md5": "f867b4351560ee22ca3d776a8eb1e872",
+   "mean": 0.57
+  },
+  {
+   "i": 30,
+   "f": "guache",
+   "w": 39,
+   "h": 218,
+   "mh": 14.0,
+   "ar": 1.0,
+   "src": "GUACHE/Gemini_Generated_Image_scmr90scmr90scmr.jpg",
+   "src_mh": 103.0,
+   "md5": "d65f35f4fb524463992380816fc2a0a4",
+   "mean": 0.475
+  },
+  {
+   "i": 31,
+   "f": "guache",
+   "w": 39,
+   "h": 271,
+   "mh": 14.0,
+   "ar": 1.0,
+   "src": "GUACHE/Gemini_Generated_Image_t7kg8st7kg8st7kg (1).jpg",
+   "src_mh": 110.95,
+   "md5": "d9cdfc5668252e2d712f85d79d9a5674",
+   "mean": 0.437
+  },
+  {
+   "i": 32,
+   "f": "guache",
+   "w": 39,
+   "h": 271,
+   "mh": 14.0,
+   "ar": 1.0,
+   "src": "GUACHE/Gemini_Generated_Image_t7kg8st7kg8st7kg.jpg",
+   "src_mh": 110.95,
+   "md5": "d9cdfc5668252e2d712f85d79d9a5674",
+   "mean": 0.437
+  },
+  {
+   "i": 33,
+   "f": "guache",
+   "w": 39,
+   "h": 240,
+   "mh": 14.0,
+   "ar": 1.0,
+   "src": "GUACHE/Gemini_Generated_Image_6l56yc6l56yc6l56.jpg",
+   "src_mh": 124.03,
+   "md5": "9bab311cea98ae8214363bad9688d686",
+   "mean": 0.575
+  },
+  {
+   "i": 34,
+   "f": "guache",
+   "w": 39,
+   "h": 267,
+   "mh": 14.0,
+   "ar": 1.0,
+   "src": "GUACHE/Gemini_Generated_Image_8ypgc28ypgc28ypg.jpg",
+   "src_mh": 107.53,
+   "md5": "09d6dc8cd54004b86c3e9e8d4b1dd3ad",
+   "mean": 0.445
+  },
+  {
+   "i": 35,
+   "f": "guache",
+   "w": 39,
+   "h": 257,
+   "mh": 14.0,
+   "ar": 1.0,
+   "src": "GUACHE/Gemini_Generated_Image_gz01rcgz01rcgz01.jpg",
+   "src_mh": 116.0,
+   "md5": "f18aa19d6296fca9dc0cefe062f0ac85",
+   "mean": 0.552
+  },
+  {
+   "i": 36,
+   "f": "lapiz",
+   "w": 30,
+   "h": 268,
+   "mh": 10.0,
+   "ar": 1.0,
+   "src": "LAPIZ/Gemini_Generated_Image_dgy3xxdgy3xxdgy3.jpg",
+   "src_mh": 74.49,
+   "md5": "f966f3c7521f5d7c4c7d8f1daf56ac59",
+   "mean": 0.458
+  },
+  {
+   "i": 37,
+   "f": "lapiz",
+   "w": 30,
+   "h": 233,
+   "mh": 10.0,
+   "ar": 1.0,
+   "src": "LAPIZ/Gemini_Generated_Image_fd6so0fd6so0fd6s.jpg",
+   "src_mh": 95.51,
+   "md5": "294280fbd4e95455d3733369cc3665e4",
+   "mean": 0.509
+  },
+  {
+   "i": 38,
+   "f": "lapiz",
+   "w": 30,
+   "h": 315,
+   "mh": 10.0,
+   "ar": 1.0,
+   "src": "LAPIZ/Gemini_Generated_Image_so6zmwso6zmwso6z.jpg",
+   "src_mh": 68.53,
+   "md5": "f0d0b71637044721c851503fad66d001",
+   "mean": 0.35
+  },
+  {
+   "i": 39,
+   "f": "lapiz",
+   "w": 30,
+   "h": 330,
+   "mh": 10.0,
+   "ar": 1.0,
+   "src": "LAPIZ/Gemini_Generated_Image_u2c2txu2c2txu2c2.jpg",
+   "src_mh": 70.48,
+   "md5": "69fe141ea57862efb8ab691634e20d70",
+   "mean": 0.293
+  },
+  {
+   "i": 40,
+   "f": "lapiz",
+   "w": 30,
+   "h": 335,
+   "mh": 10.0,
+   "ar": 1.0,
+   "src": "LAPIZ/Gemini_Generated_Image_dgy3xxdgy3xxdgy3.jpg",
+   "src_mh": 55.48,
+   "md5": "fdba18c5da33177977ee67802270f110",
+   "mean": 0.308
+  },
+  {
+   "i": 41,
+   "f": "lapiz",
+   "w": 30,
+   "h": 296,
+   "mh": 10.0,
+   "ar": 1.0,
+   "src": "LAPIZ/Gemini_Generated_Image_fd6so0fd6so0fd6s.jpg",
+   "src_mh": 70.5,
+   "md5": "727e6e151125ccb1250c2ea83deded01",
+   "mean": 0.292
+  },
+  {
+   "i": 42,
+   "f": "lapiz",
+   "w": 30,
+   "h": 293,
+   "mh": 10.0,
+   "ar": 1.0,
+   "src": "LAPIZ/Gemini_Generated_Image_so6zmwso6zmwso6z.jpg",
+   "src_mh": 73.47,
+   "md5": "466992af20944b91c289f241c7d3105b",
+   "mean": 0.419
+  },
+  {
+   "i": 43,
+   "f": "lapiz",
+   "w": 30,
+   "h": 281,
+   "mh": 10.0,
+   "ar": 1.0,
+   "src": "LAPIZ/Gemini_Generated_Image_u2c2txu2c2txu2c2.jpg",
+   "src_mh": 83.01,
+   "md5": "e3c4fdc8fe9da4b83aaacc242df5bf30",
+   "mean": 0.493
+  },
+  {
+   "i": 44,
+   "f": "lapiz",
+   "w": 30,
+   "h": 510,
+   "mh": 10.0,
+   "ar": 1.075,
+   "src": "LAPIZ/Gemini_Generated_Image_dgy3xxdgy3xxdgy3.jpg",
+   "src_mh": 32.99,
+   "md5": "5b2d74fddc355f98e823b9bde025a60a",
+   "mean": 0.295
+  },
+  {
+   "i": 45,
+   "f": "lapiz",
+   "w": 30,
+   "h": 326,
+   "mh": 10.0,
+   "ar": 1.0,
+   "src": "LAPIZ/Gemini_Generated_Image_so6zmwso6zmwso6z.jpg",
+   "src_mh": 63.42,
+   "md5": "c6e1cbe3729ff5d85b60a7ed13d13376",
+   "mean": 0.393
+  },
+  {
+   "i": 46,
+   "f": "carbon",
+   "w": 42,
+   "h": 165,
+   "mh": 11.0,
+   "ar": 1.0,
+   "src": "LAPIZ/Gemini_Generated_Image_4vfeh34vfeh34vfe.jpg",
+   "src_mh": 128.01,
+   "md5": "341198ec96698e41588e0ab49f52531d",
+   "mean": 0.349
+  },
+  {
+   "i": 47,
+   "f": "carbon",
+   "w": 42,
+   "h": 177,
+   "mh": 11.0,
+   "ar": 1.0,
+   "src": "LAPIZ/Gemini_Generated_Image_i1m1v9i1m1v9i1m1.jpg",
+   "src_mh": 119.05,
+   "md5": "82c32773b3eb0d9f09d1db9d8cbc3c26",
+   "mean": 0.375
+  },
+  {
+   "i": 48,
+   "f": "carbon",
+   "w": 42,
+   "h": 215,
+   "mh": 11.0,
+   "ar": 1.0,
+   "src": "LAPIZ/Gemini_Generated_Image_uvge2nuvge2nuvge.jpg",
+   "src_mh": 100.4,
+   "md5": "b6fe8d5da97e9bc03b196756162d3375",
+   "mean": 0.34
+  },
+  {
+   "i": 49,
+   "f": "carbon",
+   "w": 42,
+   "h": 197,
+   "mh": 11.0,
+   "ar": 1.0,
+   "src": "Gemini_Generated_Image_4k0x3g4k0x3g4k0x.jpg",
+   "src_mh": 56.97,
+   "md5": "2b9d2af3cbc5bfb5e08b9a7730869a33",
+   "mean": 0.379
+  },
+  {
+   "i": 50,
+   "f": "carbon",
+   "w": 42,
+   "h": 180,
+   "mh": 11.0,
+   "ar": 1.0,
+   "src": "LAPIZ/Gemini_Generated_Image_4vfeh34vfeh34vfe.jpg",
+   "src_mh": 99.3,
+   "md5": "ccf5e4063d1ac0806431bb6c889734cd",
+   "mean": 0.319
+  },
+  {
+   "i": 51,
+   "f": "carbon",
+   "w": 42,
+   "h": 338,
+   "mh": 11.0,
+   "ar": 1.0,
+   "src": "LAPIZ/Gemini_Generated_Image_i1m1v9i1m1v9i1m1.jpg",
+   "src_mh": 66.05,
+   "md5": "30a916a79edcfe973cd882ed00520230",
+   "mean": 0.324
+  },
+  {
+   "i": 52,
+   "f": "carbon",
+   "w": 42,
+   "h": 163,
+   "mh": 11.0,
+   "ar": 1.0,
+   "src": "LAPIZ/Gemini_Generated_Image_uvge2nuvge2nuvge.jpg",
+   "src_mh": 99.43,
+   "md5": "0fa1e5e2c3c7abee63cfb3c56f89f742",
+   "mean": 0.319
+  },
+  {
+   "i": 53,
+   "f": "carbon",
+   "w": 42,
+   "h": 166,
+   "mh": 11.0,
+   "ar": 1.0,
+   "src": "Gemini_Generated_Image_4k0x3g4k0x3g4k0x.jpg",
+   "src_mh": 66.82,
+   "md5": "3ff4e9ec54886186f48a63774e7aa5e3",
+   "mean": 0.325
+  },
+  {
+   "i": 54,
+   "f": "carbon",
+   "w": 42,
+   "h": 239,
+   "mh": 11.0,
+   "ar": 1.0,
+   "src": "LAPIZ/Gemini_Generated_Image_4vfeh34vfeh34vfe.jpg",
+   "src_mh": 91.02,
+   "md5": "8030efc68aa14fa541655fe6536fed6d",
+   "mean": 0.344
+  },
+  {
+   "i": 55,
+   "f": "carbon",
+   "w": 42,
+   "h": 198,
+   "mh": 11.0,
+   "ar": 1.0,
+   "src": "LAPIZ/Gemini_Generated_Image_i1m1v9i1m1v9i1m1.jpg",
+   "src_mh": 101.12,
+   "md5": "0833a8cbef37f7f7fdcc550c5ea734cb",
+   "mean": 0.309
+  },
+  {
+   "i": 56,
+   "f": "pincel",
+   "w": 39,
+   "h": 199,
+   "mh": 14.0,
+   "ar": 1.0,
+   "src": "Gemini_Generated_Image_1m2vhi1m2vhi1m2v.jpg",
+   "src_mh": 161.01,
+   "md5": "f6b405a0fcc1c5326dde3c7d597f26e5",
+   "mean": 0.657
+  },
+  {
+   "i": 57,
+   "f": "pincel",
+   "w": 39,
+   "h": 229,
+   "mh": 14.0,
+   "ar": 1.0,
+   "src": "Gemini_Generated_Image_dd9o77dd9o77dd9o.jpg",
+   "src_mh": 147.98,
+   "md5": "7458caa77b3d15d4890fe417eb480bb0",
+   "mean": 0.67
+  },
+  {
+   "i": 58,
+   "f": "pincel",
+   "w": 39,
+   "h": 177,
+   "mh": 14.0,
+   "ar": 1.0,
+   "src": "Gemini_Generated_Image_gtyi67gtyi67gtyi.jpg",
+   "src_mh": 159.13,
+   "md5": "38091beb93d9ffe4ba1b9a4193e7e9ed",
+   "mean": 0.639
+  },
+  {
+   "i": 59,
+   "f": "pincel",
+   "w": 39,
+   "h": 178,
+   "mh": 14.0,
+   "ar": 1.0,
+   "src": "Gemini_Generated_Image_i9od48i9od48i9od.jpg",
+   "src_mh": 163.01,
+   "md5": "54ce384be0a91273a77f2c90daefc22c",
+   "mean": 0.646
+  },
+  {
+   "i": 60,
+   "f": "pincel",
+   "w": 39,
+   "h": 192,
+   "mh": 14.0,
+   "ar": 1.0,
+   "src": "Gemini_Generated_Image_ogccn5ogccn5ogcc.jpg",
+   "src_mh": 159.03,
+   "md5": "ba21f5b11547be38902f0bd5959f2296",
+   "mean": 0.658
+  },
+  {
+   "i": 61,
+   "f": "pincel",
+   "w": 39,
+   "h": 212,
+   "mh": 14.0,
+   "ar": 1.0,
+   "src": "Gemini_Generated_Image_uoqx5fuoqx5fuoqx.jpg",
+   "src_mh": 148.49,
+   "md5": "8d2e136b44015b2b8c08c0fa7e9d2f40",
+   "mean": 0.662
+  },
+  {
+   "i": 62,
+   "f": "pincel",
+   "w": 39,
+   "h": 197,
+   "mh": 14.0,
+   "ar": 1.0,
+   "src": "Gemini_Generated_Image_xw72ktxw72ktxw72.jpg",
+   "src_mh": 171.51,
+   "md5": "887a2d1515a582fd0792dd5cc06dc68b",
+   "mean": 0.616
+  },
+  {
+   "i": 63,
+   "f": "pincel",
+   "w": 39,
+   "h": 369,
+   "mh": 14.0,
+   "ar": 1.0,
+   "src": "Cuatro pinceladas rojas sobre blanco.png",
+   "src_mh": 41.5,
+   "md5": "652c14c0421a027b6ef2e4c058528527",
+   "mean": 0.652
+  },
+  {
+   "i": 64,
+   "f": "pincel",
+   "w": 39,
+   "h": 249,
+   "mh": 14.0,
+   "ar": 1.0,
+   "src": "Franjas de pintura roja sobre blanco.png",
+   "src_mh": 73.14,
+   "md5": "35fb9b66e134c18a52fc1b1e8339e477",
+   "mean": 0.688
+  },
+  {
+   "i": 65,
+   "f": "pincel",
+   "w": 39,
+   "h": 421,
+   "mh": 14.0,
+   "ar": 1.0,
+   "src": "Pinceladas rojas sobre blanco.png",
+   "src_mh": 39.45,
+   "md5": "a3372bc0c1e5c2d63b8e82e30ce285ec",
+   "mean": 0.742
+  },
+  {
+   "i": 66,
+   "f": "pincel",
+   "w": 39,
+   "h": 409,
+   "mh": 14.0,
+   "ar": 1.0,
+   "src": "Pinceladas azules sobre blanco.png",
+   "src_mh": 49.48,
+   "md5": "c74b44e2b9562482ca3680970361a110",
+   "mean": 0.726
+  },
+  {
+   "i": 67,
+   "f": "pincel",
+   "w": 39,
+   "h": 256,
+   "mh": 14.0,
+   "ar": 1.0,
+   "src": "Trazos azules sobre fondo blanco.png",
+   "src_mh": 69.5,
+   "md5": "80caa77e183070d7d394b29a73b4ea35",
+   "mean": 0.717
+  },
+  {
+   "i": 68,
+   "f": "pincel",
+   "w": 39,
+   "h": 498,
+   "mh": 14.0,
+   "ar": 1.0,
+   "src": "Muestras de pinceladas azules en blanco.png",
+   "src_mh": 38.5,
+   "md5": "9d166b13b4dbab1dab8429b02bef6e86",
+   "mean": 0.747
+  },
+  {
+   "i": 69,
+   "f": "pincel",
+   "w": 39,
+   "h": 520,
+   "mh": 14.0,
+   "ar": 1.3654,
+   "src": "Ocho pinceladas azules sobre blanco.png",
+   "src_mh": 26.35,
+   "md5": "ecb8e57c9223d15dd3c180d3ec9c6740",
+   "mean": 0.765
+  },
+  {
+   "i": 70,
+   "f": "brocha",
+   "w": 27,
+   "h": 135,
+   "mh": 10.0,
+   "ar": 1.0,
+   "src": "Pincelada gris sobre blanco.png",
+   "src_mh": 120.49,
+   "md5": "c706d3446b930d6c7d35d60aae795d2f",
+   "mean": 0.638
+  },
+  {
+   "i": 71,
+   "f": "brocha",
+   "w": 27,
+   "h": 118,
+   "mh": 10.0,
+   "ar": 1.0,
+   "src": "Pincelada vertical gris sobre blanco.png",
+   "src_mh": 138.54,
+   "md5": "5526f67d199f2a3aa829e1619d67dcca",
+   "mean": 0.602
+  },
+  {
+   "i": 72,
+   "f": "pincelfino",
+   "w": 34,
+   "h": 480,
+   "mh": 12.0,
+   "ar": 1.0,
+   "src": "Trazos azules sobre fondo blanco (1).png",
+   "src_mh": 30.0,
+   "md5": "1bd547ade544c89a459b94d68167954b",
+   "mean": 0.744
+  },
+  {
+   "i": 73,
+   "f": "pincelfino",
+   "w": 34,
+   "h": 404,
+   "mh": 12.0,
+   "ar": 1.0,
+   "src": "Trazos azules sobre fondo blanco (1).png",
+   "src_mh": 35.09,
+   "md5": "2a13b153e03c5c7f2e443881e2b460da",
+   "mean": 0.677
+  },
+  {
+   "i": 74,
+   "f": "pincelfino",
+   "w": 34,
+   "h": 497,
+   "mh": 12.0,
+   "ar": 1.0,
+   "src": "Trazos azules sobre fondo blanco (1).png",
+   "src_mh": 28.52,
+   "md5": "72bd717d86ed8f050792d224136d4dde",
+   "mean": 0.701
+  },
+  {
+   "i": 75,
+   "f": "pincelfino",
+   "w": 34,
+   "h": 520,
+   "mh": 12.0,
+   "ar": 1.0788,
+   "src": "Trazos azules sobre fondo blanco (1).png",
+   "src_mh": 25.48,
+   "md5": "e90f484369a92c43adb0848f026baf54",
+   "mean": 0.597
+  },
+  {
+   "i": 76,
+   "f": "pincelfino",
+   "w": 34,
+   "h": 520,
+   "mh": 12.0,
+   "ar": 2.2173,
+   "src": "Trazos azules sobre fondo blanco (1).png",
+   "src_mh": 12.02,
+   "md5": "d835d86a2d753ece53925ee31845691a",
+   "mean": 0.722
+  },
+  {
+   "i": 77,
+   "f": "rotu",
+   "w": 22,
+   "h": 520,
+   "mh": 7.0,
+   "ar": 1.1212,
+   "src": "Cinco líneas azules dibujadas a mano.png",
+   "src_mh": 15.0,
+   "md5": "179de2841ba51b4948dc81b0fffc0278",
+   "mean": 0.639
+  },
+  {
+   "i": 78,
+   "f": "rotu",
+   "w": 22,
+   "h": 520,
+   "mh": 7.0,
+   "ar": 2.0385,
+   "src": "Líneas azules sobre fondo blanco.png",
+   "src_mh": 8.82,
+   "md5": "02c080967dd4246ebb84850d8d5c8a4a",
+   "mean": 0.67
+  },
+  {
+   "i": 79,
+   "f": "rotu",
+   "w": 22,
+   "h": 520,
+   "mh": 7.0,
+   "ar": 1.5462,
+   "src": "Cuatro trazos negros horizontales.png",
+   "src_mh": 11.01,
+   "md5": "6edf2462e59593b6df864bfd97cb6d32",
+   "mean": 0.621
+  },
+  {
+   "i": 80,
+   "f": "boli",
+   "w": 13,
+   "h": 520,
+   "mh": 3.0,
+   "ar": 2.8827,
+   "src": "Cinco líneas azules sobre blanco.png",
+   "src_mh": 2.01,
+   "md5": "8fbbc939c7dc4380699f966bc501062e",
+   "mean": 0.442
+  },
+  {
+   "i": 81,
+   "f": "boli",
+   "w": 13,
+   "h": 520,
+   "mh": 3.0,
+   "ar": 1.225,
+   "src": "Líneas azules sobre papel blanco.png",
+   "src_mh": 2.06,
+   "md5": "3bead1f25ef4f88be96ba305a65acd9c",
+   "mean": 0.446
+  },
+  {
+   "i": 82,
+   "f": "boli",
+   "w": 13,
+   "h": 518,
+   "mh": 3.0,
+   "ar": 2.1654,
+   "src": "Líneas rojas sobre papel blanco.png",
+   "src_mh": 3.52,
+   "md5": "363be5af9341e3c227edca06ea49fc2a",
+   "mean": 0.388
+  },
+  {
+   "i": 83,
+   "f": "boli",
+   "w": 13,
+   "h": 520,
+   "mh": 3.0,
+   "ar": 2.3635,
+   "src": "Cuatro líneas rojas dibujadas a manoยิงปลา.png",
+   "src_mh": 3.01,
+   "md5": "46cb756f215b5e33ec8d171bbba79505",
+   "mean": 0.394
+  },
+  {
+   "i": 84,
+   "f": "boli",
+   "w": 13,
+   "h": 520,
+   "mh": 3.0,
+   "ar": 2.3288,
+   "src": "Cinco líneas azules sobre blanco.png",
+   "src_mh": 2.5,
+   "md5": "c32167b711734026cee169ddc6d4163a",
+   "mean": 0.402
+  },
+  {
+   "i": 85,
+   "f": "boli",
+   "w": 13,
+   "h": 520,
+   "mh": 3.0,
+   "ar": 2.3635,
+   "src": "Líneas azules sobre papel blanco.png",
+   "src_mh": 2.04,
+   "md5": "334b6d79e6f65c0ae020481fbb36dc69",
+   "mean": 0.43
+  },
+  {
+   "i": 86,
+   "f": "boli",
+   "w": 13,
+   "h": 520,
+   "mh": 3.0,
+   "ar": 2.2115,
+   "src": "Líneas rojas sobre papel blanco.png",
+   "src_mh": 3.44,
+   "md5": "91e9e9a254ba167d63ef9a3bb4a8d2f5",
+   "mean": 0.39
+  },
+  {
+   "i": 87,
+   "f": "boli",
+   "w": 13,
+   "h": 520,
+   "mh": 3.0,
+   "ar": 2.3365,
+   "src": "Cuatro líneas rojas dibujadas a manoยิงปลา.png",
+   "src_mh": 3.01,
+   "md5": "dcd453217c55592f4c78a1aaf2e8f747",
+   "mean": 0.383
+  }
+ ],
+ "sellos": {
+  "S": [
+   {
+    "foto": "pintura_granos_2.jpg",
+    "R": 8,
+    "x": 187,
+    "y": 576
+   },
+   {
+    "foto": "pintura_granos_2.jpg",
+    "R": 8,
+    "x": 853,
+    "y": 797
+   },
+   {
+    "foto": "pintura_granos_2.jpg",
+    "R": 12,
+    "x": 538,
+    "y": 1185
+   },
+   {
+    "foto": "pared_piel_4.jpg",
+    "R": 7,
+    "x": 251,
+    "y": 82
+   },
+   {
+    "foto": "pintura_granos_2.jpg",
+    "R": 8,
+    "x": 17,
+    "y": 174
+   },
+   {
+    "foto": "pintura_grumos_1.jpg",
+    "R": 11,
+    "x": 1572,
+    "y": 433
+   },
+   {
+    "foto": "pintura_granos_2.jpg",
+    "R": 12,
+    "x": 1150,
+    "y": 147
+   },
+   {
+    "foto": "pared_piel_4.jpg",
+    "R": 7,
+    "x": 859,
+    "y": 899
+   },
+   {
+    "foto": "pintura_granos_2.jpg",
+    "R": 12,
+    "x": 108,
+    "y": 1175
+   },
+   {
+    "foto": "pintura_granos_2.jpg",
+    "R": 8,
+    "x": 910,
+    "y": 123
+   },
+   {
+    "foto": "pintura_grumos_1.jpg",
+    "R": 11,
+    "x": 540,
+    "y": 79
+   },
+   {
+    "foto": "pintura_granos_2.jpg",
+    "R": 8,
+    "x": 818,
+    "y": 233
+   },
+   {
+    "foto": "pintura_grumos_1.jpg",
+    "R": 11,
+    "x": 1628,
+    "y": 1721
+   },
+   {
+    "foto": "pared_piel_4.jpg",
+    "R": 20,
+    "x": 967,
+    "y": 168
+   },
+   {
+    "foto": "pintura_grumos_1.jpg",
+    "R": 11,
+    "x": 550,
+    "y": 702
+   },
+   {
+    "foto": "pintura_granos_2.jpg",
+    "R": 12,
+    "x": 865,
+    "y": 215
+   },
+   {
+    "foto": "pared_piel_4.jpg",
+    "R": 20,
+    "x": 1057,
+    "y": 1093
+   },
+   {
+    "foto": "pintura_granos_2.jpg",
+    "R": 12,
+    "x": 729,
+    "y": 414
+   },
+   {
+    "foto": "pared_piel_4.jpg",
+    "R": 7,
+    "x": 69,
+    "y": 192
+   },
+   {
+    "foto": "pintura_granos_2.jpg",
+    "R": 12,
+    "x": 258,
+    "y": 31
+   },
+   {
+    "foto": "pared_piel_4.jpg",
+    "R": 20,
+    "x": 741,
+    "y": 133
+   },
+   {
+    "foto": "pintura_granos_2.jpg",
+    "R": 8,
+    "x": 64,
+    "y": 382
+   },
+   {
+    "foto": "pintura_granos_2.jpg",
+    "R": 8,
+    "x": 1131,
+    "y": 232
+   },
+   {
+    "foto": "pared_piel_4.jpg",
+    "R": 7,
+    "x": 283,
+    "y": 217
+   }
+  ],
+  "M": [
+   {
+    "foto": "pintura_grumos_3.jpg",
+    "R": 22,
+    "x": 1053,
+    "y": 913
+   },
+   {
+    "foto": "pintura_grumos_1.jpg",
+    "R": 32,
+    "x": 1428,
+    "y": 1794
+   },
+   {
+    "foto": "pintura_grumos_3.jpg",
+    "R": 32,
+    "x": 1525,
+    "y": 1886
+   },
+   {
+    "foto": "pintura_grumos_3.jpg",
+    "R": 32,
+    "x": 1709,
+    "y": 1711
+   },
+   {
+    "foto": "pintura_grumos_3.jpg",
+    "R": 32,
+    "x": 1736,
+    "y": 1852
+   },
+   {
+    "foto": "pintura_grumos_1.jpg",
+    "R": 22,
+    "x": 772,
+    "y": 1375
+   },
+   {
+    "foto": "pintura_grumos_1.jpg",
+    "R": 22,
+    "x": 1228,
+    "y": 487
+   },
+   {
+    "foto": "pintura_grumos_3.jpg",
+    "R": 22,
+    "x": 1698,
+    "y": 354
+   },
+   {
+    "foto": "pintura_grumos_1.jpg",
+    "R": 22,
+    "x": 764,
+    "y": 1483
+   },
+   {
+    "foto": "pintura_grumos_1.jpg",
+    "R": 32,
+    "x": 962,
+    "y": 614
+   },
+   {
+    "foto": "pintura_grumos_1.jpg",
+    "R": 32,
+    "x": 1703,
+    "y": 1830
+   },
+   {
+    "foto": "pintura_grumos_1.jpg",
+    "R": 32,
+    "x": 873,
+    "y": 1329
+   },
+   {
+    "foto": "pintura_grumos_1.jpg",
+    "R": 22,
+    "x": 679,
+    "y": 599
+   },
+   {
+    "foto": "pintura_grumos_1.jpg",
+    "R": 22,
+    "x": 820,
+    "y": 811
+   },
+   {
+    "foto": "pintura_grumos_3.jpg",
+    "R": 22,
+    "x": 127,
+    "y": 1527
+   },
+   {
+    "foto": "pintura_grumos_3.jpg",
+    "R": 22,
+    "x": 1583,
+    "y": 461
+   },
+   {
+    "foto": "pintura_grumos_3.jpg",
+    "R": 32,
+    "x": 1366,
+    "y": 1015
+   },
+   {
+    "foto": "pintura_grumos_1.jpg",
+    "R": 32,
+    "x": 1282,
+    "y": 199
+   }
+  ],
+  "L": [
+   {
+    "foto": "pintura_grumos_1.jpg",
+    "R": 48,
+    "x": 375,
+    "y": 791
+   },
+   {
+    "foto": "pintura_grumos_1.jpg",
+    "R": 48,
+    "x": 1297,
+    "y": 975
+   },
+   {
+    "foto": "pintura_grumos_1.jpg",
+    "R": 48,
+    "x": 1295,
+    "y": 1505
+   },
+   {
+    "foto": "pintura_grumos_1.jpg",
+    "R": 68,
+    "x": 367,
+    "y": 556
+   },
+   {
+    "foto": "pintura_grumos_1.jpg",
+    "R": 68,
+    "x": 455,
+    "y": 1716
+   },
+   {
+    "foto": "pintura_grumos_1.jpg",
+    "R": 68,
+    "x": 384,
+    "y": 1087
+   },
+   {
+    "foto": "pintura_grumos_3.jpg",
+    "R": 52,
+    "x": 1038,
+    "y": 126
+   },
+   {
+    "foto": "pintura_grumos_1.jpg",
+    "R": 48,
+    "x": 1810,
+    "y": 349
+   }
+  ]
+ },
+ "huella_render": {
+  "lapiz_hb": "bd07e86121a648905bd00649a0252ab2",
+  "lapiz_blando": "772963b4faed7e6a6d8b76a15372006a",
+  "lapiz_nervioso": "f32d02841cf3f13e2cf8666d233826c5",
+  "carbon_suave": "414ba0dfda49ae2088e6ffcfef9e3f4c",
+  "carbon_fuerte": "65d6e10c1f05dc64326e76c63820592f",
+  "carbon_fino": "d99cd1a2271b63b2a90ba5ce9645063e",
+  "cera_oleo": "ae4693a734e4c52f8006be248ed25ac9",
+  "cera_cera": "419f400620cbaa1d79017da0f22ca424",
+  "cera_fina": "b7721a6af4dd4c2535d99f0792ec8842",
+  "boli_bic": "2592489cf7379a6badff36c353a2dff5",
+  "boli_fino": "bbfd0dc14cbfcf4056637c7fdc0a45e0",
+  "boli_gel": "2ff951edc650ae7938fba3fec868dd0a",
+  "rotulador_fino": "89b99412eb07b47d823bf1162e7f3731",
+  "rotulador_gordo": "f7436227d34aa22096ae646b2f60d40e",
+  "rotulador_gastado": "aa8e07584996b957c72d52b552f312ed",
+  "pincel_fino": "26c0764da23f582fd5276f15f568be47",
+  "pincel_gordo": "ba1533f5907cc9e725378795685d5c74",
+  "pincel_seco": "247ee03b34151da2b9421ae91a95dab3",
+  "pincel_humedo": "493e0eaa30bdf3626b1529a888198a44",
+  "spray_gordo": "bab9090258af198733e9d0c59c5e76dc",
+  "spray_fino": "474eef907cee7fe87265af33785f0ffd",
+  "spray_seco": "fc63ec60016b8169ed2f3479bcbe29d8",
+  "spray_mop": "22c4faab248be89659a82e6fb332ed30",
+  "spray_plano": "f0e3b57590d9d823378f1c88e03e3120",
+  "spray_rastro": "c14ba674d871157d8cbc45608e6eeaac",
+  "spray_empapado": "ac471ef37c3c4f16d1dd6bac377ca2de",
+  "spray_rodillo": "009040ee53d5622f5fe8f21b3d0b7d7c"
+ }
+}
