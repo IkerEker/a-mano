@@ -671,6 +671,16 @@ function blockDrift(strokes, letters, p, seed, auto) {
 function pc0(s) { return s.pts && (s.pts.cont0 != null || s.pts.cont1 != null); }
 
 // pinta el plan en un lienzo (solo los trazos que caen en él)
+// Margen (px) con el que hay que pintar cada franja para que el resultado sea idéntico al de pintar de una vez:
+//  · textura de la pintura (graffiti): los grumos y el relieve miran alrededor;
+//  · tinta con borde húmedo (boli, rotulador, pincel húmedo): el borde se calcula mirando a 0,45 anchos; sin margen, el
+//    corte de la franja se tomaba por borde del trazo y dejaba una raya en la costura.
+function bandMargin(strokes, p) {
+  if (p && p.relieve > 0 && p.tool === 'spray') return 48;
+  let r = 0;
+  for (const s of strokes) if (s.P && s.P.wet > 0.05) { const q = Math.max(s.P.minR || 0, s.r || 0); if (q > r) r = q; }
+  return r > 0 ? Math.max(16, Math.ceil(r * 0.45) + 4) : 0;
+}
 function paint(canvas, strokes, p) {
   const rgb0 = RD.hexToRgb(p.color || '#1b1b1b');
   const ink = p.tinta == null ? 0.55 : p.tinta;
@@ -697,4 +707,4 @@ function bounds(strokes) {
   return b;
 }
 
-module.exports = { plan, paint, bounds, chaosOf };
+module.exports = { bandMargin, plan, paint, bounds, chaosOf };

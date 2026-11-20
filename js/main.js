@@ -114,6 +114,9 @@ function chaos() { return Math.max(0, 1 - st.legib / 100); }
 // relieve de la pintura (solo graffiti): 0..1; con él, las franjas se pintan con margen (RELIEF_M) para que casen
 function relieve() { return isGraf() ? Math.max(0, Math.min(1, (st.relieve == null ? 50 : st.relieve) / 100)) : 0; }
 const RELIEF_M = 48;
+// píxeles por franja al pintar en Photoshop: con textura de la pintura las franjas grandes ahorran mucho trabajo repetido
+// (cada trazo que pisa dos franjas se pinta dos veces); el resultado es idéntico con cualquier tamaño
+const bandPx = rel => rel > 0 ? 8e6 : 6e6;
 function genParams() {
   return {
     persona: styleKey(), mode: curMode(), goteo: st.goteo / 100, nube: st.nube / 100, relieve: relieve(), deriva: (st.deriva == null ? 40 : st.deriva) / 100, tool: st.tool, preset: st.preset, color: st.color,
@@ -367,7 +370,7 @@ async function doWrite(fresh) {
       try { await P.selectLayer(target.img ? target.img.id : target.shape.id); } catch (e) { /* nada */ }
       status('Pintando…', '');
       const name = P.HAND_PREFIX + snippet(st.text);
-      const layer = await P.putBands(doc, name, bb, c => WR.paint(c, strokes, gp), (k, n) => { if (n > 1) { try { ctx.reportProgress({ value: k / n, commandName: 'A mano' }); } catch (e) { /* nada */ } } }, gp.relieve > 0 ? RELIEF_M : 0);
+      const layer = await P.putBands(doc, name, bb, c => WR.paint(c, strokes, gp), (k, n) => { if (n > 1) { try { ctx.reportProgress({ value: k / n, commandName: 'A mano' }); } catch (e) { /* nada */ } } }, WR.bandMargin(strokes, gp), bandPx(gp.relieve));
       if (!layer) throw new P.UserError('No ha salido nada visible.');
       const multiply = INK.preset(st.tool, st.preset).blend === 'multiply';
       // tinta transparente: la capa multiplica (sobre un fondo de color se ve como tinta de verdad)
@@ -427,7 +430,7 @@ async function handImage(doc, ctx, insts, hp, seed, name, say) {
     const bb = WR.bounds(neg.strokes);
     if (!bb) throw new P.UserError('No ha salido nada visible.');
     const gp = { color: insts[0].color, tinta: hp.ink, colorVar: hp.colorVar, colorSeed: seed, tool: hp.tool, relieve: hp.relieve };
-    const layerN = await P.putBands(doc, name, bb, c => WR.paint(c, neg.strokes, gp), progressFor(ctx, 'A mano'), hp.relieve > 0 ? RELIEF_M : 0);
+    const layerN = await P.putBands(doc, name, bb, c => WR.paint(c, neg.strokes, gp), progressFor(ctx, 'A mano'), WR.bandMargin(neg.strokes, gp), bandPx(gp.relieve));
     if (!layerN) throw new P.UserError('No ha salido nada visible.');
     return layerN;
   }
@@ -436,7 +439,7 @@ async function handImage(doc, ctx, insts, hp, seed, name, say) {
   let all = boxes[0];
   for (const b of boxes) all = { left: Math.min(all.left, b.left), top: Math.min(all.top, b.top), right: Math.max(all.right, b.right), bottom: Math.max(all.bottom, b.bottom) };
   let relS = 0;      // (textura: el ancho de referencia lo fija la primera franja que pinta y vale para las demás)
-  const layer = await P.putBands(doc, name, all, c => { if (hp.relieve > 0) c.relief = { amount: hp.relieve, size: relS }; const r = HD.renderHand(c, insts, hp, seed, i => meets(boxes[i], c), pv); if (c.relief && !relS) relS = c.relief.size; return r; }, progressFor(ctx, 'A mano'), hp.relieve > 0 ? RELIEF_M : 0);
+  const layer = await P.putBands(doc, name, all, c => { if (hp.relieve > 0) c.relief = { amount: hp.relieve, size: relS }; const r = HD.renderHand(c, insts, hp, seed, i => meets(boxes[i], c), pv); if (c.relief && !relS) relS = c.relief.size; return r; }, progressFor(ctx, 'A mano'), hp.relieve > 0 ? RELIEF_M : (INK.preset(hp.tool, hp.preset).wet > 0.05 ? 96 : 0), bandPx(hp.relieve));
   if (!layer) throw new P.UserError('No ha salido nada visible.');
   return layer;
 }
