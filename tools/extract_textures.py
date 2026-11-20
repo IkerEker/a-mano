@@ -94,7 +94,8 @@ MH = {'boli': 3.0, 'rotu': 7.0, 'lapiz': 10.0, 'carbon': 11.0, 'cera': 20.0, 'ol
 MH_DEF = 10.0
 MAXROWS = 520
 # como mucho estas cintas por familia (las más distintas entre sí)
-CAP = {'boli': 8, 'rotu': 3, 'gastado': 0, 'oleo': 0, 'lapiz': 10, 'carbon': 10, 'cera': 12, 'aguada': 12, 'guache': 12, 'pincel': 14, 'pincelfino': 5, 'brocha': 2}
+# (boli y rotu a 0 desde la 2.38.1: el bolígrafo y el rotulador son procedurales y nadie leía esas 11 cintas)
+CAP = {'boli': 0, 'rotu': 0, 'gastado': 0, 'oleo': 0, 'lapiz': 10, 'carbon': 10, 'cera': 12, 'aguada': 12, 'guache': 12, 'pincel': 14, 'pincelfino': 5, 'brocha': 2}
 
 
 def load(path):

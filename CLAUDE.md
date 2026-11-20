@@ -19,10 +19,11 @@ Ficha de texturas: `TEXTURAS_A_MANO.md`.
 ## Cómo se aplica aquí
 - Las fotos fuente se leen por id en `tools/extract_textures.py` (lista `SOURCES`) y `tools/grumos.py` (lista `PLAN`),
   a través de `tools/biblioteca.py`. El orden de `SOURCES` forma parte del resultado: no reordenar.
-- **Prueba exacta** (con `TEXTURAS_ROOT` puesto):
-  - `python3 tools/extract_textures.py && md5sum js/texdata.js` → `182e0cdba680cba58fea00c0dd254ca5`
+- La biblioteca está en el PC de Iker en `C:\Users\ikerg\Biblioteca` (sin `TEXTURAS_ROOT`, las herramientas buscan `~/Biblioteca`).
+- **Prueba exacta**:
+  - `python3 tools/extract_textures.py && md5sum js/texdata.js` → `efd2021b0614bfa478f8b1e111b3aa78` (77 cintas; hasta la 2.38.0, con 88, era `182e0cdb…`)
   - `python3 tools/grumos.py && md5sum js/grumosdata.js` → `d3ca0cf24cb8a2ba3fa4b8a3869c2eba`
   - `node tests/node/huella.js` → «HUELLA IDÉNTICA» (27 renders contra `tests/node/huella_ref.json`)
-  - `node tests/sim/harness.js` (67) · `node tests/ae/harness.js` (19) · `node tests/node/letras/bandtest.js gordo c` (0 distintos)
+  - `node tests/node/franjas.js` → «FRANJAS IDÉNTICAS» · `node tests/sim/harness.js` (67) · `node tests/ae/harness.js` (19) · `node tests/node/letras/bandtest.js gordo c` (0 distintos)
 - Banco de velocidad: `banco.bat` (o `node tests/banco/banco.js`) → `tests/banco/resultado.json`.
-- Rama de trabajo; no fusionar en `main` sin el OK de Iker.
+- Rama de trabajo; no fusionar en `main` sin el OK de Iker (el 20-11-2026 dio el OK a la rama `biblioteca`).

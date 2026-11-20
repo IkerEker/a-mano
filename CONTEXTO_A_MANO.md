@@ -892,6 +892,20 @@ Sigue PENDIENTE el calco.
 
 ---
 
+### 2.38.1 — biblioteca común y velocidad (20-11-2026)
+
+- **Material**: las fotos fuente ya no están en el repo. `tools/extract_textures.py` (`SOURCES`) y `tools/grumos.py` (`PLAN`)
+  las leen por id `or:<md5>` de la biblioteca de Iker (`IkerEker/TEXTURAS` rama `atlas` + `Biblioteca/` local) con
+  `tools/biblioteca.py` (variable `TEXTURAS_ROOT`; sin ella, `~/Biblioteca`). Reglas en `CLAUDE.md`.
+- **Cintas**: `CAP` de `boli` y `rotu` a 0 (11 cintas que no leía nadie). Quedan 77; son byte a byte las #0–#76 de antes y
+  la huella de render no cambia. `js/texdata.js` → md5 `efd2021b0614bfa478f8b1e111b3aa78` (antes `182e0cdb…`).
+- **Franjas** (`ps.putBands(…, margin, bandPx)`): con textura de la pintura, 8 Mpx por franja en vez de 3 (mismos píxeles;
+  si falla la memoria vuelve a 3). `writer.bandMargin(strokes, p)` da el margen: 48 con relieve; con borde húmedo
+  (`P.wet > 0.05`: boli, rotulador, pincel húmedo) 0,45 × el mayor medio ancho + 4. Sin ese margen `wetEdge` tomaba el
+  corte de la franja por borde del trazo (costura de hasta 10 niveles en documentos de más de 6 Mpx).
+- **Cronómetro**: `P.lastTimes` (pintar / Photoshop / franjas) y el mensaje final lo enseña.
+- **Pruebas nuevas**: `tests/node/huella.js`, `tests/node/franjas.js`, `tests/banco/banco.js` (`banco.bat`).
+
 ## 4. Pruebas
 
 Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y las fuentes del sistema

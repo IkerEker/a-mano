@@ -164,6 +164,7 @@ async function putInto(doc, layer, img, blend) {
 // draw(canvas) pinta en la franja; bounds en píxeles del documento.
 // margin: px de más con que se pinta cada franja por arriba y por abajo (luego se recorta); bandPx: píxeles por franja.
 // Si una franja grande no cabe en memoria, se vuelve a empezar con franjas de 3 Mpx (el resultado es el mismo).
+const lastTimes = { pintar: 0, photoshop: 0, franjas: 0 };
 async function putBands(doc, name, bounds, draw, progress, margin, bandPx) {
   const x0 = Math.max(0, Math.floor(bounds.left)), y0 = Math.max(0, Math.floor(bounds.top));
   const x1 = Math.min(doc.width, Math.ceil(bounds.right)), y1 = Math.min(doc.height, Math.ceil(bounds.bottom));
@@ -172,10 +173,11 @@ async function putBands(doc, name, bounds, draw, progress, margin, bandPx) {
   const px = bandPx || 6e6, bandH = Math.max(64, Math.floor(px / W));
   const nb = Math.ceil((y1 - y0) / bandH);
   let layer = null, k = 0;
+  const T = lastTimes; T.pintar = 0; T.photoshop = 0; T.franjas = nb;      // (cronómetro: cuánto es cálculo y cuánto Photoshop)
   for (let y = y0; y < y1; y += bandH, k++) {
     if (progress) progress(k, nb);
     const hB = Math.min(bandH, y1 - y), mT = margin ? Math.min(margin, y - y0) : 0, mB = margin ? Math.min(margin, y1 - y - hB) : 0;
-    let canvas;
+    let canvas; const tA = Date.now();
     try {
       canvas = RD.makeCanvas(x0, y - mT, W, hB + mT + mB);
       draw(canvas);
@@ -185,9 +187,11 @@ async function putBands(doc, name, bounds, draw, progress, margin, bandPx) {
       throw e;
     }
     const img = RD.trimCanvas(canvas);
+    const tB = Date.now(); T.pintar += tB - tA;
     if (!img) continue;
     if (!layer) layer = typeof doc.createPixelLayer === 'function' ? await doc.createPixelLayer({ name }) : await doc.createLayer({ name });
     await putInto(doc, layer, img, k > 0);
+    T.photoshop += Date.now() - tB;
   }
   return layer;
 }
@@ -365,7 +369,7 @@ async function deselect() { try { await bp({ _obj: 'set', _target: [{ _ref: 'cha
 
 module.exports = {
   UserError, runModal, bp, tryGet, bounds, hexToRgb, colorHex, withWorkPath, outlinesOf, getTextKey, textLayerData,
-  selectLayer, selectLayers, putBands, putInto, copyLook, getSelectionBounds,
+  selectLayer, selectLayers, putBands, lastTimes, putInto, copyLook, getSelectionBounds,
   allLayers, textLayersIn, originalOf, handCopyOf, resolveTargets, isHandCopy, handEditable, setTextStyles,
   vectorMaskOf, resolveShape, makeShapeLayer, selectionToWorkPath, deselect, isGenGroup, isShapeName, GROUP_PREFIX,
   HAND_PREFIX, constants, app, core, action

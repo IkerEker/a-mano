@@ -107,6 +107,8 @@ async function runLive() {
   } catch (e) { /* sin documento o sin destino: nada que aplicar */ }
 }
 const secs = t0 => ((Date.now() - t0) / 1000).toFixed(1) + ' s';
+// desglose del último pintado: cuánto ha sido calcular y cuánto pasar los píxeles a Photoshop
+const desglose = () => { const T = P.lastTimes, f = x => (x / 1000).toFixed(1).replace('.', ','); return T && (T.pintar || T.photoshop) ? ' (pintar ' + f(T.pintar) + ' s, Photoshop ' + f(T.photoshop) + ' s)' : ''; };
 const docKey = doc => String((doc && (doc.title || doc.id)) || '');
 
 // ------------------------------------------------------------------ parámetros
@@ -397,7 +399,7 @@ async function doWrite(fresh) {
       store.set('shape|' + key, saved);
       lastShapeKey = key;
     });
-    status('Escrito en ' + secs(t0) + '. Con la capa seleccionada, cualquier cambio del panel la rehace.', 'ok');
+    status('Escrito en ' + secs(t0) + desglose() + '. Con la capa seleccionada, cualquier cambio del panel la rehace.', 'ok');
   });
 }
 
@@ -478,7 +480,7 @@ async function doHand(fresh) {
       }
       try { await P.selectLayers(made); } catch (e) { /* nada */ }
     });
-    status('Listo: ' + n + (n === 1 ? ' capa' : ' capas') + ' en ' + secs(t0) + '. El original queda oculto debajo.', 'ok');
+    status('Listo: ' + n + (n === 1 ? ' capa' : ' capas') + ' en ' + secs(t0) + desglose() + '. El original queda oculto debajo.', 'ok');
   });
 }
 async function doHandUndo() {

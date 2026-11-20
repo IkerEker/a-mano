@@ -5,6 +5,7 @@ La biblioteca SOLO se usa al construir: lo que el plugin necesita queda incrusta
 y el .ccx funciona sin ella, sin Claude y sin internet.
 
     TEXTURAS_ROOT = la carpeta Biblioteca (la que contiene TEXTURAS/, originales/, ACIDBITE/, generadas/)
+    Si no está puesta, se usa <carpeta personal>/Biblioteca (en el PC de Iker: C:\\Users\\ikerg\\Biblioteca).
 
 ruta(id) devuelve el archivo de un id del índice (TEXTURAS/indice/indice.json, campo «archivo»):
     or:<md5>  original bit a bit (se comprueba el md5: si no coincide, se para)
@@ -19,9 +20,11 @@ _IDX = None
 
 def raiz():
     r = os.environ.get('TEXTURAS_ROOT')
-    if not r:
-        sys.exit('Falta la variable TEXTURAS_ROOT (la carpeta Biblioteca de Iker). Ejemplo en Windows:\n'
-                 '  set TEXTURAS_ROOT=C:\\Users\\ikerg\\Biblioteca')
+    if not r:                                   # sin variable: la carpeta Biblioteca de la carpeta personal (el PC de Iker)
+        r = os.path.join(os.path.expanduser('~'), 'Biblioteca')
+        if not os.path.isdir(r):
+            sys.exit('No encuentro la biblioteca. Pon la variable TEXTURAS_ROOT (la carpeta Biblioteca de Iker). En Windows:\n'
+                     '  set TEXTURAS_ROOT=C:\\Users\\ikerg\\Biblioteca')
     if not os.path.isdir(r):
         sys.exit('TEXTURAS_ROOT no es una carpeta: ' + r)
     return r

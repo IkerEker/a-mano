@@ -3,6 +3,11 @@
 Documento para la conversación que unifica las texturas de todos los plugins en la biblioteca común (repo TEXTURAS).
 Escrito el 19-11-2026 analizando el código tal como está; **no se ha cambiado nada del plugin**.
 
+> **Actualización 2.38.1 (20-11-2026).** Esta ficha describe la 2.38.0. Desde la 2.38.1: las fotos fuente se leen de la
+> biblioteca común por id (`TRAZOS/` y `referencias/texturas/` ya no están en el repo); las 11 cintas `boli` y `rotu` se
+> han quitado (quedan 77, las #0–#76, idénticas); `js/texdata.js` → md5 `efd2021b0614bfa478f8b1e111b3aa78`. La huella de
+> render del apartado 6 no cambia.
+
 Cómo leer las marcas:
 
 - **Comprobado**: lo he ejecutado o medido hoy sobre el repositorio (se dice cómo).
