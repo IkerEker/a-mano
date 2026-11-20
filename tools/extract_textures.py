@@ -1,67 +1,93 @@
 #!/usr/bin/env python3
-"""Saca de TRAZOS/ las «cintas» de textura (cada trazo recto, enderezado) y el grano de papel.
+"""Saca de las fotos de trazos de la biblioteca común (TEXTURAS_ROOT) las «cintas» de textura (cada trazo recto, enderezado) y el grano de papel.
 
-Uso: python3 tools/extract_textures.py [--preview DIR]
+Uso: TEXTURAS_ROOT=<carpeta Biblioteca> python3 tools/extract_textures.py [--preview DIR]
 Genera js/texdata.js (cintas en 8 bits, base64) que usa el motor de pintado (ink.js).
 
 Cada cinta: filas = a lo largo del trazo (de inicio a final), columnas = a lo ancho.
 Se guarda la densidad de tinta (0 = papel, 255 = tinta plena) separada del color y del papel.
 """
-import os, sys, json, base64, glob
+import os, sys, json, base64
 import numpy as np
 from PIL import Image
 from scipy import ndimage as ndi
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-TR = os.path.join(ROOT, 'TRAZOS')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import biblioteca as BIB
 
-# archivo (o patrón) -> familia de textura, orientación del inicio del trazo y ajustes
+# Las fotos fuente salen de la biblioteca común de Iker (repo TEXTURAS + Biblioteca/ local, variable TEXTURAS_ROOT) y se
+# leen por id: or:<md5> = el original bit a bit (tools/biblioteca.py lo localiza con indice/indice.json y comprueba el md5).
+# (id, nombre, familia de textura, inicio del trazo, E)
+#   nombre: la ruta que tenía en la antigua carpeta TRAZOS/ (solo para los mensajes y para el reparto por archivo)
 #   start: 'top' | 'left' | 'auto'  (por dónde empieza el trazo)
 #   E: cuánto se toma a cada lado más allá del medio ancho (para bordes rotos y polvo)
+# EL ORDEN IMPORTA: la posición de cada cinta en js/texdata.js decide qué cinta le toca a cada trazo. Hay dos fotos que
+# están dos veces (CERAS …uh9z0x… y GUACHE …t7kg8s…, con y sin «(1)»): se procesan las dos, como siempre.
 SOURCES = [
-    ('AGUADAS/*', 'aguada', 'top', 1.55),
-    ('CERAS/*', 'cera', 'top', 1.45),
-    ('GUACHE/*', 'guache', 'top', 1.4),
-    ('OLEO/*', 'oleo', 'top', 1.4),
-    ('LAPIZ/Gemini_Generated_Image_dgy3xxdgy3xxdgy3.jpg', 'lapiz', 'top', 1.5),
-    ('LAPIZ/Gemini_Generated_Image_fd6so0fd6so0fd6s.jpg', 'lapiz', 'top', 1.5),
-    ('LAPIZ/Gemini_Generated_Image_so6zmwso6zmwso6z.jpg', 'lapiz', 'top', 1.5),
-    ('LAPIZ/Gemini_Generated_Image_u2c2txu2c2txu2c2.jpg', 'lapiz', 'top', 1.5),
-    ('LAPIZ/Gemini_Generated_Image_4vfeh34vfeh34vfe.jpg', 'carbon', 'top', 1.9),
-    ('LAPIZ/Gemini_Generated_Image_i1m1v9i1m1v9i1m1.jpg', 'carbon', 'top', 1.9),
-    ('LAPIZ/Gemini_Generated_Image_uvge2nuvge2nuvge.jpg', 'carbon', 'top', 1.9),
-    ('Gemini_Generated_Image_4k0x3g4k0x3g4k0x.jpg', 'carbon', 'left', 1.9),
-    ('Gemini_Generated_Image_1m2vhi1m2vhi1m2v.jpg', 'pincel', 'top', 1.4),
-    ('Gemini_Generated_Image_dd9o77dd9o77dd9o.jpg', 'pincel', 'top', 1.4),
-    ('Gemini_Generated_Image_fooa8gfooa8gfooa.jpg', 'pincel', 'top', 1.4),
-    ('Gemini_Generated_Image_gtyi67gtyi67gtyi.jpg', 'pincel', 'top', 1.4),
-    ('Gemini_Generated_Image_i9od48i9od48i9od.jpg', 'pincel', 'top', 1.4),
-    ('Gemini_Generated_Image_ogccn5ogccn5ogcc.jpg', 'pincel', 'top', 1.4),
-    ('Gemini_Generated_Image_uoqx5fuoqx5fuoqx.jpg', 'pincel', 'top', 1.4),
-    ('Gemini_Generated_Image_xw72ktxw72ktxw72.jpg', 'pincel', 'top', 1.4),
-    ('Pincelada gris sobre blanco.png', 'brocha', 'top', 1.35),
-    ('Pincelada vertical gris sobre blanco.png', 'brocha', 'top', 1.35),
-    ('Cuatro pinceladas rojas sobre blanco.png', 'pincel', 'left', 1.4),
-    ('Franjas de pintura roja sobre blanco.png', 'pincel', 'left', 1.4),
-    ('Pinceladas rojas sobre blanco.png', 'pincel', 'left', 1.4),
-    ('Pinceladas azules sobre blanco.png', 'pincel', 'left', 1.4),
-    ('Trazos azules sobre fondo blanco.png', 'pincel', 'left', 1.4),
-    ('Muestras de pinceladas azules en blanco.png', 'pincel', 'left', 1.4),
-    ('Ocho pinceladas azules sobre blanco.png', 'pincel', 'left', 1.4),
-    ('Trazos azules sobre fondo blanco (1).png', 'pincelfino', 'left', 1.4),
-    ('Cinco trazos azules sobre blanco.png', 'gastado', 'left', 1.45),
-    ('Cinco trazos rojos sobre blanco.png', 'gastado', 'left', 1.45),
-    ('Cuatro trazos rojos texturizados.png', 'gastado', 'left', 1.45),
-    ('Tres trazos azules texturizados.png', 'gastado', 'left', 1.45),
-    ('Cinco líneas azules dibujadas a mano.png', 'rotu', 'left', 1.6),
-    ('Líneas azules sobre fondo blanco.png', 'rotu', 'left', 1.6),
-    ('Cuatro trazos negros horizontales.png', 'rotu', 'left', 1.6),
-    ('Tres líneas negras sobre fondo blanco.png', 'rotu', 'left', 1.6),
-    ('Cinco líneas azules sobre blanco.png', 'boli', 'left', 2.2),
-    ('Líneas azules sobre papel blanco.png', 'boli', 'left', 2.2),
-    ('Líneas horizontales dibujadas a mano.png', 'boli', 'left', 2.2),
-    ('Líneas rojas sobre papel blanco.png', 'boli', 'left', 2.2),
-    ('Cuatro líneas rojas dibujadas a mano*.png', 'boli', 'left', 2.2),
+    ('or:20ddea7c0fb3b440354ee377a7c7e34c', 'AGUADAS/Gemini_Generated_Image_6lti5j6lti5j6lti.jpg', 'aguada', 'top', 1.55),
+    ('or:ac6b1c0c21c3685ebafd50b783f0b0b3', 'AGUADAS/Gemini_Generated_Image_6p6u0m6p6u0m6p6u.jpg', 'aguada', 'top', 1.55),
+    ('or:2ebff079250c732bac3996e9cd79b633', 'AGUADAS/Gemini_Generated_Image_bygjtubygjtubygj.jpg', 'aguada', 'top', 1.55),
+    ('or:ff9fd5a027b2672038d83ebb42259fd1', 'AGUADAS/Gemini_Generated_Image_hbkpvbhbkpvbhbkp.jpg', 'aguada', 'top', 1.55),
+    ('or:4a0a9e9765717d23a03bf7bee0b529c6', 'AGUADAS/Gemini_Generated_Image_nft1n4nft1n4nft1.jpg', 'aguada', 'top', 1.55),
+    ('or:0c7d294c3416f7b24c426a5b7573a2e7', 'AGUADAS/Gemini_Generated_Image_umv2e3umv2e3umv2.jpg', 'aguada', 'top', 1.55),
+    ('or:4d7017da88104ffd2d20291e4fb0148f', 'AGUADAS/Gemini_Generated_Image_z82hx1z82hx1z82h.jpg', 'aguada', 'top', 1.55),
+    ('or:b39356083123b118262bc35200d62d4d', 'CERAS/Gemini_Generated_Image_2an7ri2an7ri2an7.jpg', 'cera', 'top', 1.45),
+    ('or:53d0437a073d998a7895372b37008a97', 'CERAS/Gemini_Generated_Image_56fr4h56fr4h56fr.jpg', 'cera', 'top', 1.45),
+    ('or:f8bd0d98d712eee34c871a556b86192d', 'CERAS/Gemini_Generated_Image_uh9z0xuh9z0xuh9z (1).jpg', 'cera', 'top', 1.45),
+    ('or:f8bd0d98d712eee34c871a556b86192d', 'CERAS/Gemini_Generated_Image_uh9z0xuh9z0xuh9z.jpg', 'cera', 'top', 1.45),
+    ('or:e144d33708b20cfa07cdb172e936acce', 'CERAS/Gemini_Generated_Image_y7qljdy7qljdy7ql.jpg', 'cera', 'top', 1.45),
+    ('or:44adc9c64138f6cd1a55bed4cb5abd05', 'GUACHE/Gemini_Generated_Image_6l56yc6l56yc6l56.jpg', 'guache', 'top', 1.4),
+    ('or:187140f5d0f9d9f90dbe3d6d4f41b521', 'GUACHE/Gemini_Generated_Image_8ypgc28ypgc28ypg.jpg', 'guache', 'top', 1.4),
+    ('or:a5baef658ef09e772c1402b130c62c8a', 'GUACHE/Gemini_Generated_Image_gz01rcgz01rcgz01.jpg', 'guache', 'top', 1.4),
+    ('or:0f00cb3e6dbeb43243962b2aad7ebc1f', 'GUACHE/Gemini_Generated_Image_jfrkuyjfrkuyjfrk.jpg', 'guache', 'top', 1.4),
+    ('or:a8622af802d9a3c83c25bd60e891586d', 'GUACHE/Gemini_Generated_Image_ksbdqzksbdqzksbd.jpg', 'guache', 'top', 1.4),
+    ('or:fb33f7dda84a14d3434758806b5b5cfa', 'GUACHE/Gemini_Generated_Image_omhgriomhgriomhg.jpg', 'guache', 'top', 1.4),
+    ('or:430ed44e661c68c0a1d7a4c760c61c12', 'GUACHE/Gemini_Generated_Image_scmr90scmr90scmr.jpg', 'guache', 'top', 1.4),
+    ('or:0877b4440f565bc67c81c2c19fa64d44', 'GUACHE/Gemini_Generated_Image_t7kg8st7kg8st7kg (1).jpg', 'guache', 'top', 1.4),
+    ('or:0877b4440f565bc67c81c2c19fa64d44', 'GUACHE/Gemini_Generated_Image_t7kg8st7kg8st7kg.jpg', 'guache', 'top', 1.4),
+    ('or:26c06c0b920161b7a6f75ac8bc51aec7', 'OLEO/Gemini_Generated_Image_9d31iy9d31iy9d31.jpg', 'oleo', 'top', 1.4),
+    ('or:fa7773c2e2908f4fe146ab0dffa43844', 'OLEO/Gemini_Generated_Image_br79m9br79m9br79.jpg', 'oleo', 'top', 1.4),
+    ('or:f0e4f581040ef0f237b0d8879d7c2e53', 'OLEO/Gemini_Generated_Image_gscen4gscen4gsce.jpg', 'oleo', 'top', 1.4),
+    ('or:80dad666f8311d6edb1754c362d75a5d', 'LAPIZ/Gemini_Generated_Image_dgy3xxdgy3xxdgy3.jpg', 'lapiz', 'top', 1.5),
+    ('or:d3a26863bf136a2b427559a680ae92bc', 'LAPIZ/Gemini_Generated_Image_fd6so0fd6so0fd6s.jpg', 'lapiz', 'top', 1.5),
+    ('or:8b1330c2a986ae301ae99c56608fc9fe', 'LAPIZ/Gemini_Generated_Image_so6zmwso6zmwso6z.jpg', 'lapiz', 'top', 1.5),
+    ('or:d3641f94f2fd796c41a4756940e836fb', 'LAPIZ/Gemini_Generated_Image_u2c2txu2c2txu2c2.jpg', 'lapiz', 'top', 1.5),
+    ('or:46afa9de8ecce9fc9ba79d3e9e6721b3', 'LAPIZ/Gemini_Generated_Image_4vfeh34vfeh34vfe.jpg', 'carbon', 'top', 1.9),
+    ('or:16105ce5cc4b1d2b200909510e32b70f', 'LAPIZ/Gemini_Generated_Image_i1m1v9i1m1v9i1m1.jpg', 'carbon', 'top', 1.9),
+    ('or:8b1caba32d3287fa9a08c5de574690c6', 'LAPIZ/Gemini_Generated_Image_uvge2nuvge2nuvge.jpg', 'carbon', 'top', 1.9),
+    ('or:4473e9c1d6f00ab84b4073cceaf19f51', 'Gemini_Generated_Image_4k0x3g4k0x3g4k0x.jpg', 'carbon', 'left', 1.9),
+    ('or:1fab4c773c1595efc5c71fa8ba5d003b', 'Gemini_Generated_Image_1m2vhi1m2vhi1m2v.jpg', 'pincel', 'top', 1.4),
+    ('or:93b2c592d0844bb90bdb735019f8632f', 'Gemini_Generated_Image_dd9o77dd9o77dd9o.jpg', 'pincel', 'top', 1.4),
+    ('or:8f83c88e63387f8ea7ef103928e1ed63', 'Gemini_Generated_Image_fooa8gfooa8gfooa.jpg', 'pincel', 'top', 1.4),
+    ('or:f2a1c7dbb7402bd7f31a4c3631b1ce49', 'Gemini_Generated_Image_gtyi67gtyi67gtyi.jpg', 'pincel', 'top', 1.4),
+    ('or:ea43656231d6b863d67eb6c169032e5b', 'Gemini_Generated_Image_i9od48i9od48i9od.jpg', 'pincel', 'top', 1.4),
+    ('or:039431753bcad30873ec83cfd64ee744', 'Gemini_Generated_Image_ogccn5ogccn5ogcc.jpg', 'pincel', 'top', 1.4),
+    ('or:160a8c8a106c89a1bde10f3990e915d2', 'Gemini_Generated_Image_uoqx5fuoqx5fuoqx.jpg', 'pincel', 'top', 1.4),
+    ('or:7b13ec84a1c7508de63bb6cf144d9b9e', 'Gemini_Generated_Image_xw72ktxw72ktxw72.jpg', 'pincel', 'top', 1.4),
+    ('or:0e36d27811e2498679e00e8a3bb3a6f9', 'Pincelada gris sobre blanco.png', 'brocha', 'top', 1.35),
+    ('or:9af81d46749352e1f8119c5bc9358f0b', 'Pincelada vertical gris sobre blanco.png', 'brocha', 'top', 1.35),
+    ('or:99193ea91cf681edc1b1b5946c6cabb3', 'Cuatro pinceladas rojas sobre blanco.png', 'pincel', 'left', 1.4),
+    ('or:69c2c2243bb9c323d644d2ad0eab2969', 'Franjas de pintura roja sobre blanco.png', 'pincel', 'left', 1.4),
+    ('or:aca488fbc8295f59772ed252ea43b671', 'Pinceladas rojas sobre blanco.png', 'pincel', 'left', 1.4),
+    ('or:0636e9a1be6f0583886c3571a0ea61af', 'Pinceladas azules sobre blanco.png', 'pincel', 'left', 1.4),
+    ('or:6b53b3ad9f34be43bd013cb4f2c5aba3', 'Trazos azules sobre fondo blanco.png', 'pincel', 'left', 1.4),
+    ('or:9f80ec4e19ffa2713ad247331ebb036f', 'Muestras de pinceladas azules en blanco.png', 'pincel', 'left', 1.4),
+    ('or:2b56822cc2af4b0551e9091d4cd41f2b', 'Ocho pinceladas azules sobre blanco.png', 'pincel', 'left', 1.4),
+    ('or:24e379b7698a72229e7fc58b276b3c58', 'Trazos azules sobre fondo blanco (1).png', 'pincelfino', 'left', 1.4),
+    ('or:2bcd77b876fd57f6580a35b2bc1f6585', 'Cinco trazos azules sobre blanco.png', 'gastado', 'left', 1.45),
+    ('or:783353d66f31e70cc44e7231723dd965', 'Cinco trazos rojos sobre blanco.png', 'gastado', 'left', 1.45),
+    ('or:e50cdc4bb37912262f92e93de71dbb50', 'Cuatro trazos rojos texturizados.png', 'gastado', 'left', 1.45),
+    ('or:618c499ea623d529c21ef45e511d478e', 'Tres trazos azules texturizados.png', 'gastado', 'left', 1.45),
+    ('or:818a69b66f8108734cc8d93bb0615c12', 'Cinco líneas azules dibujadas a mano.png', 'rotu', 'left', 1.6),
+    ('or:f59dfd6a89692ca182487365a11e774c', 'Líneas azules sobre fondo blanco.png', 'rotu', 'left', 1.6),
+    ('or:2ccd16b4b8ef13017948403488dc78c2', 'Cuatro trazos negros horizontales.png', 'rotu', 'left', 1.6),
+    ('or:e0bd2d6160ceb11ef79a8c8eb480e313', 'Tres líneas negras sobre fondo blanco.png', 'rotu', 'left', 1.6),
+    ('or:0561622b5e78218be9fb1c09ab07cb05', 'Cinco líneas azules sobre blanco.png', 'boli', 'left', 2.2),
+    ('or:7b041383b2b1112cff24a78775d2e49d', 'Líneas azules sobre papel blanco.png', 'boli', 'left', 2.2),
+    ('or:14b0c42ba960ff6b03c8c91c0b1db7b2', 'Líneas horizontales dibujadas a mano.png', 'boli', 'left', 2.2),
+    ('or:273a3106ba9c7dbacf9a67d4095f0739', 'Líneas rojas sobre papel blanco.png', 'boli', 'left', 2.2),
+    ('or:bc3605424110366dd797a920be1bec06', 'Cuatro líneas rojas dibujadas a manoยิงปลา.png', 'boli', 'left', 2.2),
 ]
 # resolución de la cinta: el medio ancho medio del trazo ocupa MH columnas
 MH = {'boli': 3.0, 'rotu': 7.0, 'lapiz': 10.0, 'carbon': 11.0, 'cera': 20.0, 'oleo': 16.0, 'aguada': 15.0, 'pincel': 14.0, 'guache': 14.0, 'pincelfino': 12.0}
@@ -243,23 +269,19 @@ def main():
         preview = sys.argv[sys.argv.index('--preview') + 1]
         os.makedirs(preview, exist_ok=True)
     strips = []
-    for pat, fam, start, E in SOURCES:
+    for sid, nombre, fam, start, E in SOURCES:
         if CAP.get(fam, 8) == 0:
             continue                      # familia que ya no se usa (p. ej. el rotulador es procedural)
-        files = sorted(glob.glob(os.path.join(TR, pat)))
-        if not files:
-            print('falta', pat); continue
-        for f in files:
-            d = density(load(f))
-            lab, comps = components(d, start)
-            got = 0
-            for comp in comps:
-                s = strip_of(d, lab, comp, E, fam)
-                if s is None: continue
-                s['src'] = os.path.relpath(f, TR)
-                strips.append(s); got += 1
-            print('%-60s %-10s %d' % (os.path.relpath(f, TR)[:60], fam, got))
-    # papel (de las hojas de acuarela y de lápiz, que tienen grano)
+        d = density(load(BIB.ruta(sid)))
+        lab, comps = components(d, start)
+        got = 0
+        for comp in comps:
+            s = strip_of(d, lab, comp, E, fam)
+            if s is None: continue
+            s['src'] = nombre
+            strips.append(s); got += 1
+        print('%-60s %-10s %d' % (nombre[:60], fam, got))
+    # papel: sintético (ruido filtrado; no sale de ninguna foto)
     paper = paper_tile()
     if '--paper-only' in sys.argv:
         Image.fromarray((paper * 255).astype(np.uint8)).save(os.path.join(preview, 'paper.png')); return

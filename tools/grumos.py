@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Grumos de pintura (solo graffiti).  python3 tools/grumos.py [hoja_de_comprobación.png]
 
-Lee las fotos de superficie pintada de referencias/texturas y recorta de ellas BULTOS SUELTOS (no se usa ninguna
+Lee las fotos de superficie pintada de la biblioteca común (TEXTURAS_ROOT) y recorta de ellas BULTOS SUELTOS (no se usa ninguna
 foto entera ni se superpone): pompas y granos de la película, gotas gordas ya secas, grumos y costras. Cada uno se
 guarda como un sello pequeño de sombreado —cuánto aclara o oscurece el bulto bajo la luz—, con el borde fundido a
 nada, en js/grumosdata.js. render.applyRelief los estampa solo donde la pintura va cargada.
@@ -19,17 +19,19 @@ from PIL import Image
 from scipy import ndimage as ndi
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-REF = os.path.join(ROOT, 'referencias', 'texturas')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import biblioteca as BIB
 OUT = os.path.join(ROOT, 'js', 'grumosdata.js')
 
 # clases de sello: lado en px
 CLS = [('S', 20), ('M', 36), ('L', 56)]
-# qué se saca de cada foto: (clase, radio del bulto en px de la foto, cuántos, exigir que sea bulto y no hoyo)
+# las fotos salen de la biblioteca común (TEXTURAS_ROOT), por id or:<md5> (ver tools/biblioteca.py)
+# qué se saca de cada foto (id, nombre): (clase, radio del bulto en px de la foto, cuántos, exigir que sea bulto y no hoyo)
 PLAN = [
-    ('pintura_granos_2.jpg', [('S', 8, 7, True), ('S', 12, 6, True), ('M', 20, 2, True)]),
-    ('pared_piel_4.jpg', [('S', 7, 4, True), ('S', 20, 3, False)]),
-    ('pintura_grumos_1.jpg', [('S', 11, 4, True), ('M', 22, 5, True), ('M', 32, 5, True), ('L', 48, 4, True), ('L', 68, 4, True)]),
-    ('pintura_grumos_3.jpg', [('M', 22, 4, True), ('M', 32, 4, True), ('L', 52, 3, True), ('L', 76, 3, True)]),
+    ('or:b69ffc8930e616f15913986c9876474b', 'pintura_granos_2.jpg', [('S', 8, 7, True), ('S', 12, 6, True), ('M', 20, 2, True)]),
+    ('or:831b99f6a72ed4b20a52af4e2c100d15', 'pared_piel_4.jpg', [('S', 7, 4, True), ('S', 20, 3, False)]),
+    ('or:661b783872e168d3f343baaaa39ff703', 'pintura_grumos_1.jpg', [('S', 11, 4, True), ('M', 22, 5, True), ('M', 32, 5, True), ('L', 48, 4, True), ('L', 68, 4, True)]),
+    ('or:93a7dba2d4bd0222f7d4055601acafe9', 'pintura_grumos_3.jpg', [('M', 22, 4, True), ('M', 32, 4, True), ('L', 52, 3, True), ('L', 76, 3, True)]),
 ]
 
 
@@ -81,8 +83,8 @@ def main():
     rng = np.random.RandomState(7)
     tiles = {c: [] for c, _ in CLS}
     size = dict(CLS)
-    for fname, plan in PLAN:
-        I = np.asarray(Image.open(os.path.join(REF, fname)).convert('L'), dtype=np.float32) / 255
+    for sid, fname, plan in PLAN:
+        I = np.asarray(Image.open(BIB.ruta(sid)).convert('L'), dtype=np.float32) / 255
         got = []          # (x, y, R) ya cogidos en esta foto
         # ---- de dónde viene la luz: el lado claro de los bultos de tamaño medio
         Rm = plan[len(plan) // 2][1]
