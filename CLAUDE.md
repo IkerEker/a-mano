@@ -6,9 +6,12 @@ Ficha de texturas: `TEXTURAS_A_MANO.md`.
 
 ## Biblioteca y velocidad (orden de Iker, 20-11-2026; texto completo: TEXTURAS/plugins/ORDEN_PLUGINS.md)
 - Material SOLO de la biblioteca IkerEker/TEXTURAS (rama atlas) + Biblioteca/ local (TEXTURAS_ROOT). Nada de bancos propios.
-- Buscar SIEMPRE con el método de 7 pasos de ORDEN_PLUGINS.md (varias palabras → --resumen → abrir familias → recorrer
-  clases → filtrar con --donde/--min → --parecidos → ficha + mirar la `hoja`). Incluye ab:, collage, vídeo y sonido.
-  No revisar bancos enteros: las fichas ya están hechas. Releer el índice en cada conversación.
+- Buscar SIEMPRE con TEXTURAS/tools/atlas/buscar.py v3 y el método de Biblioteca/CLAUDE.md: 2–4 palabras --ver →
+  ≥3 búsquedas desde lados distintos + filtro de papel (--tileable/--alfa/--clase) → mirar la hoja → elegir con
+  VARIEDAD (6–12 variantes por efecto, ≥3 familias, una por familia, ACIDBITE cuenta, no copiar lo que «ya lo usa»
+  otro plugin) → --plugin <yo> --apuntar ids. Nunca carpetas, catalogo.json ni el índice a mano cogiendo los primeros.
+- Para lo nuevo, usar los tx: con recorte_mejorado. Pasar un efecto existente de or: a tx: = cambia el resultado
+  → antes/después y sí de Iker.
 - Construir leyendo por id (or:/tx:/ab:) vía indice/indice.json. El plugin lleva dentro lo que usa: funciona sin Claude ni internet.
 - Si falta algo: «PEDIDO PARA LA BIBLIOTECA:» al final de la respuesta; nunca dibujarlo/descargarlo dentro del plugin.
 - Prueba exacta antes y después de todo cambio; cualquier diferencia → Iker decide con antes/después.
