@@ -6,3 +6,6 @@ __pycache__/
 .DS_Store
 dist_ae/A_mano_AE_v*/
 tests/ae/out/
+MUDANZA_informe.txt
+PRUEBAS_informe.txt
+tests/banco/resultado.json

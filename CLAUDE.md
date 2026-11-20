@@ -27,3 +27,13 @@ Ficha de texturas: `TEXTURAS_A_MANO.md`.
   - `node tests/node/franjas.js` → «FRANJAS IDÉNTICAS» · `node tests/sim/harness.js` (67) · `node tests/ae/harness.js` (19) · `node tests/node/letras/bandtest.js gordo c` (0 distintos)
 - Banco de velocidad: `banco.bat` (o `node tests/banco/banco.js`) → `tests/banco/resultado.json`.
 - Rama de trabajo; no fusionar en `main` sin el OK de Iker (el 20-11-2026 dio el OK a la rama `biblioteca`).
+
+## Casa local (orden de Iker, 20-11-2026; texto: TEXTURAS/plugins/ORDEN_CARPETA_LOCAL.md)
+- El plugin vive en C:\Users\ikerg\Biblioteca\plugins\a-mano\ (git local, sin GitHub). Única carpeta conectada: Biblioteca.
+- Copia de seguridad: git bundle --all en Biblioteca\plugins\_respaldos\ tras cada sesión (guardar 3).
+- Material SOLO por id desde Biblioteca\TEXTURAS (buscar.py, método de la ORDEN 1); nada repetido dentro del plugin.
+  Lo nuevo → «PEDIDO PARA LA BIBLIOTECA».
+- No tocar otros plugins, TEXTURAS, ACIDBITE, originales ni _fuentes. Borrar solo con permiso de Iker.
+- Prueba exacta antes y después de cada cambio. El plugin construido funciona solo, sin Claude ni internet.
+- Sin terminal en el PC de Iker: los comandos se dejan en un `.bat` dentro de esta carpeta (`MUDANZA.bat`, `RESPALDO.bat`,
+  `PRUEBAS.bat`, `banco.bat`) y los ejecuta él; cada uno escribe su informe en un `.txt` al lado.
