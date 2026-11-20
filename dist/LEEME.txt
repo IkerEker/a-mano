@@ -2,9 +2,13 @@ A MANO 2.38 · plugin para Photoshop (2024 o posterior)
 =====================================================
 
 INSTALAR
-- Doble clic en A_mano_v2.38.1.ccx -> Creative Cloud avisa de que no viene del
+- Doble clic en A_mano_v2.38.2.ccx -> Creative Cloud avisa de que no viene del
   Marketplace -> "Instalar". Sustituye a las versiones anteriores. Es independiente de Cartelator.
 - En Photoshop: Plugins > A mano.
+
+ALGO MÁS RÁPIDO (2.38.2)
+- El motor hace menos trabajo repetido (ruido, zonas vacías del graffiti, franjas mayores). La imagen es exactamente
+  la misma.
 
 MÁS RÁPIDO EN DOCUMENTOS GRANDES (2.38.1)
 - Graffiti con «Textura de la pintura» en documentos grandes: se pinta en franjas mayores y tarda bastante menos; la

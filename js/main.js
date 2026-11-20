@@ -118,7 +118,7 @@ function relieve() { return isGraf() ? Math.max(0, Math.min(1, (st.relieve == nu
 const RELIEF_M = 48;
 // píxeles por franja al pintar en Photoshop: con textura de la pintura las franjas grandes ahorran mucho trabajo repetido
 // (cada trazo que pisa dos franjas se pinta dos veces); el resultado es idéntico con cualquier tamaño
-const bandPx = rel => rel > 0 ? 8e6 : 6e6;
+const bandPx = rel => rel > 0 ? 8e6 : 12e6;
 function genParams() {
   return {
     persona: styleKey(), mode: curMode(), goteo: st.goteo / 100, nube: st.nube / 100, relieve: relieve(), deriva: (st.deriva == null ? 40 : st.deriva) / 100, tool: st.tool, preset: st.preset, color: st.color,

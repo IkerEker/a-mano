@@ -1007,9 +1007,24 @@ function paintSpray(canvas, pts, P, r, rgb, seed, opts) {
   };
   const f1 = 1 / (r * 1.1 + 1), f2 = 1 / (r * 0.33 + 1), fM = 1 / (r * 1.9 + 1);
   const yLim = Math.min(bh, Math.ceil(yMax + pad - by0) + 1);         // (más abajo solo hay chorretones)
-  for (let y = 0; y < yLim; y++) {
+  // (atajos que no cambian nada: por cada fila de la rejilla, entre qué columnas hay pintura —fuera de ahí el píxel
+  //  no lleva nada y no hace falta ni mirarlo—; y, si el trazo no chorrea, solo las filas que caen en este lienzo)
+  const gA = new Int32Array(gh).fill(gw), gB = new Int32Array(gh).fill(-1);
+  for (let gy = 0; gy < gh; gy++) {
+    const row = gy * gw; let a = gw, b = -1;
+    for (let gx = 0; gx < gw; gx++) if (GC[row + gx] !== 0 || (GH && GH[row + gx] !== 0)) { if (a === gw) a = gx; b = gx; }
+    gA[gy] = a; gB[gy] = b;
+  }
+  let yA0 = 0, yB0 = yLim;
+  if (!drips.length) { yA0 = Math.max(0, canvas.y0 - by0); yB0 = Math.min(yLim, canvas.y0 + canvas.h - by0); }
+  for (let y = yA0; y < yB0; y++) {
     const Y = by0 + y + 0.5;
-    for (let x = 0; x < bw; x++) {
+    const gyr = Math.floor((Y - oy) / gq);
+    let sa0 = gw, sb0 = -1;
+    for (let g = gyr - 1; g <= gyr + 2; g++) if (g >= 0 && g < gh) { if (gA[g] < sa0) sa0 = gA[g]; if (gB[g] > sb0) sb0 = gB[g]; }
+    if (sb0 < 0) continue;
+    const xa0 = Math.max(0, Math.floor(ox + (sa0 - 2) * gq - bx0) - 2), xb0 = Math.min(bw, Math.ceil(ox + (sb0 + 2) * gq - bx0) + 2);
+    for (let x = xa0; x < xb0; x++) {
       const X = bx0 + x + 0.5;
       if (samp(GC, X, Y) < 1e-4 && !(GH && samp(GH, X, Y) * haloK >= 0.002)) continue;
       // el borde no es una línea de compás: la presión, el pulso y la pared lo ondulan (mucho, si es un chorro)

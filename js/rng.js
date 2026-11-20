@@ -21,11 +21,19 @@ function hash2(ix, iy, seed) {
 function fade(t) { return t * t * (3 - 2 * t); }
 
 // Ruido de valor 2D en [-1, 1]
+// (memoria de la última celda por semilla: al barrer una fila casi todas las llamadas caen en la misma celda de la
+//  rejilla y sus cuatro esquinas ya están calculadas; el resultado es bit a bit el mismo)
+const NC = 64, cS = new Float64Array(NC).fill(NaN), cX = new Float64Array(NC), cY = new Float64Array(NC), cV = new Float64Array(NC * 4);
 function noise2(x, y, seed) {
   const ix = Math.floor(x), iy = Math.floor(y);
   const fx = fade(x - ix), fy = fade(y - iy);
-  const a = hash2(ix, iy, seed), b = hash2(ix + 1, iy, seed);
-  const c = hash2(ix, iy + 1, seed), d = hash2(ix + 1, iy + 1, seed);
+  const k = seed & 63, k4 = k << 2;
+  if (cS[k] !== seed || cX[k] !== ix || cY[k] !== iy) {
+    cV[k4] = hash2(ix, iy, seed); cV[k4 + 1] = hash2(ix + 1, iy, seed);
+    cV[k4 + 2] = hash2(ix, iy + 1, seed); cV[k4 + 3] = hash2(ix + 1, iy + 1, seed);
+    cS[k] = seed; cX[k] = ix; cY[k] = iy;
+  }
+  const a = cV[k4], b = cV[k4 + 1], c = cV[k4 + 2], d = cV[k4 + 3];
   const top = a + (b - a) * fx, bot = c + (d - c) * fx;
   return (top + (bot - top) * fy) * 2 - 1;
 }

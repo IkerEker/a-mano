@@ -906,6 +906,14 @@ Sigue PENDIENTE el calco.
 - **Cronómetro**: `P.lastTimes` (pintar / Photoshop / franjas) y el mensaje final lo enseña.
 - **Pruebas nuevas**: `tests/node/huella.js`, `tests/node/franjas.js`, `tests/banco/banco.js` (`banco.bat`).
 
+### 2.38.2 — velocidad sin cambiar un píxel (20-11-2026)
+
+- `rng.noise2`: memoria de la última celda por semilla (64 casillas); mismas cuentas, mismos bits.
+- `ink.paintSpray`: por fila solo se recorren las columnas donde la rejilla tiene pintura; si el trazo no chorrea, solo
+  las filas que caen en el lienzo (franja).
+- `main.bandPx`: sin textura, franjas de 12 Mpx (antes 6).
+- Huella y franjas idénticas, sim 67/67, AE 19/19.
+
 ## 4. Pruebas
 
 Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y las fuentes del sistema
