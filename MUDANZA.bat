@@ -20,6 +20,8 @@ for /f "tokens=*" %%b in ('git for-each-ref --format^="%%(refname:lstrip=3)" ref
   if not "%%b"=="HEAD" ( git show-ref -q --verify refs/heads/%%b || git branch -q %%b origin/%%b >> %INF% 2>&1 )
 )
 git checkout -q main >> %INF% 2>&1
+rem la etiqueta v2.13.0 solo existe en el respaldo (GitHub no dejo subirla): se trae de ahi
+for %%f in (%RESP%\a-mano_*.bundle) do git fetch -q "%%f" "refs/tags/*:refs/tags/*" >> %INF% 2>&1
 
 echo. >> %INF%
 echo == GITHUB (ls-remote) >> %INF%
