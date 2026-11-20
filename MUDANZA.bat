@@ -15,7 +15,8 @@ if not exist .git (
 git config core.quotepath false
 git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
 git fetch --all --tags >> %INF% 2>&1 || (echo FALLO: git fetch >> %INF% & type %INF% & pause & exit /b 1)
-git rev-parse -q --verify HEAD >nul 2>nul || git checkout -q -t origin/main >> %INF% 2>&1
+git config core.autocrlf false
+git rev-parse -q --verify HEAD >nul 2>nul || git checkout -q -f -B main --track origin/main >> %INF% 2>&1
 for /f "tokens=*" %%b in ('git for-each-ref --format^="%%(refname:lstrip=3)" refs/remotes/origin') do (
   if not "%%b"=="HEAD" ( git show-ref -q --verify refs/heads/%%b || git branch -q %%b origin/%%b >> %INF% 2>&1 )
 )
