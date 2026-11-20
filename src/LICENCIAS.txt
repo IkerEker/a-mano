@@ -14,4 +14,4 @@ Las tipografías de A mano se han construido a partir de estas fuentes de trazo 
 
 - Archivos SVG obtenidos de hersheytextjs (James T, licencia MIT).
 
-Las texturas de trazo salen de las imágenes de la carpeta TRAZOS del proyecto.
+Las texturas de trazo y de pintura salen de fotos de la biblioteca de material de Iker (se incrustan al construir).

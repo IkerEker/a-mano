@@ -107,3 +107,12 @@ las N, A y W de muestra. Detalle: sección 2.30 de CONTEXTO_A_MANO.md.
 ## 2.25–2.29: Graffiti (técnica propia, 8 puntas, 6 firmas)
 Técnica Spray (6 puntas, entre ellas la plana biselada; goteo y nube) y letra Graffiti con 4 firmas (Tag, Rabia, Bomba, De un trazo); al
 elegirla cambia la interfaz. Detalle y pendientes en la sección 2.25 de CONTEXTO_A_MANO.md.
+
+## Biblioteca común (20-11-2026, rama `biblioteca`)
+
+- Las fotos fuente ya no están en este repo: se leen por id (`or:<md5>`) de la biblioteca de Iker (`IkerEker/TEXTURAS`,
+  rama `atlas`, + carpeta `Biblioteca/` local; variable `TEXTURAS_ROOT`). Ver `CLAUDE.md` y `tools/biblioteca.py`.
+- `TRAZOS/` y las 4 fotos de `referencias/texturas/` se quitaron tras pasar la prueba exacta leyendo de la Biblioteca
+  del PC de Iker (58 archivos, md5 comprobado): `js/texdata.js` y `js/grumosdata.js` salen byte a byte iguales.
+- Pruebas nuevas: `tests/node/huella.js` (27 renders), `tests/node/franjas.js` (por franjas = de una vez),
+  banco de velocidad `tests/banco/banco.js` (`banco.bat`).
