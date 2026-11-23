@@ -64,6 +64,6 @@ def ruta(id_):
 if __name__ == '__main__':
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     import extract_textures as E, grumos as G
-    ids = [(s[0], s[1]) for s in E.SOURCES if E.CAP.get(s[2], 8) != 0] + [(p[0], p[1]) for p in G.PLAN]
+    ids = [(s[0], s[1]) for s in E.SOURCES if E.CAP.get(s[2], 8) != 0] + [(p[0], p[1]) for p in G.PLAN] + list(E.PAPERS) + [(g, g) for g in getattr(G, 'GOTEOS', [])]
     for i, n in ids: ruta(i)
     print('biblioteca correcta: %d fuentes (%d archivos distintos), md5 comprobado' % (len(ids), len(set(i for i, _ in ids))))

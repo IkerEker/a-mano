@@ -88,19 +88,37 @@ SOURCES = [
     ('or:14b0c42ba960ff6b03c8c91c0b1db7b2', 'Líneas horizontales dibujadas a mano.png', 'boli', 'left', 2.2),
     ('or:273a3106ba9c7dbacf9a67d4095f0739', 'Líneas rojas sobre papel blanco.png', 'boli', 'left', 2.2),
     ('or:bc3605424110366dd797a920be1bec06', 'Cuatro líneas rojas dibujadas a manoยิงปลา.png', 'boli', 'left', 2.2),
+    # 2.39 (ORDEN 4, variedad aprobada por Iker el 23-11-2026). Al final de la lista: las familias que no se tocan
+    # (aguada, cera, guache, carbón, brocha, pincel fino) salen idénticas.
+    ('ab:8c8443e2026c', 'ACIDBITE/Ink/Green Stroke 1.png', 'pincel', 'left', 1.4),
+    ('ab:6d218874b3eb', 'ACIDBITE/Ink/Blue Stroke 2.png', 'pincel', 'top', 1.4),
+    ('ab:1128e09c4c8e', 'ACIDBITE/Ink/Blue Stroke 5.png', 'pincel', 'top', 1.4),
+    ('ab:79396bec7989', 'ACIDBITE/Ink/Red Stroke 2.png', 'pincel', 'left', 1.4),
+    ('tx:collage/grafito/grafito_0246', 'collage/grafito_0246.png', 'lapiz', 'top', 1.5),
+    ('ab:0ef0d15bb187', 'ACIDBITE/Marker/Red Stroke 1.png', 'rotu', 'left', 1.6),
+    ('ab:5946774d2cc7', 'ACIDBITE/Marker/Red Stroke 2.png', 'rotu', 'left', 1.6),
 ]
 # resolución de la cinta: el medio ancho medio del trazo ocupa MH columnas
 MH = {'boli': 3.0, 'rotu': 7.0, 'lapiz': 10.0, 'carbon': 11.0, 'cera': 20.0, 'oleo': 16.0, 'aguada': 15.0, 'pincel': 14.0, 'guache': 14.0, 'pincelfino': 12.0}
 MH_DEF = 10.0
 MAXROWS = 520
 # como mucho estas cintas por familia (las más distintas entre sí)
-# (boli y rotu a 0 desde la 2.38.1: el bolígrafo y el rotulador son procedurales y nadie leía esas 11 cintas)
-CAP = {'boli': 0, 'rotu': 0, 'gastado': 0, 'oleo': 0, 'lapiz': 10, 'carbon': 10, 'cera': 12, 'aguada': 12, 'guache': 12, 'pincel': 14, 'pincelfino': 5, 'brocha': 2}
+# (boli a 0 desde la 2.38.1: el bolígrafo es procedural. 2.39: vuelven rotu —para el rotulador «Real»— y óleo —para el
+#  pincel gordo y seco—; pincel y lápiz suben para que entren las fotos nuevas)
+CAP = {'boli': 0, 'rotu': 6, 'gastado': 0, 'oleo': 9, 'lapiz': 14, 'carbon': 10, 'cera': 12, 'aguada': 12, 'guache': 12, 'pincel': 18, 'pincelfino': 5, 'brocha': 2}
 
 
 def load(path):
-    im = np.asarray(Image.open(path).convert('RGB')).astype(np.float32) / 255.0
-    return im
+    im = Image.open(path)
+    if im.mode in ('RGBA', 'LA') or (im.mode == 'P' and 'transparency' in im.info):
+        # recorte con transparencia (ACIDBITE, collage): se pone sobre papel blanco y con margen alrededor, para que
+        # el trazo no toque el borde de la imagen (components() descarta lo que lo toca)
+        im = im.convert('RGBA')
+        pad = max(24, int(0.06 * max(im.size)))
+        bg = Image.new('RGBA', (im.size[0] + 2 * pad, im.size[1] + 2 * pad), (255, 255, 255, 255))
+        bg.alpha_composite(im, (pad, pad))
+        im = bg
+    return np.asarray(im.convert('RGB')).astype(np.float32) / 255.0
 
 
 def density(im):
@@ -248,6 +266,32 @@ def strip_of(d, lab, comp, E, fam):
     return {'fam': fam, 'a': A.astype(np.float32), 'mh': mhc, 'ar': ustep, 'src_mh': mh}
 
 
+# GRANO DE PAPEL REAL (2.39): papeles grises a escala de la biblioteca (productos/papel_gris: 128 = papel plano,
+# px_por_mm conocido, repetibles). Se llevan a 300 ppp (11,81 px/mm) y se igualan en contraste al grano sintético de
+# antes (misma media y desviación), así el deslizador y los presets significan lo mismo.
+#   (id, para qué técnicas)    el orden es el índice que usa ink.js (PAPER_OF)
+PAPERS = [
+    ('tx:productos/papel_gris/textura_papel_acuarela_marfil_fina_1022_gris', 'grano fino: lápiz, boli, rotulador'),
+    ('tx:productos/papel_gris/textura_papel_acuarela_blanco_1021_gris', 'grano medio: carbón, cera, pincel'),
+]
+PPMM = 300 / 25.4
+
+
+def paper_real(sid):
+    ref = paper_tile()
+    meta = {}
+    idx = os.path.join(BIB.raiz(), 'TEXTURAS', 'productos', 'papel_gris', 'papeles.json')
+    for e in json.load(open(idx, encoding='utf-8'))['papeles']:
+        if e['id'] == sid: meta = e
+    im = Image.open(BIB.ruta(sid)).convert('L')
+    n = int(round(im.size[0] * PPMM / meta['px_por_mm']))
+    im = im.resize((n, n), Image.LANCZOS)            # (todo el tile: sigue siendo repetible)
+    v = (np.asarray(im, dtype=np.float32) - 128.0)
+    v = (v - v.mean()) / (v.std() + 1e-6)
+    g = ref.mean() + v * ref.std()
+    return np.clip(g, 0, 1), meta
+
+
 def paper_tile(paths=None, size=256):
     """grano de papel de dibujo, repetible sin costuras: ruido filtrado en frecuencia (dientes de 4-14 px,
     algo alargados en horizontal, como la fibra), más una pizca de poro fino"""
@@ -282,10 +326,8 @@ def main():
             s['src'] = nombre
             strips.append(s); got += 1
         print('%-60s %-10s %d' % (nombre[:60], fam, got))
-    # papel: sintético (ruido filtrado; no sale de ninguna foto)
-    paper = paper_tile()
-    if '--paper-only' in sys.argv:
-        Image.fromarray((paper * 255).astype(np.uint8)).save(os.path.join(preview, 'paper.png')); return
+    # papel: grano real de la biblioteca (hasta la 2.38, sintético: paper_tile)
+    papers = [paper_real(sid)[0] for sid, _ in PAPERS]
     fams = {}
     for s in strips: fams.setdefault(s['fam'], []).append(s)
     # reparto: de cada archivo, por turnos, hasta el tope de la familia
@@ -310,12 +352,12 @@ def main():
         total += a.size
         out.append({'f': s['fam'], 'w': int(a.shape[1]), 'h': int(a.shape[0]), 'mh': s['mh'], 'ar': round(float(s['ar']), 4),
                     'd': base64.b64encode(a.tobytes()).decode('ascii')})
-    pj = None
-    if paper is not None:
-        pa = np.round(paper * 255).astype(np.uint8)
-        pj = {'w': pa.shape[1], 'h': pa.shape[0], 'd': base64.b64encode(pa.tobytes()).decode('ascii')}
-    js = "'use strict';\n// Generado por tools/extract_textures.py a partir de TRAZOS/. No editar a mano.\n"
-    js += 'module.exports = ' + json.dumps({'strips': out, 'paper': pj}, separators=(',', ':')) + ';\n'
+    pj = []
+    for (sid, _), pp in zip(PAPERS, papers):
+        pa = np.round(pp * 255).astype(np.uint8)
+        pj.append({'id': sid, 'w': pa.shape[1], 'h': pa.shape[0], 'd': base64.b64encode(pa.tobytes()).decode('ascii')})
+    js = "'use strict';\n// Generado por tools/extract_textures.py a partir de la biblioteca común (TEXTURAS_ROOT). No editar a mano.\n"
+    js += 'module.exports = ' + json.dumps({'strips': out, 'papers': pj}, separators=(',', ':')) + ';\n'
     open(os.path.join(ROOT, 'js', 'texdata.js'), 'w').write(js)
     print('cintas:', len(out), 'bytes crudos:', total, 'js:', len(js))
     if preview:
@@ -327,8 +369,8 @@ def main():
                 h, w = s['a'].shape
                 sheet[:h, x:x + w] = 1 - s['a']; x += w + 6
             Image.fromarray((sheet * 255).astype(np.uint8)).save(os.path.join(preview, 'fam_%s.png' % fam))
-        if paper is not None:
-            Image.fromarray((paper * 255).astype(np.uint8)).save(os.path.join(preview, 'paper.png'))
+        for k, pp in enumerate(papers):
+            Image.fromarray((pp * 255).astype(np.uint8)).save(os.path.join(preview, 'paper_%d.png' % k))
 
 
 if __name__ == '__main__':

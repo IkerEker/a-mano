@@ -58,14 +58,16 @@ const TOOLS = {
     label: 'Rotulador', presets: {
       fino: { label: 'Fino', proc: 'marker', load: 0.15, w: 0.022, dens: 0.93, tIn: 0.95, tOut: 0.92, inL: 1, outL: 1.2, press: 0.04, wet: 0.1, pool: 0.4, tremor: 0.75, lift: 0.1, tone: 0.12, grain: 0.06, fuse: true },
       gordo: { label: 'Gordo', useFont: true, proc: 'marker', load: 0.18, w: 0.055, dens: 0.9, tIn: 0.97, tOut: 0.95, inL: 0.8, outL: 1, press: 0.03, wet: 0.1, pool: 0.35, tremor: 0.7, lift: 0.08, tone: 0.1, grain: 0.07, fuse: true },
+      // (2.39) rotulador de verdad: cintas de trazos reales de rotulador (fotos y ACIDBITE), no la punta procedural
+      real: { label: 'Real', fams: ['rotu'], w: 0.03, dens: 1.0, tIn: 0.92, tOut: 0.85, inL: 1, outL: 1.5, press: 0.05, wet: 0.1, pool: 0.25, tremor: 0.8, lift: 0.12, tone: 0.15, grain: 0.06, load: 0.15, fuse: true },
       gastado: { label: 'Gastado', proc: 'marker', w: 0.05, dens: 0.95, tIn: 0.95, tOut: 0.9, inL: 0.8, outL: 1, press: 0.05, wet: 0.15, pool: 0.15, dry: 0.75, tremor: 0.3, lift: 0.1, tone: 0.15, load: 0.3, grain: 0.12, fuse: true }
     }
   },
   pincel: {
     label: 'Pincel', presets: {
       fino: { label: 'Fino', fams: ['pincelfino', 'guache'], w: 0.036, dens: 1.1, tIn: 0.6, tOut: 0.5, inL: 2, outL: 3.5, press: 0.12, down: 0.3, tremor: 0.85, up: 0.5, lift: 0.15, tone: 0.3, load: 0.45, blend: 'over', fuse: true },
-      gordo: { label: 'Gordo', useFont: true, fams: ['pincel'], w: 0.08, dens: 1.15, tIn: 0.8, tOut: 0.65, inL: 1, outL: 1.8, press: 0.07, down: 0.1, tremor: 0.8, up: 0.5, lift: 0.1, tone: 0.25, load: 0.5, blend: 'over', fuse: true },
-      seco: { label: 'Seco', useFont: true, fams: ['pincel', 'guache', 'brocha'], w: 0.07, dens: 1.15, tIn: 0.85, tOut: 0.7, inL: 1, outL: 1.6, press: 0.08, down: 0.08, dry: 0.75, grain: 0.15, tremor: 0.85, up: 0.5, lift: 0.1, tone: 0.25, load: 0.55, blend: 'over', fuse: true },
+      gordo: { label: 'Gordo', useFont: true, fams: ['pincel', 'oleo'], w: 0.08, dens: 1.15, tIn: 0.8, tOut: 0.65, inL: 1, outL: 1.8, press: 0.07, down: 0.1, tremor: 0.8, up: 0.5, lift: 0.1, tone: 0.25, load: 0.5, blend: 'over', fuse: true },
+      seco: { label: 'Seco', useFont: true, fams: ['pincel', 'guache', 'brocha', 'oleo'], w: 0.07, dens: 1.15, tIn: 0.85, tOut: 0.7, inL: 1, outL: 1.6, press: 0.08, down: 0.08, dry: 0.75, grain: 0.15, tremor: 0.85, up: 0.5, lift: 0.1, tone: 0.25, load: 0.55, blend: 'over', fuse: true },
       humedo: { label: 'Húmedo', useFont: true, fams: ['aguada'], w: 0.07, dens: 1.15, tIn: 0.8, tOut: 0.7, inL: 1, outL: 1.6, press: 0.08, down: 0.08, wet: 0.12, tremor: 0.8, up: 0.5, lift: 0.1, tone: 0.2, load: 0.4, fuse: true }
     }
   }
@@ -124,14 +126,25 @@ function b64(s) {
   return out;
 }
 
-let strips = null, byFam = null, paper = null;
+let strips = null, byFam = null, papers = null;
+// grano de papel (2.39: papeles reales de la biblioteca, a 300 ppp): fino para lápiz, boli y rotulador; medio para
+// carbón, cera y pincel
+const PAPER_OF = { lapiz: 0, boli: 0, rotulador: 0, carbon: 1, cera: 1, pincel: 1 };
+function paperFor(P) { load(); return papers[Math.min(papers.length - 1, PAPER_OF[P.tool] || 0)]; }
+// valor del papel en (x, y) del documento (repetible)
+function pg(Pp, x, y) {
+  let ix = Math.floor(x) % Pp.w, iy = Math.floor(y) % Pp.h;
+  if (ix < 0) ix += Pp.w; if (iy < 0) iy += Pp.h;
+  return Pp.d[iy * Pp.w + ix];
+}
 function load() {
   if (strips) return;
   strips = TD.strips.map(s => ({ fam: s.f, w: s.w, h: s.h, mh: s.mh, ar: s.ar, raw: s.d, data: null, blur: {} }));
   byFam = {};
   strips.forEach((s, i) => { (byFam[s.fam] = byFam[s.fam] || []).push(i); });
-  if (TD.paper) { const d = b64(TD.paper.d); paper = new Float32Array(d.length); for (let i = 0; i < d.length; i++) paper[i] = d[i] / 255; }
-  else { paper = new Float32Array(65536); for (let i = 0; i < 65536; i++) paper[i] = R.hash2(i & 255, i >> 8, 5); }
+  const src = TD.papers || (TD.paper ? [TD.paper] : []);
+  papers = src.map(P => { const d = b64(P.d), f = new Float32Array(d.length); for (let i = 0; i < d.length; i++) f[i] = d[i] / 255; return { w: P.w, h: P.h, d: f }; });
+  if (!papers.length) { const f = new Float32Array(65536); for (let i = 0; i < 65536; i++) f[i] = R.hash2(i & 255, i >> 8, 5); papers = [{ w: 256, h: 256, d: f }]; }
 }
 function stripData(S) {
   if (!S.data) { const d = b64(S.raw); S.data = new Float32Array(d.length); for (let i = 0; i < d.length; i++) S.data[i] = d[i] / 255; S.raw = null; }
@@ -193,6 +206,7 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
   if (P.proc === 'spray') return paintSpray(canvas, pts, P, r, rgb, seed, opts);
   load();
   const rnd = R.mulberry32(seed >>> 0);
+  const PP = paperFor(P);
   r = Math.max(P.minR, r);
   const step = Math.max(0.5, Math.min(r * 0.35, 3));
   const Q = resample(pts, step);
@@ -314,13 +328,13 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
     const streak = 0.12 * R.noise1(vs * 3.1, mSeed + 7) + 0.09 * R.noise1(vs * 8.5 + s / (r * 30 + 1), mSeed + 9)
       + 0.07 * fib - 0.12 * smooth01(0.55, 0.85, fib);
     // absorción del papel: moteado fino
-    const mott = 0.1 * (paper[(((py * 0.7) & 255) << 8) | ((px * 0.7) & 255)] - 0.5);
+    const mott = 0.1 * (pg(PP, px * 0.7, py * 0.7) - 0.5);
     // borde: una línea fina un poco más cargada donde la tinta se seca antes
     const rim = P.pen ? (P.wet || 0) * (smooth01(0.25, 0.75, ve / edge) - 0.35) * 0.5   // carriles del surco
       : (P.wet || 0) * 0.55 * smooth01(0.8, 0.97, ve / edge) * (1 - smooth01(0.97, 1.02, ve / edge) * 0.5);
     let a = inside * (0.86 + (P.streak == null ? 1 : P.streak) * streak + mott + rim) * (1 + 0.3 * bleed);
     // rotulador: moteado fino y claro (el papel no absorbe igual en todas partes)
-    if (!P.pen) { const pf = paper[(((py * 1.7 + 31) & 255) << 8) | ((px * 1.7 + 17) & 255)]; a *= 1 - 0.28 * smooth01(0.58, 0.85, pf); }
+    if (!P.pen) { const pf = pg(PP, px * 1.7 + 17, py * 1.7 + 31); a *= 1 - 0.28 * smooth01(0.58, 0.85, pf); }
     // pasada rápida: al soltar, la punta se abre en fibras secas (más cuanto más cerca del final)
     if (P.endDry) {
       const dl = Ls - s, Lz = Math.min(Ls * 0.45, hEnd1 * (3 + 3 * R.hash2(3, 7, mSeed))), Lz0 = Math.min(Ls * 0.3, hEnd0 * (1.5 + 2 * R.hash2(5, 9, mSeed)));
@@ -344,7 +358,7 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
       const side = 0.5 + 0.5 * R.noise1(s / (r * 5 + 1), mSeed + 17);
       const z = 0.5 + 0.38 * R.noise2(vs * 2.6, s / (r * 2.2 + 1), mSeed + 13) + 0.18 * R.noise2(vs * 7, s / (r * 0.9 + 1), mSeed + 19)
         - 0.25 * Math.max(0, v * (side - 0.5) * 2);
-      const g = paper[(((py * 0.9) & 255) << 8) | ((px * 0.9) & 255)];
+      const g = pg(PP, px * 0.9, py * 0.9);
       const thr = P.dry * (0.1 + 0.55 * t) + (1 - g) * 0.25 * P.dry;
       a *= 0.25 + 0.75 * smooth01(thr, thr + 0.22, z);
       a *= smooth01(thr * 0.6, thr * 0.6 + 0.25, z + 0.15);
@@ -473,8 +487,7 @@ function paintStroke(canvas, pts, P, r, rgb, seed, opts) {
       const k = y * bw + x, d = buf[k];
       if (d <= 0) continue;
       const a = Math.min(1, d);
-      const gx = ((bx0 + x) / ps) & 255, gy = ((by0 + y) / ps) & 255;
-      const g = paper[(gy << 8) | gx];
+      const g = pg(PP, (bx0 + x) / ps, (by0 + y) / ps);
       const thr = (1 - g) * G;
       const na = Math.max(0, Math.min(1, (a - thr * (0.55 + 0.45 * (1 - a))) / (1 - thr * 0.45)));
       buf[k] = d * na / a;
@@ -516,13 +529,19 @@ function drawDrips(buf, bx0, by0, bx1, by1, bw, drips, dens, hb) {
     const inL = Math.max(2, Math.min(ex.depth - 1, d.w * 6 + 3));
     live.push(Object.assign({}, d, { x, y0: ex.ye - inL, inL }));
   }
+  const SPR = RD.dripSprites ? RD.dripSprites() : null;
   for (const d of live) {
     const w = d.w, tip = w * (d.bead || 1.3), taper = d.taper || 0, y0 = d.y0, inL = d.inL, lenT = d.len + inL;
+    // (2.39) los chorretones largos —los que acaban en gota— son goteos de pintura reales (biblioteca), estirados por el
+    // hilo sin deformar la raíz ni la gota; aquí arriba solo se dibuja su arranque dentro de la pintura
+    let S = SPR && d.bead > 1 ? SPR[Math.floor(R.hash2(d.sd, 3, 77) * SPR.length) % SPR.length] : null;
+    if (S && !drawDripSprite(buf, bx0, by0, bx1, by1, bw, d, S, dens, hb)) S = null;     // (demasiado corto: el de código)
     const yA = Math.max(by0, Math.floor(y0)), yB = Math.min(by1 - 1, Math.ceil(y0 + lenT + tip + 1));
     const lB = Math.min(d.len * 0.6, tip * 5.5);                               // tramo en que engorda hacia la gota
     for (let Y = yA; Y <= yB; Y++) {
       const yy = Y + 0.5 - y0;
       let hw;
+      if (S && yy > inL + w) break;
       if (yy <= lenT) {
         const t = Math.max(0, yy - inL) / Math.max(1, d.len);
         hw = w * (1 - taper * t) * (1 + 0.1 * R.noise1(yy / (w * 5 + 2), d.sd + 1));
@@ -549,6 +568,45 @@ function drawDrips(buf, bx0, by0, bx1, by1, bw, drips, dens, hb) {
       }
     }
   }
+}
+
+// un goteo real: raíz en la salida del borde de la pintura (d.y0 + d.inL), estirado a lo largo del hilo para que mida
+// lo que tocaba (d.len + la gota); la raíz y la gota conservan su proporción
+function drawDripSprite(buf, bx0, by0, bx1, by1, bw, d, S, dens, hb) {
+  // (sin la raíz del recorte —su ensanche saldría como un tejadillo—: el hilo de código ya nace dentro de la pintura y
+  //  el goteo real sigue desde su hilo; solo se usa si el hilo no queda aplastado)
+  // (escala: el hilo como el de código, pero la gota nunca más ancha que ~1,3 veces la de código: las de la foto son
+  //  muy gordas para su hilo)
+  const tip = d.w * (d.bead || 1.3), s = Math.max(0.15, Math.min(4, (2 * d.w) / S.mw, (2.6 * tip) / S.bw));
+  const yE = d.y0 + d.inL - 1, Lt = d.len + 2 * tip;
+  const r1 = Math.round(S.h * 0.15), r2 = Math.max(r1 + 1, S.r2), H = S.h;
+  const stemT = Lt - (H - r2) * s, sy = s;
+  if (stemT < (r2 - r1) * s * 0.6) return false;
+  const tot = stemT + (H - r2) * sy;
+  const rowOf = yy => yy < stemT ? r1 + yy * (r2 - r1) / stemT : r2 + (yy - stemT) / sy;
+  const yA = Math.max(by0, Math.floor(yE)), yB = Math.min(by1 - 1, Math.ceil(yE + tot));
+  const half = (S.w / 2 + 1) * s;
+  const xA = Math.max(bx0, Math.floor(d.x - (S.cx + 1) * s)), xB = Math.min(bx1 - 1, Math.ceil(d.x + (S.w - S.cx + 1) * s));
+  if (half <= 0) return true;
+  for (let Y = yA; Y <= yB; Y++) {
+    const v = rowOf(Y + 0.5 - yE) - 0.5;
+    if (v < -0.5 || v > H - 0.5) continue;
+    const v0 = Math.max(0, Math.min(H - 1, Math.floor(v))), v1 = Math.min(H - 1, v0 + 1), fv = Math.max(0, Math.min(1, v - v0));
+    const bead = smooth01(r2 - 0.15 * (H - r2), r2 + 0.35 * (H - r2), v);
+    for (let X = xA; X <= xB; X++) {
+      const u = (X + 0.5 - d.x) / s + S.cx - 0.5;
+      if (u < 0 || u > S.w - 1) continue;
+      const u0 = Math.floor(u), u1 = Math.min(S.w - 1, u0 + 1), fu = u - u0;
+      const A0 = S.a[v0 * S.w + u0] * (1 - fu) + S.a[v0 * S.w + u1] * fu, A1 = S.a[v1 * S.w + u0] * (1 - fu) + S.a[v1 * S.w + u1] * fu;
+      const al = (A0 * (1 - fv) + A1 * fv) * dens;
+      if (al <= 0.003) continue;
+      const k = (Y - by0) * bw + (X - bx0);
+      if (al > buf[k]) buf[k] = al;
+      // (relieve: el hilo es una película plana —0,47—; solo la gota del final abulta)
+      if (hb) { const hv = 0.47 + 0.4 * bead * Math.min(1, al); if (hv > hb[k]) hb[k] = hv; }
+    }
+  }
+  return true;
 }
 
 // EMPAPADO: pigmento y spray sobre tela o papel que chupa. No es un trazo con borde ni un punteado: es tinta.
@@ -956,7 +1014,8 @@ function paintSpray(canvas, pts, P, r, rgb, seed, opts) {
   let bx0 = Infinity, by0 = Infinity, bx1 = -Infinity, by1 = -Infinity;
   for (const q of Q) { if (q.x < bx0) bx0 = q.x; if (q.x > bx1) bx1 = q.x; if (q.y < by0) by0 = q.y; if (q.y > by1) by1 = q.y; }
   bx0 -= pad; by0 -= pad; bx1 += pad; by1 += pad;
-  for (const d of drips) { bx0 = Math.min(bx0, d.x - d.w * 4 - 2); bx1 = Math.max(bx1, d.x + d.w * 4 + 2); by1 = Math.max(by1, yMax + r * 2.2 + d.len + d.w * 5 + 3); }
+  for (const d of drips) { bx0 = Math.min(bx0, d.x - d.w * 7 - 2); bx1 = Math.max(bx1, d.x + d.w * 7 + 2);      // (7: cabe la gota de un goteo real)
+    by1 = Math.max(by1, yMax + r * 2.2 + d.len + d.w * 5 + 3); }
   for (const p of spots) { const e = p.r * p.e + 1; bx0 = Math.min(bx0, p.x - e); bx1 = Math.max(bx1, p.x + e); by0 = Math.min(by0, p.y - e); by1 = Math.max(by1, p.y + e); }
   bx0 = Math.floor(bx0); by0 = Math.floor(by0); bx1 = Math.ceil(bx1); by1 = Math.ceil(by1);
   if (bx1 < canvas.x0 || bx0 > canvas.x0 + canvas.w || by1 < canvas.y0 || by0 > canvas.y0 + canvas.h) return;

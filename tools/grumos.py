@@ -13,7 +13,7 @@ Cómo se saca cada uno:
      que la luz le venga de arriba a la izquierda, como en el plugin; se descartan los hoyos;
   4. se recorta, se funde el borde con una ventana redonda, se iguala la fuerza y se reduce al tamaño del sello.
 """
-import os, sys, base64
+import os, sys, base64, json
 import numpy as np
 from PIL import Image
 from scipy import ndimage as ndi
@@ -32,7 +32,36 @@ PLAN = [
     ('or:831b99f6a72ed4b20a52af4e2c100d15', 'pared_piel_4.jpg', [('S', 7, 4, True), ('S', 20, 3, False)]),
     ('or:661b783872e168d3f343baaaa39ff703', 'pintura_grumos_1.jpg', [('S', 11, 4, True), ('M', 22, 5, True), ('M', 32, 5, True), ('L', 48, 4, True), ('L', 68, 4, True)]),
     ('or:93a7dba2d4bd0222f7d4055601acafe9', 'pintura_grumos_3.jpg', [('M', 22, 4, True), ('M', 32, 4, True), ('L', 52, 3, True), ('L', 76, 3, True)]),
+    # 2.39 (ORDEN 4): pintura gris con grumos de la biblioteca (bultos limpios, de 2 tamaños). Se probaron también
+    # tx:superposiciones/9x16/aguada/aguada_1192 y tx:collage/pintura/blanca/pintura_0110_1: a tamaño de sello solo dan
+    # crestas y cantos oscuros de pincelada, no grumos; se dejan fuera.
+    ('tx:tileables/superficies/textura_pintura_gris_grumos_relieves_0664', 'textura_pintura_gris_grumos_relieves_0664.jpg', [('S', 6, 4, True), ('S', 10, 4, True), ('M', 14, 3, True), ('M', 16, 3, False)]),
 ]
+
+
+# CHORRETONES REALES (2.39, ORDEN 4): goteos de pintura recortados (productos/piezas_neonizador/goteos, raíz arriba).
+# Se guarda solo su cobertura (alfa) y tres medidas para estirarlos sin deformar la gota: dónde está la raíz (cx),
+# el ancho del hilo (mw) y en qué fila empieza la gota del final (r2). ink.drawDrips los usa en los chorretones largos.
+GOTEOS = [
+    'tx:productos/piezas_neonizador/goteos/gruesa/goteo_gruesa_043',
+    'tx:productos/piezas_neonizador/goteos/suelta/goteo_suelta_010',
+    'tx:productos/piezas_neonizador/goteos/fina/goteo_fina_020',
+]
+
+
+def goteo(sid):
+    a = np.asarray(Image.open(BIB.ruta(sid)).convert('RGBA'), dtype=np.uint8)[..., 3]
+    ys, xs = np.nonzero(a > 8)
+    a = a[ys.min():ys.max() + 1, max(0, xs.min() - 1):xs.max() + 2]
+    h, w = a.shape
+    wid = (a > 128).sum(1).astype(np.float32)
+    top = a[:max(2, h // 20)].astype(np.float32)
+    cx = float((top.sum(0) * np.arange(w)).sum() / max(1e-6, top.sum()))
+    mw = float(max(2.0, np.median(wid[int(h * 0.2):int(h * 0.6)])))
+    r2 = int(h * 0.8)
+    for y in range(int(h * 0.55), h):
+        if wid[y] > 1.6 * mw: r2 = y; break
+    return {'w': int(w), 'h': int(h), 'cx': round(cx, 2), 'mw': round(mw, 2), 'r2': int(r2), 'd': base64.b64encode(a.tobytes()).decode('ascii')}
 
 
 def smooth01(a, b, x):
@@ -84,7 +113,10 @@ def main():
     tiles = {c: [] for c, _ in CLS}
     size = dict(CLS)
     for sid, fname, plan in PLAN:
-        I = np.asarray(Image.open(BIB.ruta(sid)).convert('L'), dtype=np.float32) / 255
+        im = Image.open(BIB.ruta(sid))
+        if im.mode in ('RGBA', 'LA'):          # recorte de collage: sobre blanco (la pintura es blanca: sin canto falso)
+            bg = Image.new('RGBA', im.size, (255, 255, 255, 255)); bg.alpha_composite(im.convert('RGBA')); im = bg
+        I = np.asarray(im.convert('L'), dtype=np.float32) / 255
         got = []          # (x, y, R) ya cogidos en esta foto
         # ---- de dónde viene la luz: el lado claro de los bultos de tamaño medio
         Rm = plan[len(plan) // 2][1]
@@ -137,10 +169,12 @@ def main():
     with open(OUT, 'w', encoding='utf-8') as f:
         f.write("'use strict';\n")
         f.write('// GRUMOS de pintura: sellos de sombreado de bultos sueltos (pompas, granos, gotas gordas, costras) recortados de\n')
-        f.write('// las fotos de referencias/texturas. Generado por tools/grumos.py: no editar a mano.\n')
+        f.write('// fotos de la biblioteca común (TEXTURAS_ROOT). Generado por tools/grumos.py: no editar a mano.\n')
         f.write('// cls: [lado del sello en px, cuántos]; d: los sellos seguidos, un byte por píxel (128 = nada, más = luz, menos =\n')
         f.write('// sombra; luz desde arriba a la izquierda), en base64\n')
-        f.write('module.exports = { cls: %s, d: \'%s\' };\n' % (str([[T, len(tiles[c])] for c, T in CLS]).replace(' ', ''), b64))
+        f.write('// goteos: chorretones reales (alfa 8 bits, raíz arriba) con cx, mw, r2 (ver GOTEOS)\n')
+        gj = json.dumps([goteo(g) for g in GOTEOS], separators=(',', ':'))
+        f.write('module.exports = { cls: %s, d: \'%s\', goteos: %s };\n' % (str([[T, len(tiles[c])] for c, T in CLS]).replace(' ', ''), b64, gj))
     print('%s: %d sellos, %d KB' % (os.path.relpath(OUT, ROOT), sum(len(v) for v in tiles.values()), os.path.getsize(OUT) // 1024))
     if len(sys.argv) > 1:      # hoja de comprobación
         Z, pad = 4, 6

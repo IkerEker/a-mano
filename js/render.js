@@ -154,8 +154,24 @@ function finalize(canvas) {
 // de superficie pintada (tools/grumos.py -> grumosdata.js). Son sellos de sombreado: cuánto aclara u oscurece el
 // bulto bajo la luz, con el borde fundido a nada. Tres tamaños. setLumps(datos) los entrega (lo llama main.js; el
 // panel de After Effects no los lleva); se descodifican la primera vez que hacen falta.
-let LUMPS = null, LUMPS_RAW = null;
-function setLumps(data) { LUMPS_RAW = data || null; LUMPS = null; }
+let LUMPS = null, LUMPS_RAW = null, DRIPS = null;
+function setLumps(data) { LUMPS_RAW = data || null; LUMPS = null; DRIPS = null; }
+// chorretones reales (2.39): [{ w, h, cx, mw, r2, a: Float32Array 0..1 }] o null (sin datos: los de código)
+function dripSprites() {
+  if (DRIPS || !LUMPS_RAW || !LUMPS_RAW.goteos || !LUMPS_RAW.goteos.length) return DRIPS;
+  const A = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/', T = new Uint8Array(128);
+  for (let i = 0; i < 64; i++) T[A.charCodeAt(i)] = i;
+  DRIPS = LUMPS_RAW.goteos.map(g => {
+    const d = g.d, n = g.w * g.h, a = new Float32Array(n);
+    for (let i = 0, o = 0; i < d.length && o < n; i += 4) {
+      const v = (T[d.charCodeAt(i) & 127] << 18) | (T[d.charCodeAt(i + 1) & 127] << 12) | (T[d.charCodeAt(i + 2) & 127] << 6) | T[d.charCodeAt(i + 3) & 127];
+      if (o < n) a[o++] = (v >> 16) / 255; if (o < n) a[o++] = ((v >> 8) & 255) / 255; if (o < n) a[o++] = (v & 255) / 255;
+    }
+    let bw = 1; for (let y = g.r2; y < g.h; y++) { let n0 = 0; for (let x = 0; x < g.w; x++) if (a[y * g.w + x] > 0.5) n0++; if (n0 > bw) bw = n0; }
+    return { w: g.w, h: g.h, cx: g.cx, mw: g.mw, r2: g.r2, bw, a };
+  });
+  return DRIPS;
+}
 function lumps() {
   if (LUMPS || !LUMPS_RAW) return LUMPS;
   const A = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/', T = new Uint8Array(128);
@@ -458,4 +474,4 @@ function toDepth(data, bits) {
   return data;
 }
 
-module.exports = { setLumps, hexToRgb, letterColor, makeCanvas, composite, compositePigment, finalize, rasterLocal, fillPolys, lineGlyphs, lineMapper, mapContours, localScale, renderPlain, trimCanvas, toDepth, polysBBox };
+module.exports = { setLumps, dripSprites, hexToRgb, letterColor, makeCanvas, composite, compositePigment, finalize, rasterLocal, fillPolys, lineGlyphs, lineMapper, mapContours, localScale, renderPlain, trimCanvas, toDepth, polysBBox };
