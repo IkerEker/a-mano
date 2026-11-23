@@ -1,0 +1,907 @@
+{
+ "plugin": "a-mano",
+ "version": "2.39.0",
+ "fecha": "2026-11-23",
+ "nota": "Orden de SOURCES = orden de las cintas (forma parte del resultado). Duplicados de CERAS/GUACHE citados dos veces a propósito.",
+ "busquedas_orden_3_4": [
+  "necesidad trazo_pincel",
+  "brocha | pincel seco | brochazo",
+  "trazo oleo | pincelada gouache | aguada",
+  "trazo lapiz | grafito | lapicero",
+  "rotulador | marker | tinta trazo",
+  "grumos pintura | pegote | empaste",
+  "necesidad relieve_textura_material",
+  "hoja PROPUESTA_a-mano.jpg (ORDEN 4)"
+ ],
+ "sustituciones_orden_4": {
+  "ab:c338dc54f937": "no da cintas (mancha, solo pelos sueltos) → ab:6d218874b3eb, ab:1128e09c4c8e, ab:79396bec7989",
+  "ab:ced7ac8d3c8a": "trazo demasiado ondulado para el extractor",
+  "tx:superposiciones/9x16/aguada/aguada_1192": "a tamaño de sello da crestas, no grumos",
+  "tx:collage/pintura/blanca/pintura_0110_1": "a tamaño de sello da cantos oscuros, no grumos"
+ },
+ "filas": [
+  {
+   "orden": 0,
+   "id": "or:20ddea7c0fb3b440354ee377a7c7e34c",
+   "nombre": "AGUADAS/Gemini_Generated_Image_6lti5j6lti5j6lti.jpg",
+   "familia": "aguada",
+   "inicio": "top",
+   "E": 1.55,
+   "uso": "cintas de aguada (Pincel Húmedo)",
+   "usada": true
+  },
+  {
+   "orden": 1,
+   "id": "or:ac6b1c0c21c3685ebafd50b783f0b0b3",
+   "nombre": "AGUADAS/Gemini_Generated_Image_6p6u0m6p6u0m6p6u.jpg",
+   "familia": "aguada",
+   "inicio": "top",
+   "E": 1.55,
+   "uso": "cintas de aguada (Pincel Húmedo)",
+   "usada": true
+  },
+  {
+   "orden": 2,
+   "id": "or:2ebff079250c732bac3996e9cd79b633",
+   "nombre": "AGUADAS/Gemini_Generated_Image_bygjtubygjtubygj.jpg",
+   "familia": "aguada",
+   "inicio": "top",
+   "E": 1.55,
+   "uso": "cintas de aguada (Pincel Húmedo)",
+   "usada": true
+  },
+  {
+   "orden": 3,
+   "id": "or:ff9fd5a027b2672038d83ebb42259fd1",
+   "nombre": "AGUADAS/Gemini_Generated_Image_hbkpvbhbkpvbhbkp.jpg",
+   "familia": "aguada",
+   "inicio": "top",
+   "E": 1.55,
+   "uso": "cintas de aguada (Pincel Húmedo)",
+   "usada": true
+  },
+  {
+   "orden": 4,
+   "id": "or:4a0a9e9765717d23a03bf7bee0b529c6",
+   "nombre": "AGUADAS/Gemini_Generated_Image_nft1n4nft1n4nft1.jpg",
+   "familia": "aguada",
+   "inicio": "top",
+   "E": 1.55,
+   "uso": "cintas de aguada (Pincel Húmedo)",
+   "usada": true
+  },
+  {
+   "orden": 5,
+   "id": "or:0c7d294c3416f7b24c426a5b7573a2e7",
+   "nombre": "AGUADAS/Gemini_Generated_Image_umv2e3umv2e3umv2.jpg",
+   "familia": "aguada",
+   "inicio": "top",
+   "E": 1.55,
+   "uso": "cintas de aguada (Pincel Húmedo)",
+   "usada": true
+  },
+  {
+   "orden": 6,
+   "id": "or:4d7017da88104ffd2d20291e4fb0148f",
+   "nombre": "AGUADAS/Gemini_Generated_Image_z82hx1z82hx1z82h.jpg",
+   "familia": "aguada",
+   "inicio": "top",
+   "E": 1.55,
+   "uso": "cintas de aguada (Pincel Húmedo)",
+   "usada": true
+  },
+  {
+   "orden": 7,
+   "id": "or:b39356083123b118262bc35200d62d4d",
+   "nombre": "CERAS/Gemini_Generated_Image_2an7ri2an7ri2an7.jpg",
+   "familia": "cera",
+   "inicio": "top",
+   "E": 1.45,
+   "uso": "cintas de cera",
+   "usada": true
+  },
+  {
+   "orden": 8,
+   "id": "or:53d0437a073d998a7895372b37008a97",
+   "nombre": "CERAS/Gemini_Generated_Image_56fr4h56fr4h56fr.jpg",
+   "familia": "cera",
+   "inicio": "top",
+   "E": 1.45,
+   "uso": "cintas de cera",
+   "usada": true
+  },
+  {
+   "orden": 9,
+   "id": "or:f8bd0d98d712eee34c871a556b86192d",
+   "nombre": "CERAS/Gemini_Generated_Image_uh9z0xuh9z0xuh9z (1).jpg",
+   "familia": "cera",
+   "inicio": "top",
+   "E": 1.45,
+   "uso": "cintas de cera",
+   "usada": true
+  },
+  {
+   "orden": 10,
+   "id": "or:f8bd0d98d712eee34c871a556b86192d",
+   "nombre": "CERAS/Gemini_Generated_Image_uh9z0xuh9z0xuh9z.jpg",
+   "familia": "cera",
+   "inicio": "top",
+   "E": 1.45,
+   "uso": "cintas de cera",
+   "usada": true
+  },
+  {
+   "orden": 11,
+   "id": "or:e144d33708b20cfa07cdb172e936acce",
+   "nombre": "CERAS/Gemini_Generated_Image_y7qljdy7qljdy7ql.jpg",
+   "familia": "cera",
+   "inicio": "top",
+   "E": 1.45,
+   "uso": "cintas de cera",
+   "usada": true
+  },
+  {
+   "orden": 12,
+   "id": "or:44adc9c64138f6cd1a55bed4cb5abd05",
+   "nombre": "GUACHE/Gemini_Generated_Image_6l56yc6l56yc6l56.jpg",
+   "familia": "guache",
+   "inicio": "top",
+   "E": 1.4,
+   "uso": "cintas de guache (Pincel Fino y Seco)",
+   "usada": true
+  },
+  {
+   "orden": 13,
+   "id": "or:187140f5d0f9d9f90dbe3d6d4f41b521",
+   "nombre": "GUACHE/Gemini_Generated_Image_8ypgc28ypgc28ypg.jpg",
+   "familia": "guache",
+   "inicio": "top",
+   "E": 1.4,
+   "uso": "cintas de guache (Pincel Fino y Seco)",
+   "usada": true
+  },
+  {
+   "orden": 14,
+   "id": "or:a5baef658ef09e772c1402b130c62c8a",
+   "nombre": "GUACHE/Gemini_Generated_Image_gz01rcgz01rcgz01.jpg",
+   "familia": "guache",
+   "inicio": "top",
+   "E": 1.4,
+   "uso": "cintas de guache (Pincel Fino y Seco)",
+   "usada": true
+  },
+  {
+   "orden": 15,
+   "id": "or:0f00cb3e6dbeb43243962b2aad7ebc1f",
+   "nombre": "GUACHE/Gemini_Generated_Image_jfrkuyjfrkuyjfrk.jpg",
+   "familia": "guache",
+   "inicio": "top",
+   "E": 1.4,
+   "uso": "cintas de guache (Pincel Fino y Seco)",
+   "usada": true
+  },
+  {
+   "orden": 16,
+   "id": "or:a8622af802d9a3c83c25bd60e891586d",
+   "nombre": "GUACHE/Gemini_Generated_Image_ksbdqzksbdqzksbd.jpg",
+   "familia": "guache",
+   "inicio": "top",
+   "E": 1.4,
+   "uso": "cintas de guache (Pincel Fino y Seco)",
+   "usada": true
+  },
+  {
+   "orden": 17,
+   "id": "or:fb33f7dda84a14d3434758806b5b5cfa",
+   "nombre": "GUACHE/Gemini_Generated_Image_omhgriomhgriomhg.jpg",
+   "familia": "guache",
+   "inicio": "top",
+   "E": 1.4,
+   "uso": "cintas de guache (Pincel Fino y Seco)",
+   "usada": true
+  },
+  {
+   "orden": 18,
+   "id": "or:430ed44e661c68c0a1d7a4c760c61c12",
+   "nombre": "GUACHE/Gemini_Generated_Image_scmr90scmr90scmr.jpg",
+   "familia": "guache",
+   "inicio": "top",
+   "E": 1.4,
+   "uso": "cintas de guache (Pincel Fino y Seco)",
+   "usada": true
+  },
+  {
+   "orden": 19,
+   "id": "or:0877b4440f565bc67c81c2c19fa64d44",
+   "nombre": "GUACHE/Gemini_Generated_Image_t7kg8st7kg8st7kg (1).jpg",
+   "familia": "guache",
+   "inicio": "top",
+   "E": 1.4,
+   "uso": "cintas de guache (Pincel Fino y Seco)",
+   "usada": true
+  },
+  {
+   "orden": 20,
+   "id": "or:0877b4440f565bc67c81c2c19fa64d44",
+   "nombre": "GUACHE/Gemini_Generated_Image_t7kg8st7kg8st7kg.jpg",
+   "familia": "guache",
+   "inicio": "top",
+   "E": 1.4,
+   "uso": "cintas de guache (Pincel Fino y Seco)",
+   "usada": true
+  },
+  {
+   "orden": 21,
+   "id": "or:26c06c0b920161b7a6f75ac8bc51aec7",
+   "nombre": "OLEO/Gemini_Generated_Image_9d31iy9d31iy9d31.jpg",
+   "familia": "oleo",
+   "inicio": "top",
+   "E": 1.4,
+   "uso": "cintas de óleo (Pincel Gordo y Seco)",
+   "usada": true
+  },
+  {
+   "orden": 22,
+   "id": "or:fa7773c2e2908f4fe146ab0dffa43844",
+   "nombre": "OLEO/Gemini_Generated_Image_br79m9br79m9br79.jpg",
+   "familia": "oleo",
+   "inicio": "top",
+   "E": 1.4,
+   "uso": "cintas de óleo (Pincel Gordo y Seco)",
+   "usada": true
+  },
+  {
+   "orden": 23,
+   "id": "or:f0e4f581040ef0f237b0d8879d7c2e53",
+   "nombre": "OLEO/Gemini_Generated_Image_gscen4gscen4gsce.jpg",
+   "familia": "oleo",
+   "inicio": "top",
+   "E": 1.4,
+   "uso": "cintas de óleo (Pincel Gordo y Seco)",
+   "usada": true
+  },
+  {
+   "orden": 24,
+   "id": "or:80dad666f8311d6edb1754c362d75a5d",
+   "nombre": "LAPIZ/Gemini_Generated_Image_dgy3xxdgy3xxdgy3.jpg",
+   "familia": "lapiz",
+   "inicio": "top",
+   "E": 1.5,
+   "uso": "cintas de lápiz",
+   "usada": true
+  },
+  {
+   "orden": 25,
+   "id": "or:d3a26863bf136a2b427559a680ae92bc",
+   "nombre": "LAPIZ/Gemini_Generated_Image_fd6so0fd6so0fd6s.jpg",
+   "familia": "lapiz",
+   "inicio": "top",
+   "E": 1.5,
+   "uso": "cintas de lápiz",
+   "usada": true
+  },
+  {
+   "orden": 26,
+   "id": "or:8b1330c2a986ae301ae99c56608fc9fe",
+   "nombre": "LAPIZ/Gemini_Generated_Image_so6zmwso6zmwso6z.jpg",
+   "familia": "lapiz",
+   "inicio": "top",
+   "E": 1.5,
+   "uso": "cintas de lápiz",
+   "usada": true
+  },
+  {
+   "orden": 27,
+   "id": "or:d3641f94f2fd796c41a4756940e836fb",
+   "nombre": "LAPIZ/Gemini_Generated_Image_u2c2txu2c2txu2c2.jpg",
+   "familia": "lapiz",
+   "inicio": "top",
+   "E": 1.5,
+   "uso": "cintas de lápiz",
+   "usada": true
+  },
+  {
+   "orden": 28,
+   "id": "or:46afa9de8ecce9fc9ba79d3e9e6721b3",
+   "nombre": "LAPIZ/Gemini_Generated_Image_4vfeh34vfeh34vfe.jpg",
+   "familia": "carbon",
+   "inicio": "top",
+   "E": 1.9,
+   "uso": "cintas de carbón",
+   "usada": true
+  },
+  {
+   "orden": 29,
+   "id": "or:16105ce5cc4b1d2b200909510e32b70f",
+   "nombre": "LAPIZ/Gemini_Generated_Image_i1m1v9i1m1v9i1m1.jpg",
+   "familia": "carbon",
+   "inicio": "top",
+   "E": 1.9,
+   "uso": "cintas de carbón",
+   "usada": true
+  },
+  {
+   "orden": 30,
+   "id": "or:8b1caba32d3287fa9a08c5de574690c6",
+   "nombre": "LAPIZ/Gemini_Generated_Image_uvge2nuvge2nuvge.jpg",
+   "familia": "carbon",
+   "inicio": "top",
+   "E": 1.9,
+   "uso": "cintas de carbón",
+   "usada": true
+  },
+  {
+   "orden": 31,
+   "id": "or:4473e9c1d6f00ab84b4073cceaf19f51",
+   "nombre": "Gemini_Generated_Image_4k0x3g4k0x3g4k0x.jpg",
+   "familia": "carbon",
+   "inicio": "left",
+   "E": 1.9,
+   "uso": "cintas de carbón",
+   "usada": true
+  },
+  {
+   "orden": 32,
+   "id": "or:1fab4c773c1595efc5c71fa8ba5d003b",
+   "nombre": "Gemini_Generated_Image_1m2vhi1m2vhi1m2v.jpg",
+   "familia": "pincel",
+   "inicio": "top",
+   "E": 1.4,
+   "uso": "cintas de pincel (Pincel Gordo y Seco; relleno de negativos)",
+   "usada": true
+  },
+  {
+   "orden": 33,
+   "id": "or:93b2c592d0844bb90bdb735019f8632f",
+   "nombre": "Gemini_Generated_Image_dd9o77dd9o77dd9o.jpg",
+   "familia": "pincel",
+   "inicio": "top",
+   "E": 1.4,
+   "uso": "cintas de pincel (Pincel Gordo y Seco; relleno de negativos)",
+   "usada": true
+  },
+  {
+   "orden": 34,
+   "id": "or:8f83c88e63387f8ea7ef103928e1ed63",
+   "nombre": "Gemini_Generated_Image_fooa8gfooa8gfooa.jpg",
+   "familia": "pincel",
+   "inicio": "top",
+   "E": 1.4,
+   "uso": "cintas de pincel (Pincel Gordo y Seco; relleno de negativos)",
+   "usada": true
+  },
+  {
+   "orden": 35,
+   "id": "or:f2a1c7dbb7402bd7f31a4c3631b1ce49",
+   "nombre": "Gemini_Generated_Image_gtyi67gtyi67gtyi.jpg",
+   "familia": "pincel",
+   "inicio": "top",
+   "E": 1.4,
+   "uso": "cintas de pincel (Pincel Gordo y Seco; relleno de negativos)",
+   "usada": true
+  },
+  {
+   "orden": 36,
+   "id": "or:ea43656231d6b863d67eb6c169032e5b",
+   "nombre": "Gemini_Generated_Image_i9od48i9od48i9od.jpg",
+   "familia": "pincel",
+   "inicio": "top",
+   "E": 1.4,
+   "uso": "cintas de pincel (Pincel Gordo y Seco; relleno de negativos)",
+   "usada": true
+  },
+  {
+   "orden": 37,
+   "id": "or:039431753bcad30873ec83cfd64ee744",
+   "nombre": "Gemini_Generated_Image_ogccn5ogccn5ogcc.jpg",
+   "familia": "pincel",
+   "inicio": "top",
+   "E": 1.4,
+   "uso": "cintas de pincel (Pincel Gordo y Seco; relleno de negativos)",
+   "usada": true
+  },
+  {
+   "orden": 38,
+   "id": "or:160a8c8a106c89a1bde10f3990e915d2",
+   "nombre": "Gemini_Generated_Image_uoqx5fuoqx5fuoqx.jpg",
+   "familia": "pincel",
+   "inicio": "top",
+   "E": 1.4,
+   "uso": "cintas de pincel (Pincel Gordo y Seco; relleno de negativos)",
+   "usada": true
+  },
+  {
+   "orden": 39,
+   "id": "or:7b13ec84a1c7508de63bb6cf144d9b9e",
+   "nombre": "Gemini_Generated_Image_xw72ktxw72ktxw72.jpg",
+   "familia": "pincel",
+   "inicio": "top",
+   "E": 1.4,
+   "uso": "cintas de pincel (Pincel Gordo y Seco; relleno de negativos)",
+   "usada": true
+  },
+  {
+   "orden": 40,
+   "id": "or:0e36d27811e2498679e00e8a3bb3a6f9",
+   "nombre": "Pincelada gris sobre blanco.png",
+   "familia": "brocha",
+   "inicio": "top",
+   "E": 1.35,
+   "uso": "cintas de brocha (Pincel Seco)",
+   "usada": true
+  },
+  {
+   "orden": 41,
+   "id": "or:9af81d46749352e1f8119c5bc9358f0b",
+   "nombre": "Pincelada vertical gris sobre blanco.png",
+   "familia": "brocha",
+   "inicio": "top",
+   "E": 1.35,
+   "uso": "cintas de brocha (Pincel Seco)",
+   "usada": true
+  },
+  {
+   "orden": 42,
+   "id": "or:99193ea91cf681edc1b1b5946c6cabb3",
+   "nombre": "Cuatro pinceladas rojas sobre blanco.png",
+   "familia": "pincel",
+   "inicio": "left",
+   "E": 1.4,
+   "uso": "cintas de pincel (Pincel Gordo y Seco; relleno de negativos)",
+   "usada": true
+  },
+  {
+   "orden": 43,
+   "id": "or:69c2c2243bb9c323d644d2ad0eab2969",
+   "nombre": "Franjas de pintura roja sobre blanco.png",
+   "familia": "pincel",
+   "inicio": "left",
+   "E": 1.4,
+   "uso": "cintas de pincel (Pincel Gordo y Seco; relleno de negativos)",
+   "usada": true
+  },
+  {
+   "orden": 44,
+   "id": "or:aca488fbc8295f59772ed252ea43b671",
+   "nombre": "Pinceladas rojas sobre blanco.png",
+   "familia": "pincel",
+   "inicio": "left",
+   "E": 1.4,
+   "uso": "cintas de pincel (Pincel Gordo y Seco; relleno de negativos)",
+   "usada": true
+  },
+  {
+   "orden": 45,
+   "id": "or:0636e9a1be6f0583886c3571a0ea61af",
+   "nombre": "Pinceladas azules sobre blanco.png",
+   "familia": "pincel",
+   "inicio": "left",
+   "E": 1.4,
+   "uso": "cintas de pincel (Pincel Gordo y Seco; relleno de negativos)",
+   "usada": true
+  },
+  {
+   "orden": 46,
+   "id": "or:6b53b3ad9f34be43bd013cb4f2c5aba3",
+   "nombre": "Trazos azules sobre fondo blanco.png",
+   "familia": "pincel",
+   "inicio": "left",
+   "E": 1.4,
+   "uso": "cintas de pincel (Pincel Gordo y Seco; relleno de negativos)",
+   "usada": true
+  },
+  {
+   "orden": 47,
+   "id": "or:9f80ec4e19ffa2713ad247331ebb036f",
+   "nombre": "Muestras de pinceladas azules en blanco.png",
+   "familia": "pincel",
+   "inicio": "left",
+   "E": 1.4,
+   "uso": "cintas de pincel (Pincel Gordo y Seco; relleno de negativos)",
+   "usada": true
+  },
+  {
+   "orden": 48,
+   "id": "or:2b56822cc2af4b0551e9091d4cd41f2b",
+   "nombre": "Ocho pinceladas azules sobre blanco.png",
+   "familia": "pincel",
+   "inicio": "left",
+   "E": 1.4,
+   "uso": "cintas de pincel (Pincel Gordo y Seco; relleno de negativos)",
+   "usada": true
+  },
+  {
+   "orden": 49,
+   "id": "or:24e379b7698a72229e7fc58b276b3c58",
+   "nombre": "Trazos azules sobre fondo blanco (1).png",
+   "familia": "pincelfino",
+   "inicio": "left",
+   "E": 1.4,
+   "uso": "cintas de pincel fino",
+   "usada": true
+  },
+  {
+   "orden": 50,
+   "id": "or:2bcd77b876fd57f6580a35b2bc1f6585",
+   "nombre": "Cinco trazos azules sobre blanco.png",
+   "familia": "gastado",
+   "inicio": "left",
+   "E": 1.45,
+   "uso": "no se usa (tope 0)",
+   "usada": false
+  },
+  {
+   "orden": 51,
+   "id": "or:783353d66f31e70cc44e7231723dd965",
+   "nombre": "Cinco trazos rojos sobre blanco.png",
+   "familia": "gastado",
+   "inicio": "left",
+   "E": 1.45,
+   "uso": "no se usa (tope 0)",
+   "usada": false
+  },
+  {
+   "orden": 52,
+   "id": "or:e50cdc4bb37912262f92e93de71dbb50",
+   "nombre": "Cuatro trazos rojos texturizados.png",
+   "familia": "gastado",
+   "inicio": "left",
+   "E": 1.45,
+   "uso": "no se usa (tope 0)",
+   "usada": false
+  },
+  {
+   "orden": 53,
+   "id": "or:618c499ea623d529c21ef45e511d478e",
+   "nombre": "Tres trazos azules texturizados.png",
+   "familia": "gastado",
+   "inicio": "left",
+   "E": 1.45,
+   "uso": "no se usa (tope 0)",
+   "usada": false
+  },
+  {
+   "orden": 54,
+   "id": "or:818a69b66f8108734cc8d93bb0615c12",
+   "nombre": "Cinco líneas azules dibujadas a mano.png",
+   "familia": "rotu",
+   "inicio": "left",
+   "E": 1.6,
+   "uso": "cintas de rotulador (Rotulador «Real»)",
+   "usada": true
+  },
+  {
+   "orden": 55,
+   "id": "or:f59dfd6a89692ca182487365a11e774c",
+   "nombre": "Líneas azules sobre fondo blanco.png",
+   "familia": "rotu",
+   "inicio": "left",
+   "E": 1.6,
+   "uso": "cintas de rotulador (Rotulador «Real»)",
+   "usada": true
+  },
+  {
+   "orden": 56,
+   "id": "or:2ccd16b4b8ef13017948403488dc78c2",
+   "nombre": "Cuatro trazos negros horizontales.png",
+   "familia": "rotu",
+   "inicio": "left",
+   "E": 1.6,
+   "uso": "cintas de rotulador (Rotulador «Real»)",
+   "usada": true
+  },
+  {
+   "orden": 57,
+   "id": "or:e0bd2d6160ceb11ef79a8c8eb480e313",
+   "nombre": "Tres líneas negras sobre fondo blanco.png",
+   "familia": "rotu",
+   "inicio": "left",
+   "E": 1.6,
+   "uso": "cintas de rotulador (Rotulador «Real»)",
+   "usada": true
+  },
+  {
+   "orden": 58,
+   "id": "or:0561622b5e78218be9fb1c09ab07cb05",
+   "nombre": "Cinco líneas azules sobre blanco.png",
+   "familia": "boli",
+   "inicio": "left",
+   "E": 2.2,
+   "uso": "no se usa (tope 0)",
+   "usada": false
+  },
+  {
+   "orden": 59,
+   "id": "or:7b041383b2b1112cff24a78775d2e49d",
+   "nombre": "Líneas azules sobre papel blanco.png",
+   "familia": "boli",
+   "inicio": "left",
+   "E": 2.2,
+   "uso": "no se usa (tope 0)",
+   "usada": false
+  },
+  {
+   "orden": 60,
+   "id": "or:14b0c42ba960ff6b03c8c91c0b1db7b2",
+   "nombre": "Líneas horizontales dibujadas a mano.png",
+   "familia": "boli",
+   "inicio": "left",
+   "E": 2.2,
+   "uso": "no se usa (tope 0)",
+   "usada": false
+  },
+  {
+   "orden": 61,
+   "id": "or:273a3106ba9c7dbacf9a67d4095f0739",
+   "nombre": "Líneas rojas sobre papel blanco.png",
+   "familia": "boli",
+   "inicio": "left",
+   "E": 2.2,
+   "uso": "no se usa (tope 0)",
+   "usada": false
+  },
+  {
+   "orden": 62,
+   "id": "or:bc3605424110366dd797a920be1bec06",
+   "nombre": "Cuatro líneas rojas dibujadas a manoยิงปลา.png",
+   "familia": "boli",
+   "inicio": "left",
+   "E": 2.2,
+   "uso": "no se usa (tope 0)",
+   "usada": false
+  },
+  {
+   "orden": 63,
+   "id": "ab:8c8443e2026c",
+   "nombre": "ACIDBITE/Ink/Green Stroke 1.png",
+   "familia": "pincel",
+   "inicio": "left",
+   "E": 1.4,
+   "uso": "cintas de pincel (Pincel Gordo y Seco; relleno de negativos)",
+   "usada": true
+  },
+  {
+   "orden": 64,
+   "id": "ab:6d218874b3eb",
+   "nombre": "ACIDBITE/Ink/Blue Stroke 2.png",
+   "familia": "pincel",
+   "inicio": "top",
+   "E": 1.4,
+   "uso": "cintas de pincel (Pincel Gordo y Seco; relleno de negativos)",
+   "usada": true
+  },
+  {
+   "orden": 65,
+   "id": "ab:1128e09c4c8e",
+   "nombre": "ACIDBITE/Ink/Blue Stroke 5.png",
+   "familia": "pincel",
+   "inicio": "top",
+   "E": 1.4,
+   "uso": "cintas de pincel (Pincel Gordo y Seco; relleno de negativos)",
+   "usada": true
+  },
+  {
+   "orden": 66,
+   "id": "ab:79396bec7989",
+   "nombre": "ACIDBITE/Ink/Red Stroke 2.png",
+   "familia": "pincel",
+   "inicio": "left",
+   "E": 1.4,
+   "uso": "cintas de pincel (Pincel Gordo y Seco; relleno de negativos)",
+   "usada": true
+  },
+  {
+   "orden": 67,
+   "id": "tx:collage/grafito/grafito_0246",
+   "nombre": "collage/grafito_0246.png",
+   "familia": "lapiz",
+   "inicio": "top",
+   "E": 1.5,
+   "uso": "cintas de lápiz",
+   "usada": true
+  },
+  {
+   "orden": 68,
+   "id": "ab:0ef0d15bb187",
+   "nombre": "ACIDBITE/Marker/Red Stroke 1.png",
+   "familia": "rotu",
+   "inicio": "left",
+   "E": 1.6,
+   "uso": "cintas de rotulador (Rotulador «Real»)",
+   "usada": true
+  },
+  {
+   "orden": 69,
+   "id": "ab:5946774d2cc7",
+   "nombre": "ACIDBITE/Marker/Red Stroke 2.png",
+   "familia": "rotu",
+   "inicio": "left",
+   "E": 1.6,
+   "uso": "cintas de rotulador (Rotulador «Real»)",
+   "usada": true
+  },
+  {
+   "id": "or:b69ffc8930e616f15913986c9876474b",
+   "nombre": "pintura_granos_2.jpg",
+   "familia": "grumo",
+   "uso": "sellos de grumo del graffiti",
+   "plan": [
+    [
+     "S",
+     8,
+     7,
+     true
+    ],
+    [
+     "S",
+     12,
+     6,
+     true
+    ],
+    [
+     "M",
+     20,
+     2,
+     true
+    ]
+   ],
+   "usada": true
+  },
+  {
+   "id": "or:831b99f6a72ed4b20a52af4e2c100d15",
+   "nombre": "pared_piel_4.jpg",
+   "familia": "grumo",
+   "uso": "sellos de grumo del graffiti",
+   "plan": [
+    [
+     "S",
+     7,
+     4,
+     true
+    ],
+    [
+     "S",
+     20,
+     3,
+     false
+    ]
+   ],
+   "usada": true
+  },
+  {
+   "id": "or:661b783872e168d3f343baaaa39ff703",
+   "nombre": "pintura_grumos_1.jpg",
+   "familia": "grumo",
+   "uso": "sellos de grumo del graffiti",
+   "plan": [
+    [
+     "S",
+     11,
+     4,
+     true
+    ],
+    [
+     "M",
+     22,
+     5,
+     true
+    ],
+    [
+     "M",
+     32,
+     5,
+     true
+    ],
+    [
+     "L",
+     48,
+     4,
+     true
+    ],
+    [
+     "L",
+     68,
+     4,
+     true
+    ]
+   ],
+   "usada": true
+  },
+  {
+   "id": "or:93a7dba2d4bd0222f7d4055601acafe9",
+   "nombre": "pintura_grumos_3.jpg",
+   "familia": "grumo",
+   "uso": "sellos de grumo del graffiti",
+   "plan": [
+    [
+     "M",
+     22,
+     4,
+     true
+    ],
+    [
+     "M",
+     32,
+     4,
+     true
+    ],
+    [
+     "L",
+     52,
+     3,
+     true
+    ],
+    [
+     "L",
+     76,
+     3,
+     true
+    ]
+   ],
+   "usada": true
+  },
+  {
+   "id": "tx:tileables/superficies/textura_pintura_gris_grumos_relieves_0664",
+   "nombre": "textura_pintura_gris_grumos_relieves_0664.jpg",
+   "familia": "grumo",
+   "uso": "sellos de grumo del graffiti",
+   "plan": [
+    [
+     "S",
+     6,
+     4,
+     true
+    ],
+    [
+     "S",
+     10,
+     4,
+     true
+    ],
+    [
+     "M",
+     14,
+     3,
+     true
+    ],
+    [
+     "M",
+     16,
+     3,
+     false
+    ]
+   ],
+   "usada": true
+  },
+  {
+   "id": "tx:productos/papel_gris/textura_papel_acuarela_marfil_fina_1022_gris",
+   "familia": "papel",
+   "uso": "grano de papel real (grano fino: lápiz, boli, rotulador)",
+   "usada": true
+  },
+  {
+   "id": "tx:productos/papel_gris/textura_papel_acuarela_blanco_1021_gris",
+   "familia": "papel",
+   "uso": "grano de papel real (grano medio: carbón, cera, pincel)",
+   "usada": true
+  },
+  {
+   "id": "tx:productos/piezas_neonizador/goteos/gruesa/goteo_gruesa_043",
+   "familia": "goteo",
+   "uso": "chorretones reales del graffiti (los largos)",
+   "usada": true
+  },
+  {
+   "id": "tx:productos/piezas_neonizador/goteos/suelta/goteo_suelta_010",
+   "familia": "goteo",
+   "uso": "chorretones reales del graffiti (los largos)",
+   "usada": true
+  },
+  {
+   "id": "tx:productos/piezas_neonizador/goteos/fina/goteo_fina_020",
+   "familia": "goteo",
+   "uso": "chorretones reales del graffiti (los largos)",
+   "usada": true
+  }
+ ]
+}

@@ -2,9 +2,19 @@ A MANO 2.38 · plugin para Photoshop (2024 o posterior)
 =====================================================
 
 INSTALAR
-- Doble clic en A_mano_v2.38.2.ccx -> Creative Cloud avisa de que no viene del
+- Doble clic en A_mano_v2.39.0.ccx -> Creative Cloud avisa de que no viene del
   Marketplace -> "Instalar". Sustituye a las versiones anteriores. Es independiente de Cartelator.
 - En Photoshop: Plugins > A mano.
+
+MÁS VARIEDAD Y MATERIAL REAL (2.39)
+- Pincel Gordo y Seco: nuevas pinceladas de óleo y de pincel real.
+- Lápiz: trazos de grafito de verdad.
+- Rotulador «Real» (nuevo): rotulador de verdad con trazos reales; Fino, Gordo y Gastado siguen como antes.
+- Papel: el grano de lápiz, carbón, cera, boli y rotulador sale ahora de papel de acuarela real (fino para lápiz,
+  boli y rotulador; medio para carbón, cera y pincel).
+- Graffiti: los chorretones largos son goteos de pintura reales, con su lágrima; grumos nuevos en la pintura.
+- Pincel Fino, Pincel Húmedo, Empapado y Rodillo quedan exactamente igual.
+- El plugin pesa más (3,5 MB) por el papel real.
 
 ALGO MÁS RÁPIDO (2.38.2)
 - El motor hace menos trabajo repetido (ruido, zonas vacías del graffiti, franjas mayores). La imagen es exactamente

@@ -24,12 +24,13 @@ Ficha de texturas: `TEXTURAS_A_MANO.md`.
   a través de `tools/biblioteca.py`. El orden de `SOURCES` forma parte del resultado: no reordenar.
 - La biblioteca está en el PC de Iker en `C:\Users\ikerg\Biblioteca` (sin `TEXTURAS_ROOT`, las herramientas buscan `~/Biblioteca`).
 - **Prueba exacta**:
-  - `python3 tools/extract_textures.py && md5sum js/texdata.js` → `efd2021b0614bfa478f8b1e111b3aa78` (77 cintas; hasta la 2.38.0, con 88, era `182e0cdb…`)
-  - `python3 tools/grumos.py && md5sum js/grumosdata.js` → `d3ca0cf24cb8a2ba3fa4b8a3869c2eba`
-  - `node tests/node/huella.js` → «HUELLA IDÉNTICA» (27 renders contra `tests/node/huella_ref.json`)
+  - `python3 tools/extract_textures.py && md5sum js/texdata.js` → `ce3a473beada2dcbe3ac1e1da740bbd4` (2.39: 100 cintas + 2 papeles reales; 2.38.1–2.38.2: `efd2021b…`; hasta 2.38.0: `182e0cdb…`)
+  - `python3 tools/grumos.py && md5sum js/grumosdata.js` → `eec01fd54451c4d758ca0a7d39486bf8` (2.39: 64 grumos + 3 goteos; antes `d3ca0cf2…`)
+  - `node tests/node/huella.js` → «HUELLA IDÉNTICA» (28 renders contra `tests/node/huella_ref.json`, renovada en la 2.39 con el sí de Iker)
   - `node tests/node/franjas.js` → «FRANJAS IDÉNTICAS» · `node tests/sim/harness.js` (67) · `node tests/ae/harness.js` (19) · `node tests/node/letras/bandtest.js gordo c` (0 distintos)
 - Banco de velocidad: `banco.bat` (o `node tests/banco/banco.js`) → `tests/banco/resultado.json`.
-- Rama de trabajo; no fusionar en `main` sin el OK de Iker (el 20-11-2026 dio el OK a la rama `biblioteca`).
+- Rama de trabajo; no fusionar en `main` sin el OK de Iker (OK a `biblioteca` el 20-11-2026 y a `variedad` —2.39— el 23-11-2026).
+- Ids que usa A mano (con su uso): `uso_id.json` en la raíz de este repo.
 
 ## Casa local (orden de Iker, 20-11-2026; texto: TEXTURAS/plugins/ORDEN_CARPETA_LOCAL.md)
 - El plugin vive en C:\Users\ikerg\Biblioteca\plugins\a-mano\ (git local, sin GitHub). Única carpeta conectada: Biblioteca.

@@ -914,6 +914,31 @@ Sigue PENDIENTE el calco.
 - `main.bandPx`: sin textura, franjas de 12 Mpx (antes 6).
 - Huella y franjas idénticas, sim 67/67, AE 19/19.
 
+### 2.39 — variedad aprobada de la biblioteca (ORDEN 4, 23-11-2026)
+
+Iker aceptó todas las propuestas y vio el antes/después antes del instalable.
+- **Cintas** (`tools/extract_textures.py`, entradas nuevas AL FINAL de `SOURCES`; `load()` pone los PNG con transparencia
+  sobre blanco y con margen): pincel + 4 pinceladas de ACIDBITE (Green Stroke 1, Blue Stroke 2, Blue Stroke 5, Red
+  Stroke 2; la mancha roja y Blue Stroke 4 de la propuesta no daban cintas: pelos sueltos / trazo ondulado); óleo
+  activado (CAP 9, las 3 fotos `OLEO/`, familia `oleo` en pincel Gordo y Seco); lápiz + grafito de collage
+  (`tx:collage/grafito/grafito_0246`, 4 cintas); familia `rotu` (CAP 6: 4 fotos antiguas + 2 subrayados de ACIDBITE)
+  para el preset nuevo **rotulador «Real»** (`fams: ['rotu']`, no procedural). Total 100 cintas. Aguada, cera,
+  guache, carbón, brocha y pincel fino: idénticas.
+- **Papel real** (`PAPERS`, `paper_real`): `textura_papel_acuarela_marfil_fina_1022_gris` (fino: lápiz, boli,
+  rotulador) y `textura_papel_acuarela_blanco_1021_gris` (medio: carbón, cera, pincel), llevados a 300 ppp e igualados
+  en media y contraste al sintético. `ink.js`: `papers`, `PAPER_OF`, `paperFor(P)`, `pg(Pp, x, y)` (repetible, cualquier
+  tamaño). `texdata.js` → `papers: [{id, w, h, d}]` (758² y 1300²).
+- **Grumos** (`tools/grumos.py`): + `tx:tileables/superficies/textura_pintura_gris_grumos_relieves_0664` (8 S + 6 M).
+  `aguada_1192` y `pintura_0110_1` se probaron y se dejaron fuera (crestas y cantos oscuros, no grumos). 64 sellos.
+- **Chorretones reales**: `GOTEOS` (3 de `productos/piezas_neonizador/goteos`) en `grumosdata.goteos` (alfa + `cx`,
+  `mw`, `r2`); `render.dripSprites()`; `ink.drawDripSprite`: en los chorretones largos (con gota), el hilo de código
+  nace dentro de la pintura y desde la salida sigue el goteo real, estirado por el hilo; la gota no pasa de 1,3 veces
+  la de código y su relieve es 0,47 + 0,4 (hilo plano). Si quedaría aplastado, el de código. Caja de goteos ±7 anchos.
+  El panel de AE no lleva goteos reales (no carga `grumosdata`).
+- Prueba exacta nueva: `texdata.js` `ce3a473b…`, `grumosdata.js` `eec01fd5…` (regeneración reproducible);
+  huella renovada (28). Idénticos a la 2.38.2: pincel fino, pincel húmedo, empapado, rodillo.
+- `.ccx` 3,5 MB (por el papel real).
+
 ## 4. Pruebas
 
 Requisitos: Node 22, Python 3 con numpy/scipy/Pillow, Playwright con Chromium y las fuentes del sistema
